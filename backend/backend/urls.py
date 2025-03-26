@@ -1,16 +1,10 @@
 from django.contrib import admin
-from django.urls import path
-from authentication.views import (
-    login_view, 
-    register_view, 
-    logout_view, 
-    home_view  # Assurez-vous d'importer home_view
-)
+from django.urls import path, include
+from authentication import views  # Importer les vues depuis l'application authentication
 
 urlpatterns = [
     path('admin/', admin.site.urls),
-    path('', home_view, name='home'),  # Page d'accueil
-    path('login/', login_view, name='login'),
-    path('register/', register_view, name='register'),
-    path('logout/', logout_view, name='logout'),
+    path('auth/', include('authentication.urls')),
+    path('', views.home, name='home'),  # Rediriger vers home.html
+    path('login/', views.login_view, name='login'),  # Rediriger vers login.html
 ]

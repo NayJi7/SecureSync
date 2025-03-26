@@ -1,48 +1,18 @@
-{% raw %}
-{% extends 'base.html' %}
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Login</title>
+</head>
+<body>
+    <h1>Se connecter</h1>
+    <form method="POST">
+        {% csrf_token %}
+        {{ form.as_p }}
+        <button type="submit">Se connecter</button>
+    </form>
 
-{% block title %}Connexion{% endblock %}
-
-{% block content %}
-<h2>Connexion</h2>
-<form method="post">
-    {% csrf_token %}
-    
-    {% if form.non_field_errors %}
-    <div class="error">
-        {% for error in form.non_field_errors %}
-            {{ error }}
-        {% endfor %}
-    </div>
-    {% endif %}
-
-    <div>
-        {{ form.username.label_tag }}
-        {{ form.username }}
-        {% if form.username.errors %}
-            <div class="error">
-                {% for error in form.username.errors %}
-                    {{ error }}
-                {% endfor %}
-            </div>
-        {% endif %}
-    </div>
-
-    <div>
-        {{ form.password.label_tag }}
-        {{ form.password }}
-        {% if form.password.errors %}
-            <div class="error">
-                {% for error in form.password.errors %}
-                    {{ error }}
-                {% endfor %}
-            </div>
-        {% endif %}
-    </div>
-
-    <button type="submit">Se connecter</button>
-</form>
-
-<p>Pas de compte ? <a href="{% url 'register' %}">Inscrivez-vous</a></p>
-{% endblock %}
-{% endraw %}
+    <p>Pas encore de compte ? <a href="{% url 'register' %}">S'inscrire ici</a></p>
+</body>
+</html>
