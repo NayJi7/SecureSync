@@ -30,8 +30,6 @@ ALLOWED_HOSTS = []
 LOGIN_REDIRECT_URL = 'home'  # Redirige après connexion
 LOGOUT_REDIRECT_URL = 'login'  # Redirige après déconnexion
 
-
-
 # Application definition
 
 INSTALLED_APPS = [
