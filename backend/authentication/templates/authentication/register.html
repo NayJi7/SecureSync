@@ -1,0 +1,30 @@
+{% raw %}
+{% extends 'base.html' %}
+
+{% block title %}Inscription{% endblock %}
+
+{% block content %}
+<h2>Inscription</h2>
+<form method="post">
+    {% csrf_token %}
+    
+    {% for field in form %}
+    <div>
+        {{ field.label_tag }}
+        {{ field }}
+        {% if field.errors %}
+            <div class="error">
+                {% for error in field.errors %}
+                    {{ error }}
+                {% endfor %}
+            </div>
+        {% endif %}
+    </div>
+    {% endfor %}
+
+    <button type="submit">S'inscrire</button>
+</form>
+
+<p>Déjà un compte ? <a href="{% url 'login' %}">Connectez-vous</a></p>
+{% endblock %}
+{% endraw %}

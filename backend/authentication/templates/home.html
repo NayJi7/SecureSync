@@ -1,0 +1,19 @@
+{% raw %}
+{% extends 'base.html' %}
+
+{% block title %}Accueil{% endblock %}
+
+{% block content %}
+<h2>Bienvenue, {{ user.username }} !</h2>
+<p>Vous êtes maintenant connecté à votre espace personnel.</p>
+
+{% if user.is_authenticated %}
+    <p>Voici quelques informations sur votre compte :</p>
+    <ul>
+        <li>Nom d'utilisateur : {{ user.username }}</li>
+        <li>Email : {{ user.email }}</li>
+        <li>Date d'inscription : {{ user.date_joined }}</li>
+    </ul>
+{% endif %}
+{% endblock %}
+{% endraw %}
