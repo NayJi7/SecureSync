@@ -5,6 +5,13 @@
   text-align: center;
 }
 
+/* Page de login sans padding et largeur maximale */
+.login-page #root {
+  max-width: 100%;
+  padding: 0;
+  margin: 0;
+}
+
 .logo {
   height: 6em;
   padding: 1.5em;

@@ -1,54 +1,48 @@
-import { SidebarProvider, SidebarTrigger } from "@/components/ui/sidebar"
-import { AppSidebar } from "@/components/ui/app-sidebar"
-import { Separator } from "@/components/ui/separator"
-import {
-  Breadcrumb,
-  BreadcrumbItem,
-  BreadcrumbLink,
-  BreadcrumbList,
-  BreadcrumbPage,
-  BreadcrumbSeparator,
-} from "@/components/ui/breadcrumb"
-import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar"
+import React from 'react';
+import { BrowserRouter as Router, Route, Routes, Navigate } from 'react-router-dom';
+import HomePage from '@/pages/HomePage';
+import LoginPage from '@/pages/LoginPage';
+import './App.css';
 
-export default function Accueil({ children }: { children: React.ReactNode }) {
+export default function App() {
   return (
-    <SidebarProvider>
-      <AppSidebar />
-      <main className="w-full">
-        <div className="w-full flex justify-between items-center">
-          <div className="container p-4 flex gap-4">
-            <SidebarTrigger />
-            {children}
-
-            <Breadcrumb className="mt-1">
-              <BreadcrumbList>
-                <BreadcrumbItem>
-                  <BreadcrumbLink href="/">Home</BreadcrumbLink>
-                </BreadcrumbItem>
-                <BreadcrumbSeparator />
-                <BreadcrumbItem>
-                  <BreadcrumbLink href="/components">Components</BreadcrumbLink>
-                </BreadcrumbItem>
-                <BreadcrumbSeparator />
-                <BreadcrumbItem>
-                  <BreadcrumbPage>Breadcrumb</BreadcrumbPage>
-                </BreadcrumbItem>
-              </BreadcrumbList>
-            </Breadcrumb>
-          </div>
-
-          <div className="p-4 flex gap-4 w-min">
-            <Avatar>
-              <AvatarImage src="https://lh3.googleusercontent.com/ogw/AF2bZyhd184Wz5LlpcbpEbmK8TIg73_K9X5kKiP_EvFsDVHit4Gj=s32-c-mo" />
-              <AvatarFallback className="bg-gray-300">AT</AvatarFallback>
-            </Avatar>
-          </div>
-        </div>
-        
-        <div className="px-5"><Separator /></div>
-
-      </main>
-    </SidebarProvider>
-  )
+    <Router>
+      <Routes>
+        <Route path="/home" element={<HomePage />} />
+        <Route path="/login" element={<LoginPage />} />
+        <Route path="*" element={<Navigate to="/home" replace />} />
+      </Routes>
+    </Router>
+  );
 }
+
+// Composant pour le contenu de la page d'accueil
+const HomeContent: React.FC = () => {
+  const [apiData, setApiData] = React.useState<{ message: string, status: string } | null>(null);
+  const [isLoading, setIsLoading] = React.useState(true);
+  const [error, setError] = React.useState<string | null>(null);
+
+  React.useEffect(() => {
+    const fetchHomeData = async () => {
+      try {
+        // Importer dynamiquement pour éviter les problèmes potentiels de chargement
+        const { getHomeData } = await import('@/services/apiService');
+        const data = await getHomeData();
+        setApiData(data);
+        setIsLoading(false);
+      } catch (err) {
+        setError('Erreur lors de la connexion à l\'API. Vérifiez que le serveur Django est en cours d\'exécution.');
+        setIsLoading(false);
+        console.error('Erreur:', err);
+      }
+    };
+
+    fetchHomeData();
+  }, []);
+
+  return (
+    <Router>
+      <App />
+    </Router>
+  );
+};
