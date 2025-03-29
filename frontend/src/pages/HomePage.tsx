@@ -87,7 +87,7 @@ export default function HomePage({ children }: { children?: React.ReactNode }) {
                 <DropdownMenuItem className="cursor-pointer">Facturation</DropdownMenuItem>
                 <DropdownMenuItem className="cursor-pointer">Équipe</DropdownMenuItem>
                 <DropdownMenuSeparator />
-                <DropdownMenuItem className="cursor-pointer" onClick={handleLogout}>Déconnexion</DropdownMenuItem>
+                <DropdownMenuItem variant="danger" className="cursor-pointer transition-colors duration-200" onClick={handleLogout}>Déconnexion</DropdownMenuItem>
               </DropdownMenuContent>
             </DropdownMenu>
           </div>
