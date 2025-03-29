@@ -135,6 +135,18 @@ html, body {
   display: block;
 }
 
+/* Classe spécifique pour la page de login qui requiert un affichage plein écran */
+.landing-page {
+  overflow: hidden;
+}
+
+.landing-page #root {
+  width: 100%;
+  height: 100vh;
+  overflow: hidden;
+  display: block;
+}
+
 @layer base {
   * {
     @apply border-border outline-ring/50;
