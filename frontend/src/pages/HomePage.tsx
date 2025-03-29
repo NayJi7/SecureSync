@@ -15,7 +15,7 @@ export default function HomePage({ children }: { children?: React.ReactNode }) {
   return (
     <SidebarProvider>
       <AppSidebar />
-      <main className="w-full">
+      <main className="w-full h-auto">
         <div className="w-full flex justify-between items-center">
           <div className="container p-4 flex gap-4">
             <SidebarTrigger />
