@@ -26,6 +26,7 @@ import { Home, MailOpen, ArrowRight, Check, X } from 'lucide-react';
 import { HiMail } from "react-icons/hi";
 import { TbLockPassword } from "react-icons/tb";
 import { FiRepeat } from "react-icons/fi";
+import { MdOutlineLogin } from "react-icons/md";
 
 const AnimatedDiv = animated.div as React.FC<AnimatedProps<React.HTMLAttributes<HTMLDivElement>>>;
 
@@ -219,8 +220,8 @@ export default function LoginPage() {
                         </Button>
                       </ModalFooter>
                     </Modal>
-                    <Button className='bg-black hover:bg-gray-900 cursor-pointer pointer-events-auto' type="submit">
-                      <MailOpen className="mr-2" /> Se connecter
+                    <Button className='bg-black hover:bg-gray-900 cursor-pointer pointer-events-auto' type="submit" onClick={(handleResendCode)}>
+                      <MdOutlineLogin className="mr-2" /> Se connecter
                     </Button>
                   </motion.form>
                 </SpotlightCard>
@@ -263,14 +264,14 @@ export default function LoginPage() {
                         onClick={handleResendCode}
                         disabled={resendDisabled}
                       >
-                        {resendDisabled ? `Veuillez patienter (${countdown}s)` : 'Renvoyer le code'}
+                        {resendDisabled ? `Veuillez patienter avant de réessayer (${countdown}s)` : 'Renvoyer le code'}
                       </button>
                       <Button 
-                        className='bg-black hover:bg-gray-900 cursor-pointer pointer-events-auto mt-2 text-lg py-6 w-[300px]' 
+                        className='bg-black hover:bg-gray-900 cursor-pointer pointer-events-auto' 
                         type="submit"
                         onClick={() => navigate('/home')}
                       >
-                        <ArrowRight className="mr-3 w-6 h-6" /> Vérifier
+                        <ArrowRight className="mr-2" /> Vérifier
                       </Button>
                     </div>
                   </motion.form>
