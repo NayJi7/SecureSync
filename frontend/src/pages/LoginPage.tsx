@@ -1,18 +1,31 @@
-import { useEffect, useState } from 'react';
-import Particles from '../blocks/Backgrounds/Particles/Particles.tsx';
-import SpotlightCard from '../blocks/Components/SpotlightCard/SpotlightCard.tsx';
-import { Label, TextInput } from "flowbite-react";
-import { MailOpen, ArrowRight, KeyRound, Check, X } from "lucide-react";
+// React et hooks
+import { useEffect, useState, useRef } from 'react';
+import { useNavigate } from 'react-router-dom';
+
+// Librairies externes
+import { animated, useTransition, AnimatedProps } from '@react-spring/web';
+import { Label, TextInput, Modal, ModalBody, ModalFooter, ModalHeader } from "flowbite-react";
+import { motion } from 'framer-motion';
+
+// Composants locaux
 import { Button } from "@/components/ui/button";
-import SplitText from "../blocks/TextAnimations/SplitText/SplitText.tsx";
+import {
+  InputOTP,
+  InputOTPGroup,
+  InputOTPSeparator,
+  InputOTPSlot,
+} from "@/components/ui/input-otp"
 import { Separator } from "@/components/ui/separator";
+import Particles from '../blocks/Backgrounds/Particles/Particles';
+import SpotlightCard from '../blocks/Components/SpotlightCard/SpotlightCard';
+import SplitText from "../blocks/TextAnimations/SplitText/SplitText";
+import VariableProximity from '../blocks/TextAnimations/VariableProximity/VariableProximity';
+
+// Icônes
+import { Home, MailOpen, ArrowRight, Check, X } from 'lucide-react';
 import { HiMail } from "react-icons/hi";
 import { TbLockPassword } from "react-icons/tb";
 import { FiRepeat } from "react-icons/fi";
-import { useIsMobile } from '@/hooks/use-mobile';
-import { animated, useTransition, AnimatedProps } from '@react-spring/web';
-import { Modal, ModalBody, ModalFooter, ModalHeader } from "flowbite-react";
-import { motion } from 'framer-motion';
 
 const AnimatedDiv = animated.div as React.FC<AnimatedProps<React.HTMLAttributes<HTMLDivElement>>>;
 
@@ -22,12 +35,30 @@ const formVariants = {
 };
 
 export default function LoginPage() {
-  const isMobile = useIsMobile();
+  const navigate = useNavigate();
   const [authStep, setAuthStep] = useState('login');
   const [email, setEmail] = useState('');
   const [openModal, setOpenModal] = useState(false);
   const [acceptedTerms, setAcceptedTerms] = useState(false);
-  
+  const titleContainerRef = useRef<HTMLDivElement>(null);
+  const [resendDisabled, setResendDisabled] = useState(false);
+  const [countdown, setCountdown] = useState(10);
+
+  const handleResendCode = () => {
+    setResendDisabled(true);
+    let timeLeft = 10;
+    
+    const timer = setInterval(() => {
+      timeLeft -= 1;
+      setCountdown(timeLeft);
+      
+      if (timeLeft === 0) {
+        clearInterval(timer);
+        setResendDisabled(false);
+      }
+    }, 1000);
+  };
+
   const transitions = useTransition(authStep, {
     from: { opacity: 0, transform: 'translate3d(100%,0,0)' },
     enter: { opacity: 1, transform: 'translate3d(0%,0,0)' },
@@ -48,6 +79,14 @@ export default function LoginPage() {
 
   return (
     <div className="absolute inset-0 w-full h-screen overflow-hidden bg-black">
+      <div className="absolute top-4 right-4 z-20">
+        <button 
+          onClick={() => navigate('/')}
+          className="cursor-pointer p-3 rounded-full bg-black/50 transition-all duration-300 ease-in-out transform hover:bg-black/70 hover:scale-110 hover:rotate-12 hover:shadow-[0_0_15px_rgba(255,255,255,0.3)] group"
+        >
+          <Home className="w-6 h-6 text-white transition-transform duration-300 group-hover:-rotate-12" />
+        </button>
+      </div>
       <Particles
         particleColors={['#ffffff', '#ffffff']}
         particleCount={200}
@@ -59,14 +98,30 @@ export default function LoginPage() {
         disableRotation={false}
       />
       <div className="absolute inset-0 flex items-center justify-center z-10 pointer-events-none">
-        <div className='hidden xl:flex w-4/5 h-full items-center justify-center'>
-          <img className='w-auto h-11/12 rounded-2xl' src="https://www.lalibre.be/resizer/v2/BJYUKUYMC5HL7EZAHSL7B3MXFA.jpg?auth=98465b5b9263ff3b8dc1e34aadad1646214eb19c644f32c889f5a3d6f2c20fab&width=1200&height=800&quality=85&focal=3360%2C2240" alt="Prison Image" />
+        <div className='hidden xl:flex w-4/5 h-full items-center justify-center relative'>
+          <img className='w-auto h-[95%] rounded-2xl' src="https://www.lalibre.be/resizer/v2/BJYUKUYMC5HL7EZAHSL7B3MXFA.jpg?auth=98465b5b9263ff3b8dc1e34aadad1646214eb19c644f32c889f5a3d6f2c20fab&width=1200&height=800&quality=85&focal=3360%2C2240" alt="Prison Image" />
+            <div className="absolute w-[90%] bg-black/85 rounded-xl p-8 md:p-16 text-center min-h-[300px] flex flex-col items-center" style={{ top: '45%', transform: 'translateY(-50%)' }}>
+              <div ref={titleContainerRef} style={{ position: 'relative', marginBottom: '2rem md:3rem' }}>
+                <VariableProximity
+                  label="SecureSync"
+                  className="text-4xl md:text-8xl font-bold text-white"
+                  fromFontVariationSettings="'wght' 400, 'opsz' 9"
+                  toFontVariationSettings="'wght' 1000, 'opsz' 40"
+                  containerRef={titleContainerRef}
+                  radius={150}
+                  falloff='linear'
+                />
+              </div>
+              <div>
+                <p className="text-white mt-4 text-lg md:text-2xl">L'innovation digitale au cœur de l'univers carcéral</p>
+              </div>
+            </div>
         </div>
         <div className='w-full h-full flex items-center justify-center'>
           {transitions((styles) => (
             <AnimatedDiv style={{ ...styles, position: 'absolute', width: '100%', display: 'flex', justifyContent: 'center' }}>
               {authStep === 'login' ? (
-                <SpotlightCard className={`${isMobile ? 'w-[90%]' : 'w-[70%]'} max-w-4xl mx-auto flex flex-col md:flex-row justify-evenly pointer-events-auto`} spotlightColor="rgba(0, 229, 255, 0.2)">
+                <SpotlightCard className='w-[70%] max-w-4xl mx-auto flex flex-col justify-evenly pointer-events-auto' spotlightColor="rgba(0, 229, 255, 0.2)">
                   <motion.form 
                     className="flex flex-col gap-4 w-[80%] mx-auto" 
                     onSubmit={handleSubmit}
@@ -77,15 +132,15 @@ export default function LoginPage() {
                     <SplitText
                       text="Connexion"
                       delay={150}
-                      className="text-5xl mb-auto mx-auto text-white"
+                      className="text-4xl md:text-6xl mb-auto mx-auto text-white"
                     />
                     <Separator className='bg-gray-400' />
                     <div>
-                      <div className="mb-2 block">
-                        <Label className='text-white' htmlFor="email2">Votre email</Label>
+                      <div className="mb-3 block">
+                        <Label className='text-white text-base md:text-lg' htmlFor="email2">Votre email</Label>
                       </div>
                       <TextInput 
-                        className='pointer-events-auto' 
+                        className='pointer-events-auto text-lg' 
                         id="email2" 
                         type="email" 
                         icon={HiMail} 
@@ -109,7 +164,7 @@ export default function LoginPage() {
                       <TextInput className='pointer-events-auto' id="repeat-password" icon={FiRepeat} placeholder='•••' type="password" required shadow />
                     </div>
                     <div className="flex items-center gap-2 pt-4 w-full justify-center">
-                      <div className="flex items-center gap-2">
+                      <div className="flex items-center gap-2 whitespace-nowrap min-w-max">
                         {acceptedTerms ? (
                           <Check className="w-4 h-4 text-green-500" />
                         ) : (
@@ -132,14 +187,22 @@ export default function LoginPage() {
                       <ModalBody>
                         <div className="space-y-6">
                           <p className="text-base leading-relaxed text-gray-500 dark:text-gray-400">
-                            À moins d'un mois de l'entrée en vigueur des nouvelles lois sur la protection de la vie privée des consommateurs 
-                            de l'Union européenne, les entreprises du monde entier mettent à jour leurs accords de conditions d'utilisation.
+                            En utilisant l'application SecureSync de gestion intelligente de prison, vous acceptez les conditions suivantes :
                           </p>
-                          <p className="text-base leading-relaxed text-gray-500 dark:text-gray-400">
-                            Le Règlement Général sur la Protection des Données (RGPD) de l'Union européenne entre en vigueur le 25 mai et 
-                            vise à garantir un ensemble commun de droits en matière de données dans l'Union européenne. Il oblige les 
-                            organisations à informer les utilisateurs dès que possible des violations de données à haut risque qui 
-                            pourraient les affecter personnellement.
+                          <ul className="list-disc pl-6 space-y-2 text-gray-500 dark:text-gray-400">
+                            <li>L'application est réservée au personnel autorisé des établissements pénitentiaires.</li>
+                            <li>Chaque utilisateur est responsable de la confidentialité de ses identifiants.</li>
+                            <li>L'utilisation des données doit respecter le RGPD et les lois sur la protection des données.</li>
+                            <li>Les données des détenus sont strictement confidentielles.</li>
+                            <li>Nous vous informerons immédiatement de toute violation de données conformément au RGPD.</li>
+                            <li>L'application est fournie "telle quelle" sans garantie d'absence d'erreurs.</li>
+                            <li>Des mises à jour seront effectuées régulièrement pour améliorer la sécurité.</li>
+                            <li>L'accès peut être révoqué en cas de non-respect de ces conditions.</li>
+                          </ul>
+                          <p className="text-base leading-relaxed text-gray-500 dark:text-gray-400 mt-4">
+                            Pour toute question, contactez <a href="mailto:email@securesync.com" className="text-blue-500 hover:text-blue-600">email@securesync.com</a>
+                            <br />
+                            En date du : {new Date().toLocaleDateString('fr-FR')}
                           </p>
                         </div>
                       </ModalBody>
@@ -162,7 +225,7 @@ export default function LoginPage() {
                   </motion.form>
                 </SpotlightCard>
               ) : (
-                <SpotlightCard className={`${isMobile ? 'w-[90%]' : 'w-[70%]'} max-w-4xl mx-auto flex flex-col justify-evenly pointer-events-auto`} spotlightColor="rgba(0, 229, 255, 0.2)">
+                <SpotlightCard className='w-[70%] max-w-4xl mx-auto flex flex-col justify-evenly pointer-events-auto' spotlightColor="rgba(0, 229, 255, 0.2)">
                   <motion.form 
                     className="flex flex-col gap-4 w-[80%] mx-auto" 
                     onSubmit={(e) => e.preventDefault()}
@@ -173,29 +236,43 @@ export default function LoginPage() {
                     <SplitText
                       text="Vérification"
                       delay={150}
-                      className="text-5xl mb-auto mx-auto text-white"
+                      className="text-4xl md:text-6xl mb-auto mx-auto text-white"
                     />
                     <Separator className='bg-gray-400' />
-                    <div className="text-center text-white mb-4">
-                      Un code de vérification a été envoyé à {email}
+                    <div className="text-center text-white text-base md:text-lg mb-4">
+                      Un code de vérification a été envoyé à <span className='font-bold'>{email}</span>
                     </div>
-                    <div>
-                      <div className="mb-2 block">
-                        <Label className='text-white' htmlFor="verificationCode">Code de vérification</Label>
-                      </div>
-                      <TextInput 
-                        className='pointer-events-auto' 
-                        id="verificationCode" 
-                        type="text" 
-                        icon={KeyRound}
-                        placeholder="Entrez le code à 6 chiffres" 
-                        required 
-                        shadow 
-                      />
+                    <div className="flex justify-center w-full">
+                      <InputOTP maxLength={6} className="gap-2">
+                        <InputOTPGroup>
+                          <InputOTPSlot index={0} />
+                          <InputOTPSlot index={1} />
+                          <InputOTPSlot index={2} />
+                        </InputOTPGroup>
+                        <InputOTPSeparator />
+                        <InputOTPGroup>
+                          <InputOTPSlot index={3} />
+                          <InputOTPSlot index={4} />
+                          <InputOTPSlot index={5} />
+                        </InputOTPGroup>
+                      </InputOTP>
                     </div>
-                    <Button className='bg-black hover:bg-gray-900 cursor-pointer pointer-events-auto mt-4' type="submit">
-                      <ArrowRight className="mr-2" /> Vérifier
-                    </Button>
+                    <div className="flex flex-col items-center gap-4">
+                      <button 
+                        className={`text-blue-400 text-sm ${resendDisabled ? 'opacity-50 cursor-not-allowed' : 'cursor-pointer hover:underline hover:text-blue-300'}`}
+                        onClick={handleResendCode}
+                        disabled={resendDisabled}
+                      >
+                        {resendDisabled ? `Veuillez patienter (${countdown}s)` : 'Renvoyer le code'}
+                      </button>
+                      <Button 
+                        className='bg-black hover:bg-gray-900 cursor-pointer pointer-events-auto mt-2 text-lg py-6 w-[300px]' 
+                        type="submit"
+                        onClick={() => navigate('/home')}
+                      >
+                        <ArrowRight className="mr-3 w-6 h-6" /> Vérifier
+                      </Button>
+                    </div>
                   </motion.form>
                 </SpotlightCard>
               )}
