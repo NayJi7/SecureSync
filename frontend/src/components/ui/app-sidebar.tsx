@@ -49,7 +49,7 @@ export function AppSidebar() {
         <img src="/src/assets/logo-band.png" alt="SmartHub Logo" className="w-auto h-24" />
       </div>
       <div className="px-5"><Separator /></div>
-      <SidebarContent>
+      <SidebarContent className="scroll overflow-x-hidden">
         <SidebarGroup className="mx-2.75 mt-2">
           {/* <SidebarGroupLabel>Accueil</SidebarGroupLabel> */}
           <SidebarGroupContent>
