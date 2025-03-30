@@ -1,6 +1,7 @@
 // React et hooks
 import { useState, useRef, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
+import { useDevice } from "@/hooks/use-device";
 
 // Librairies externes
 import { animated, useTransition, AnimatedProps } from '@react-spring/web';
@@ -51,6 +52,8 @@ export default function LoginPage() {
   const titleContainerRef = useRef<HTMLDivElement>(null);
   const [resendDisabled, setResendDisabled] = useState(false);
   const [countdown, setCountdown] = useState(10);
+  const { isLessThan } = useDevice();
+  const isLessThanWidth = isLessThan(1672);
 
   const handleResendCode = () => {
     setResendDisabled(true);
@@ -150,31 +153,50 @@ export default function LoginPage() {
         alphaParticles={false}
         disableRotation={false}
       />
-      <div className="absolute inset-0 flex items-center justify-center z-10 pointer-events-none">
-        <div className='hidden xl:flex w-4/5 h-full items-center justify-center relative'>
-          <img className='w-auto h-[95%] rounded-2xl' src="https://www.lalibre.be/resizer/v2/BJYUKUYMC5HL7EZAHSL7B3MXFA.jpg?auth=98465b5b9263ff3b8dc1e34aadad1646214eb19c644f32c889f5a3d6f2c20fab&width=1200&height=800&quality=85&focal=3360%2C2240" alt="Prison Image" />
-            <div className="absolute w-[90%] bg-black/85 rounded-xl p-8 md:p-16 text-center min-h-[300px] flex flex-col items-center" style={{ top: '45%', transform: 'translateY(-50%)' }}>
-              <div ref={titleContainerRef} style={{ position: 'relative', marginBottom: '2rem md:3rem' }}>
-                <VariableProximity
-                  label="SecureSync"
-                  className="text-4xl md:text-8xl font-bold text-white"
-                  fromFontVariationSettings="'wght' 400, 'opsz' 9"
-                  toFontVariationSettings="'wght' 1000, 'opsz' 40"
-                  containerRef={titleContainerRef}
-                  radius={150}
-                  falloff='linear'
-                />
-              </div>
-              <div>
-                <p className="text-white mt-4 text-lg md:text-2xl">L'innovation digitale au cœur de l'univers carcéral</p>
-              </div>
+      <div className={`absolute inset-0 flex items-center z-10 pointer-events-none ${isLessThanWidth ? 'flex-col' : ''} `}>
+        {isLessThanWidth ? (
+          <div className="w-full h-auto flex-col text-center items-center justify-center z-10 relative" style={{ top: '5vh' }}>
+            <div ref={titleContainerRef}>
+              <VariableProximity
+              label="SecureSync"
+              className="text-4xl md:text-5xl lg:text-7xl font-bold text-white"
+              fromFontVariationSettings="'wght' 400, 'opsz' 9"
+              toFontVariationSettings="'wght' 1000, 'opsz' 40"
+              containerRef={titleContainerRef}
+              radius={150}
+              falloff='linear'
+              />
             </div>
-        </div>
+            <div>
+              <p className="text-white mt-4 text-sm sm:text-lg md:text-xl lg:text-2xl xl:text-3xl max-w-[80%] mx-auto">L'innovation digitale au cœur de l'univers carcéral</p>
+            </div>
+          </div>
+        ) : (
+          <div className='flex w-4/5 h-full items-center justify-center relative'>
+            <img className='w-auto h-[95%] rounded-2xl' src="https://www.lalibre.be/resizer/v2/BJYUKUYMC5HL7EZAHSL7B3MXFA.jpg?auth=98465b5b9263ff3b8dc1e34aadad1646214eb19c644f32c889f5a3d6f2c20fab&width=1200&height=800&quality=85&focal=3360%2C2240" alt="Prison Image" />
+              <div className="absolute w-[90%] bg-black/85 rounded-xl p-8 md:p-16 text-center min-h-[300px] flex flex-col items-center" style={{ top: '45%', transform: 'translateY(-50%)' }}>
+                <div ref={titleContainerRef} style={{ position: 'relative', marginBottom: '2rem md:3rem' }}>
+                  <VariableProximity
+                    label="SecureSync"
+                    className="text-4xl md:text-8xl font-bold text-white"
+                    fromFontVariationSettings="'wght' 400, 'opsz' 9"
+                    toFontVariationSettings="'wght' 1000, 'opsz' 40"
+                    containerRef={titleContainerRef}
+                    radius={150}
+                    falloff='linear'
+                  />
+                </div>
+                <div>
+                  <p className="text-white mt-4 text-lg md:text-2xl">L'innovation digitale au cœur de l'univers carcéral</p>
+                </div>
+              </div>
+          </div>
+        )}
         <div className='w-full h-full flex items-center justify-center'>
           {transitions((styles) => (
             <AnimatedDiv style={{ ...styles, position: 'absolute', width: '100%', display: 'flex', justifyContent: 'center' }}>
               {authStep === 'login' ? (
-                <SpotlightCard className='w-[70%] max-w-4xl mx-auto flex flex-col justify-evenly pointer-events-auto' spotlightColor="rgba(0, 229, 255, 0.2)">
+                <SpotlightCard className='w-[85%] max-w-4xl mx-auto flex flex-col justify-evenly pointer-events-auto' spotlightColor="rgba(0, 229, 255, 0.2)">
                   <motion.form 
                     className="flex flex-col gap-4 w-[80%] mx-auto" 
                     onSubmit={handleSubmit}
@@ -331,7 +353,7 @@ export default function LoginPage() {
                   </motion.form>
                 </SpotlightCard>
               ) : (
-                <SpotlightCard className='w-[70%] max-w-4xl mx-auto flex flex-col justify-evenly pointer-events-auto' spotlightColor="rgba(0, 229, 255, 0.2)">
+                <SpotlightCard className='w-[85%] max-w-4xl mx-auto flex flex-col justify-evenly pointer-events-auto' spotlightColor="rgba(0, 229, 255, 0.2)">
                   <motion.form 
                     className="flex flex-col gap-4 w-[80%] mx-auto" 
                     onSubmit={(e) => e.preventDefault()}
