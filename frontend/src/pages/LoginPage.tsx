@@ -1,5 +1,5 @@
 // React et hooks
-import { useEffect, useState, useRef } from 'react';
+import { useState, useRef, useEffect, FC, ComponentProps } from 'react';
 import { useNavigate } from 'react-router-dom';
 
 // Librairies externes
@@ -27,6 +27,7 @@ import { HiMail } from "react-icons/hi";
 import { TbLockPassword } from "react-icons/tb";
 import { FiRepeat } from "react-icons/fi";
 import { MdOutlineLogin } from "react-icons/md";
+import { LuEyeClosed, LuEye } from "react-icons/lu";
 
 const AnimatedDiv = animated.div as React.FC<AnimatedProps<React.HTMLAttributes<HTMLDivElement>>>;
 
@@ -39,6 +40,12 @@ export default function LoginPage() {
   const navigate = useNavigate();
   const [authStep, setAuthStep] = useState('login');
   const [email, setEmail] = useState('');
+  const [password, setPassword] = useState('');
+  const [repeatPassword, setRepeatPassword] = useState('');
+  const [passwordError, setPasswordError] = useState('');
+  const [emailError, setEmailError] = useState('');
+  const [showPassword, setShowPassword] = useState(false);
+  const [showRepeatPassword, setShowRepeatPassword] = useState(false);
   const [openModal, setOpenModal] = useState(false);
   const [acceptedTerms, setAcceptedTerms] = useState(false);
   const titleContainerRef = useRef<HTMLDivElement>(null);
@@ -73,9 +80,54 @@ export default function LoginPage() {
     };
   }, []);
 
+  const validateEmail = (email: string) => {
+    const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+    if (!email) {
+      setEmailError("Veuillez saisir une adresse e-mail");
+      return false;
+    }
+    if (!emailRegex.test(email)) {
+      setEmailError("Veuillez saisir une adresse e-mail valide");
+      return false;
+    }
+    setEmailError('');
+    return true;
+  };
+
+  const validatePasswords = () => {
+    if (password === '' || repeatPassword === '') {
+      setPasswordError("Veuillez remplir tous les champs de mot de passe");
+      return false;
+    }
+    if (password !== repeatPassword) {
+      setPasswordError("Les mots de passe ne correspondent pas");
+      return false;
+    }
+    setPasswordError('');
+    return true;
+  };
+
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
+    
+    // Validation de l'email
+    if (!validateEmail(email)) {
+      return;
+    }
+
+    if (!acceptedTerms) {
+      alert("Veuillez accepter les conditions d'utilisation pour continuer");
+      return;
+    }
+
+    // Validation des mots de passe
+    if (!validatePasswords()) {
+      return;
+    }
+
     setAuthStep('verify');
+    // Lancer le timer dès qu'on passe à l'étape de vérification
+    handleResendCode();
   };
 
   return (
@@ -140,8 +192,8 @@ export default function LoginPage() {
                       <div className="mb-3 block">
                         <Label className='text-white text-base md:text-lg' htmlFor="email2">Votre email</Label>
                       </div>
-                      <TextInput 
-                        className='pointer-events-auto text-lg' 
+                        <TextInput 
+                        className={`pointer-events-auto text-lg`}
                         id="email2" 
                         type="email" 
                         icon={HiMail} 
@@ -150,19 +202,68 @@ export default function LoginPage() {
                         shadow
                         value={email}
                         onChange={(e) => setEmail(e.target.value)}
-                      />
+                        onBlur={() => validateEmail(email)}
+                        color={emailError ? 'failure' : undefined}
+                        />
+                      {emailError && (
+                        <p className="text-red-500 text-sm mt-1">{emailError}</p>
+                      )}
                     </div>
+                    
                     <div>
                       <div className="mb-2 block">
                         <Label className='text-white' htmlFor="password2">Votre mot de passe</Label>
                       </div>
-                      <TextInput className='pointer-events-auto' id="password2" icon={TbLockPassword} placeholder='•••' type="password" required shadow />
+                      <div className="relative">
+                        <TextInput 
+                          className='pointer-events-auto w-full' 
+                          id="password2" 
+                          icon={TbLockPassword} 
+                          placeholder='•••' 
+                          type={showPassword ? "text" : "password"} 
+                          required 
+                          shadow 
+                          value={password}
+                          onChange={(e) => setPassword(e.target.value)}
+                        />
+                        <button
+                          type="button"
+                          className="absolute inset-y-0 right-0 flex items-center pr-3 text-gray-400 hover:text-gray-600 cursor-pointer"
+                          onClick={() => setShowPassword(!showPassword)}
+                        >
+                          {showPassword ? <LuEye className="pointer-events-none" size={20} /> : <LuEyeClosed className="pointer-events-none" size={20} />}
+                        </button>
+                      </div>
                     </div>
                     <div>
                       <div className="mb-2 block">
                         <Label className='text-white' htmlFor="repeat-password">Répéter le mot de passe</Label>
                       </div>
-                      <TextInput className='pointer-events-auto' id="repeat-password" icon={FiRepeat} placeholder='•••' type="password" required shadow />
+                      <div className="relative">
+                        <TextInput 
+                          className='pointer-events-auto w-full' 
+                          id="repeat-password" 
+                          icon={FiRepeat} 
+                          placeholder='•••' 
+                          type={showRepeatPassword ? "text" : "password"} 
+                          required 
+                          shadow 
+                          value={repeatPassword}
+                          onChange={(e) => setRepeatPassword(e.target.value)}
+                          onBlur={validatePasswords}
+                          color={passwordError ? 'failure' : undefined}
+                        />
+                        <button
+                          type="button"
+                          className="absolute inset-y-0 right-0 flex items-center pr-3 text-gray-400 hover:text-gray-600 cursor-pointer"
+                          onClick={() => setShowRepeatPassword(!showRepeatPassword)}
+                        >
+                          {showRepeatPassword ? <LuEye className="pointer-events-none" size={20} /> : <LuEyeClosed className="pointer-events-none" size={20} />}
+                        </button>
+                      </div>
+                      {passwordError && (
+                        <p className="text-red-500 text-sm mt-1">{passwordError}</p>
+                      )}
                     </div>
                     <div className="flex items-center gap-2 pt-4 w-full justify-center">
                       <div className="flex items-center gap-2 whitespace-nowrap min-w-max">
@@ -220,7 +321,11 @@ export default function LoginPage() {
                         </Button>
                       </ModalFooter>
                     </Modal>
-                    <Button className='bg-black hover:bg-gray-900 cursor-pointer pointer-events-auto' type="submit" onClick={(handleResendCode)}>
+                    <Button 
+                      className={`bg-black hover:bg-gray-900 cursor-pointer pointer-events-auto ${(!acceptedTerms || !email || !password || !repeatPassword) ? 'opacity-50' : ''}`} 
+                      type="submit" 
+                      disabled={!acceptedTerms || !email || !password || !repeatPassword}
+                    >
                       <MdOutlineLogin className="mr-2" /> Se connecter
                     </Button>
                   </motion.form>
