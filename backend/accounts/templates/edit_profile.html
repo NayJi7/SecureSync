@@ -1,69 +1,68 @@
-
-
+{% load static %}
 {% block title %}Modifier mon profil{% endblock %}
 
 {% block content %}
-<div class="container my-5">
-    <div class="row">
-        <div class="col-md-8 mx-auto">
+<div class="container py-5">
+    <div class="row justify-content-center">
+        <div class="col-md-8">
             <div class="card shadow">
                 <div class="card-header bg-primary text-white">
                     <h3 class="mb-0">Modifier mon profil</h3>
                 </div>
                 <div class="card-body">
-                    <form method="post" enctype="multipart/form-data">
+                    <div class="mb-4 text-center">
+                        {% if user.photo %}
+                            <img src="{{ user.photo.url }}" alt="Photo de profil" class="rounded-circle img-thumbnail" style="width: 150px; height: 150px; object-fit: cover;">
+                        {% else %}
+                            <div class="rounded-circle bg-secondary text-white d-flex align-items-center justify-content-center mx-auto" style="width: 150px; height: 150px;">
+                                <span style="font-size: 60px;">{{ user.username.0|upper }}</span>
+                            </div>
+                        {% endif %}
+                    </div>
+
+                    <form method="POST" enctype="multipart/form-data">
                         {% csrf_token %}
                         
                         {% if form.non_field_errors %}
-                        <div class="alert alert-danger">
-                            {% for error in form.non_field_errors %}
-                                {{ error }}
-                            {% endfor %}
-                        </div>
+                            <div class="alert alert-danger">
+                                {{ form.non_field_errors }}
+                            </div>
                         {% endif %}
                         
                         <div class="mb-3">
                             <label for="{{ form.username.id_for_label }}" class="form-label">Nom d'utilisateur</label>
+                            {{ form.username }}
                             {% if form.username.errors %}
-                            <div class="text-danger">
-                                {% for error in form.username.errors %}
-                                    {{ error }}
-                                {% endfor %}
-                            </div>
+                                <div class="text-danger">
+                                    {{ form.username.errors }}
+                                </div>
                             {% endif %}
                         </div>
                         
                         <div class="mb-3">
                             <label for="{{ form.email.id_for_label }}" class="form-label">Email</label>
+                            {{ form.email }}
                             {% if form.email.errors %}
-                            <div class="text-danger">
-                                {% for error in form.email.errors %}
-                                    {{ error }}
-                                {% endfor %}
-                            </div>
+                                <div class="text-danger">
+                                    {{ form.email.errors }}
+                                </div>
                             {% endif %}
                         </div>
                         
-                        <div class="mb-3">
+                        <div class="mb-4">
                             <label for="{{ form.photo.id_for_label }}" class="form-label">Photo de profil</label>
-                            {% if user.photo %}
-                            <div class="mb-2">
-                                <img src="{{ user.photo.url }}" alt="Photo actuelle" class="img-thumbnail" style="max-width: 150px;">
-                            </div>
-                            {% endif %}
+                            {{ form.photo }}
                             {% if form.photo.errors %}
-                            <div class="text-danger">
-                                {% for error in form.photo.errors %}
-                                    {{ error }}
-                                {% endfor %}
-                            </div>
+                                <div class="text-danger">
+                                    {{ form.photo.errors }}
+                                </div>
                             {% endif %}
-                            <div class="form-text">Format recommandé : JPEG ou PNG, taille maximale 2 Mo</div>
+                            <div class="form-text">Formats acceptés: JPG, PNG, GIF - Max 5 MB</div>
                         </div>
                         
-                        <div class="d-flex justify-content-between">
-                            <a href="{% url 'profile' %}" class="btn btn-secondary">Annuler</a>
+                        <div class="d-grid gap-2">
                             <button type="submit" class="btn btn-primary">Enregistrer les modifications</button>
+                            <a href="{% url 'profile' %}" class="btn btn-outline-secondary">Annuler</a>
                         </div>
                     </form>
                 </div>

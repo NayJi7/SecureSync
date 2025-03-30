@@ -6,6 +6,7 @@ from django.contrib import messages
 from django.contrib.auth.decorators import login_required
 from .forms import CustomUserUpdateForm 
 from .models import CustomUser
+from django import forms
 def index(request):
     return render(request, 'index.html')
 
@@ -81,3 +82,72 @@ def edit_profile(request):
     
     return render(request, 'edit_profile.html', {'form': form})
 
+
+class EditProfileForm(forms.ModelForm):
+    """Formulaire de modification de profil utilisateur"""
+    
+    class Meta:
+        model = CustomUser
+        fields = ['username', 'email', 'photo']
+        widgets = {
+            'username': forms.TextInput(attrs={'class': 'form-control'}),
+            'email': forms.EmailInput(attrs={'class': 'form-control'}),
+            'photo': forms.FileInput(attrs={'class': 'form-control'}),
+        }
+    
+    def clean_username(self):
+        username = self.cleaned_data.get('username')
+        user_id = self.instance.id
+        
+        # Vérifier si le nom d'utilisateur existe déjà (pour un autre utilisateur)
+        if CustomUser.objects.filter(username=username).exclude(id=user_id).exists():
+            raise forms.ValidationError("Ce nom d'utilisateur est déjà utilisé.")
+        
+        return username
+    
+    def clean_email(self):
+        email = self.cleaned_data.get('email')
+        user_id = self.instance.id
+        
+        # Vérifier si l'email existe déjà (pour un autre utilisateur)
+        if CustomUser.objects.filter(email=email).exclude(id=user_id).exists():
+            raise forms.ValidationError("Cet email est déjà utilisé.")
+        
+        return email
+    
+    def clean_photo(self):
+        photo = self.cleaned_data.get('photo')
+        if photo:
+            # Vérifier la taille du fichier (5MB max)
+            if hasattr(photo, 'size') and photo.size > 5 * 1024 * 1024:
+                raise forms.ValidationError("La taille de l'image ne doit pas dépasser 5 MB.")
+            
+            # Vérifier le format du fichier
+            if hasattr(photo, 'content_type'):
+                # Si c'est un nouveau fichier téléchargé
+                allowed_formats = ['image/jpeg', 'image/png', 'image/gif']
+                if photo.content_type not in allowed_formats:
+                    raise forms.ValidationError("Seuls les formats JPG, PNG et GIF sont acceptés.")
+            else:
+                # Pour les fichiers existants, vérifier l'extension
+                import os
+                ext = os.path.splitext(photo.name)[1].lower()
+                if ext not in ['.jpg', '.jpeg', '.png', '.gif']:
+                    raise forms.ValidationError("Seuls les formats JPG, PNG et GIF sont acceptés.")
+        
+        return photo
+
+@login_required
+def edit_profile(request):
+    """Vue pour modifier le profil utilisateur"""
+    
+    if request.method == 'POST':
+        form = EditProfileForm(request.POST, request.FILES, instance=request.user)
+        if form.is_valid():
+            form.save()
+            messages.success(request, "Votre profil a été mis à jour avec succès.")
+            return redirect('profile')  # Redirection vers la page de profil
+    else:
+        form = EditProfileForm(instance=request.user)
+    
+    return render(request, 'edit_profile.html', {'form': form})
