@@ -8,8 +8,15 @@ def user_directory_path(instance, filename):
     return f'profile_pics/user_{instance.id}/{filename}'
 
 class CustomUser(AbstractUser):
+    GENDER_CHOICES = (
+        ('M', 'Masculin'),
+        ('F', 'Féminin'),
+        ('O', 'Autre'),
+        ('N', 'Préfère ne pas préciser')
+    )
     email = models.EmailField(unique=True)
     photo = models.ImageField(upload_to=user_directory_path, blank=True, null=True)
+    gender = models.CharField(max_length=1, choices=GENDER_CHOICES, blank=True, null=True, verbose_name="Sexe")
     
     def save(self, *args, **kwargs):
         # On doit d'abord sauvegarder pour avoir un ID si c'est un nouvel utilisateur
