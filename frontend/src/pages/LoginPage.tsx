@@ -1,5 +1,5 @@
 // React et hooks
-import { useState, useRef, useEffect, FC, ComponentProps } from 'react';
+import { useState, useRef, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 
 // Librairies externes
@@ -22,7 +22,7 @@ import SplitText from "../blocks/TextAnimations/SplitText/SplitText";
 import VariableProximity from '../blocks/TextAnimations/VariableProximity/VariableProximity';
 
 // Icônes
-import { Home, MailOpen, ArrowRight, Check, X } from 'lucide-react';
+import { Home, ArrowRight, Check, X } from 'lucide-react';
 import { HiMail } from "react-icons/hi";
 import { TbLockPassword } from "react-icons/tb";
 import { FiRepeat } from "react-icons/fi";

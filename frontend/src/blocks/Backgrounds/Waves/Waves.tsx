@@ -143,6 +143,7 @@ interface WavesProps {
   friction?: number;
   tension?: number;
   maxCursorMove?: number;
+  dot?: boolean; // Contrôle l'affichage du point qui suit le curseur
   style?: CSSProperties;
   className?: string;
 }
@@ -159,6 +160,7 @@ const Waves: React.FC<WavesProps> = ({
   friction = 0.925,
   tension = 0.005,
   maxCursorMove = 100,
+  dot = true, // Par défaut, le point est affiché
   style = {},
   className = "",
 }) => {
@@ -430,14 +432,16 @@ const Waves: React.FC<WavesProps> = ({
       }}
       className={`absolute top-0 left-0 w-full h-full overflow-hidden ${className}`}
     >
-      <div
-        className="absolute top-0 left-0 bg-[#160000] rounded-full w-[0.5rem] h-[0.5rem]"
-        style={{
-          transform:
-            "translate3d(calc(var(--x) - 50%), calc(var(--y) - 50%), 0)",
-          willChange: "transform",
-        }}
-      />
+      {dot && (
+        <div
+          className="absolute top-0 left-0 bg-[#160000] rounded-full w-[0.5rem] h-[0.5rem]"
+          style={{
+            transform:
+              "translate3d(calc(var(--x) - 50%), calc(var(--y) - 50%), 0)",
+            willChange: "transform",
+          }}
+        />
+      )}
       <canvas ref={canvasRef} className="block w-full h-full" />
     </div>
   );
