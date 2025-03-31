@@ -35,6 +35,26 @@
                                         <td>{{ user.email }}</td>
                                     </tr>
                                     <tr>
+                                        <th>Sexe :</th>
+                                        <td>{{ user.gender }}</td>
+                                    </tr>
+                                    <tr>
+                                        <th>Nom :</th>
+                                        <td>{{  user.last_name }}</td>
+                                    </tr>
+                                    <tr>
+                                        <th>Prenom :</th>
+                                        <td>{{user.first_name }}</td>
+                                    </tr>
+                                    <tr>
+                                        <th>Date de naissance</th>
+                                        <td>{{user.date_naissance|date:"d F Y" }}</td>
+                                    </tr>
+                                    <tr>
+                                        <th>Age</th>
+                                        <td>{{ user.date_naissance|timesince }} ans</td>
+                                    </tr> 
+                                    <tr>
                                         <th>Membre depuis :</th>
                                         <td>{{ user.date_joined|date:"d F Y" }}</td>
                                     </tr>

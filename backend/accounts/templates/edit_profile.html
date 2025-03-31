@@ -1,68 +1,105 @@
-{% load static %}
-{% block title %}Modifier mon profil{% endblock %}
+
 
 {% block content %}
 <div class="container py-5">
-    <div class="row justify-content-center">
-        <div class="col-md-8">
+    <div class="row">
+        <div class="col-md-8 mx-auto">
             <div class="card shadow">
                 <div class="card-header bg-primary text-white">
-                    <h3 class="mb-0">Modifier mon profil</h3>
+                    <h3 class="mb-0">Modifier votre profil</h3>
                 </div>
                 <div class="card-body">
-                    <div class="mb-4 text-center">
-                        {% if user.photo %}
-                            <img src="{{ user.photo.url }}" alt="Photo de profil" class="rounded-circle img-thumbnail" style="width: 150px; height: 150px; object-fit: cover;">
-                        {% else %}
-                            <div class="rounded-circle bg-secondary text-white d-flex align-items-center justify-content-center mx-auto" style="width: 150px; height: 150px;">
-                                <span style="font-size: 60px;">{{ user.username.0|upper }}</span>
-                            </div>
-                        {% endif %}
+                    {% if messages %}
+                    <div class="messages">
+                        {% for message in messages %}
+                        <div class="alert {% if message.tags == 'success' %}alert-success{% elif message.tags == 'error' %}alert-danger{% else %}alert-info{% endif %} alert-dismissible fade show" role="alert">
+                            {{ message }}
+                            <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+                        </div>
+                        {% endfor %}
                     </div>
+                    {% endif %}
 
-                    <form method="POST" enctype="multipart/form-data">
+                    <form method="post" enctype="multipart/form-data" novalidate>
                         {% csrf_token %}
                         
-                        {% if form.non_field_errors %}
-                            <div class="alert alert-danger">
-                                {{ form.non_field_errors }}
-                            </div>
-                        {% endif %}
-                        
                         <div class="mb-3">
-                            <label for="{{ form.username.id_for_label }}" class="form-label">Nom d'utilisateur</label>
+                            <label for="{{ form.username.id_for_label }}" class="form-label">{{ form.username.label }}</label>
                             {{ form.username }}
                             {% if form.username.errors %}
-                                <div class="text-danger">
-                                    {{ form.username.errors }}
-                                </div>
+                            <div class="text-danger">{{ form.username.errors }}</div>
                             {% endif %}
                         </div>
                         
                         <div class="mb-3">
-                            <label for="{{ form.email.id_for_label }}" class="form-label">Email</label>
+                            <label for="{{ form.email.id_for_label }}" class="form-label">{{ form.email.label }}</label>
                             {{ form.email }}
                             {% if form.email.errors %}
-                                <div class="text-danger">
-                                    {{ form.email.errors }}
+                            <div class="text-danger">{{ form.email.errors }}</div>
+                            {% endif %}
+                        </div>
+                        
+                        <div class="row">
+                            <div class="col-md-6">
+                                <div class="mb-3">
+                                    <label for="{{ form.nom.id_for_label }}" class="form-label">{{ form.nom.label }}</label>
+                                    {{ form.nom }}
+                                    {% if form.nom.errors %}
+                                    <div class="text-danger">{{ form.nom.errors }}</div>
+                                    {% endif %}
                                 </div>
+                            </div>
+                            <div class="col-md-6">
+                                <div class="mb-3">
+                                    <label for="{{ form.prenom.id_for_label }}" class="form-label">{{ form.prenom.label }}</label>
+                                    {{ form.prenom }}
+                                    {% if form.prenom.errors %}
+                                    <div class="text-danger">{{ form.prenom.errors }}</div>
+                                    {% endif %}
+                                </div>
+                            </div>
+                        </div>
+                        
+                        <div class="mb-3">
+                            <label class="form-label">{{ form.sexe.label }}</label>
+                            <div class="d-flex">
+                                {% for radio in form.sexe %}
+                                <div class="form-check me-3">
+                                    {{ radio }}
+                                    <label class="form-check-label" for="{{ radio.id_for_label }}">{{ radio.choice_label }}</label>
+                                </div>
+                                {% endfor %}
+                            </div>
+                            {% if form.sexe.errors %}
+                            <div class="text-danger">{{ form.sexe.errors }}</div>
+                            {% endif %}
+                        </div>
+                        
+                        <div class="mb-3">
+                            <label for="{{ form.date_naissance.id_for_label }}" class="form-label">{{ form.date_naissance.label }}</label>
+                            {{ form.date_naissance }}
+                            {% if form.date_naissance.errors %}
+                            <div class="text-danger">{{ form.date_naissance.errors }}</div>
                             {% endif %}
                         </div>
                         
                         <div class="mb-4">
-                            <label for="{{ form.photo.id_for_label }}" class="form-label">Photo de profil</label>
-                            {{ form.photo }}
-                            {% if form.photo.errors %}
-                                <div class="text-danger">
-                                    {{ form.photo.errors }}
-                                </div>
+                            <label for="{{ form.photo.id_for_label }}" class="form-label">{{ form.photo.label }}</label>
+                            {% if user.photo %}
+                            <div class="mb-2">
+                                <img src="{{ user.photo.url }}" alt="Photo de profil" class="img-thumbnail" style="max-width: 150px;">
+                            </div>
                             {% endif %}
-                            <div class="form-text">Formats acceptés: JPG, PNG, GIF - Max 5 MB</div>
+                            {{ form.photo }}
+                            <small class="form-text text-muted">Formats acceptés: JPG, PNG, GIF. Taille max: 5MB.</small>
+                            {% if form.photo.errors %}
+                            <div class="text-danger">{{ form.photo.errors }}</div>
+                            {% endif %}
                         </div>
                         
-                        <div class="d-grid gap-2">
-                            <button type="submit" class="btn btn-primary">Enregistrer les modifications</button>
-                            <a href="{% url 'profile' %}" class="btn btn-outline-secondary">Annuler</a>
+                        <div class="d-grid gap-2 d-md-flex justify-content-md-end">
+                            <a href="{% url 'profile' %}" class="btn btn-secondary me-md-2">Annuler</a>
+                            <button type="submit" class="btn btn-primary">Enregistrer</button>
                         </div>
                     </form>
                 </div>

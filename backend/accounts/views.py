@@ -18,7 +18,14 @@ def register(request):
     if request.method == "POST":
         form = CustomUserCreationForm(request.POST, request.FILES)  # Prendre en compte les fichiers pour l'image
         if form.is_valid():
-            user = form.save()  # Crée le compte utilisateur
+            user = form.save(commit=False)  # On ne sauvegarde pas tout de suite pour modifier les champs
+            user.email = form.cleaned_data['email']
+            user.photo = form.cleaned_data['photo']
+            user.sexe = form.cleaned_data['sexe']
+            user.first_name = form.cleaned_data['prenom']  # first_name correspond à prenom
+            user.last_name = form.cleaned_data['nom']  # last_name correspond à nom
+            user.date_naissance = form.cleaned_data['date_naissance']
+            user.save()  # Maintenant, on sauvegarde
             login(request, user)  # Connecte automatiquement l'utilisateur
             messages.success(request, "Votre compte a été créé avec succès !")  # Message de succès
             return redirect('home')  # Redirige vers la page d'accueil
@@ -139,15 +146,18 @@ class EditProfileForm(forms.ModelForm):
 
 @login_required
 def edit_profile(request):
-    """Vue pour modifier le profil utilisateur"""
-    
+    """
+    Vue pour modifier le profil utilisateur avec tous les champs requis
+    """
     if request.method == 'POST':
-        form = EditProfileForm(request.POST, request.FILES, instance=request.user)
+        form = CustomUserUpdateForm(request.POST, request.FILES, instance=request.user)
         if form.is_valid():
             form.save()
             messages.success(request, "Votre profil a été mis à jour avec succès.")
             return redirect('profile')  # Redirection vers la page de profil
+        else:
+            messages.error(request, "Une erreur est survenue. Veuillez vérifier les informations fournies.")
     else:
-        form = EditProfileForm(instance=request.user)
+        form = CustomUserUpdateForm(instance=request.user)
     
     return render(request, 'edit_profile.html', {'form': form})

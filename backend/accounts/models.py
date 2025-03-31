@@ -2,6 +2,7 @@ from django.contrib.auth.models import AbstractUser
 from django.db import models
 from django.core.files.base import ContentFile
 from PIL import Image, ImageDraw, ImageFont
+from django.db import models
 import io
 
 def user_directory_path(instance, filename):
@@ -17,6 +18,8 @@ class CustomUser(AbstractUser):
     email = models.EmailField(unique=True)
     photo = models.ImageField(upload_to=user_directory_path, blank=True, null=True)
     gender = models.CharField(max_length=1, choices=GENDER_CHOICES, blank=True, null=True, verbose_name="Sexe")
+    date_naissance = models.DateField(null=True, blank=True)
+
     
     def save(self, *args, **kwargs):
         # On doit d'abord sauvegarder pour avoir un ID si c'est un nouvel utilisateur
