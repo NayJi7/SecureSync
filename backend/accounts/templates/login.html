@@ -1,0 +1,33 @@
+{% load static %}
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Connexion</title>
+    <link rel="stylesheet" href="{% static 'css/styles.css' %}">
+</head>
+<body>
+    <div class="container">
+        <h1>Connexion</h1>
+        
+        <form method="POST">
+            {% csrf_token %}
+            
+            <label for="id_username">Nom d'utilisateur :</label>
+            {{ form.username }}
+            
+            <label for="id_password">Mot de passe :</label>
+            {{ form.password }}
+
+            <button type="submit" class="btn">Se connecter</button>
+        </form>
+
+        {% if form.errors %}
+            <p style="color: red;">Nom d'utilisateur ou mot de passe incorrect.</p>
+        {% endif %}
+        
+        <p>Pas encore de compte ? <a href="{% url 'register' %}">Inscrivez-vous ici</a></p>
+    </div>
+</body>
+</html>
