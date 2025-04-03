@@ -1,26 +1,27 @@
 from django import forms
 from django.contrib.auth.forms import UserCreationForm, AuthenticationForm
 from .models import CustomUser
+from django.db import models
 
 class CustomUserCreationForm(UserCreationForm):
     GENDER_CHOICES = [
-    ('M', 'Homme'),
-    ('F', 'Femme'),
-    ('O', 'Autre'),
-]
+        ('M', 'Homme'),
+        ('F', 'Femme'),
+        ('O', 'Autre'),
+    ]
+    
     email = forms.EmailField(required=True)
     photo = forms.ImageField(required=False)
-    sexe = forms.ChoiceField(choices=GENDER_CHOICES, widget=forms.Select(), required=False)
+    sexe = forms.ChoiceField(choices=GENDER_CHOICES, required=False)
     nom = forms.CharField(max_length=100)
     prenom = forms.CharField(max_length=100)
     date_naissance = forms.DateField(required=False, widget=forms.DateInput(attrs={'type': 'date', 'class': 'form-control'}), label="Date de naissance")
-
     
     class Meta:
         model = CustomUser
-        fields = ['username', 'email', 'password1', 'password2', 'photo','sexe','nom','prenom','date_naissance' ]
+        fields = ['username', 'email', 'password1', 'password2', 'photo', 'sexe', 'nom', 'prenom', 'date_naissance']
 
-class CustomAuthenticationForm(AuthenticationForm):
+class CustomAuthenticationForm(AuthenticationForm): 
     username = forms.CharField(label="Nom d'utilisateur", widget=forms.TextInput(attrs={
         'class': 'form-control',
         'placeholder': 'Entrez votre nom d\'utilisateur'
@@ -30,9 +31,6 @@ class CustomAuthenticationForm(AuthenticationForm):
         'placeholder': 'Entrez votre mot de passe'
     }))
     
-# accounts/forms.py
-from django import forms
-from .models import CustomUser
 import os
 
 class CustomUserUpdateForm(forms.ModelForm):

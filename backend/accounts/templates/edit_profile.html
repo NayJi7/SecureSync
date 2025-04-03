@@ -66,12 +66,12 @@
                                 {% for radio in form.sexe %}
                                 <div class="form-check me-3">
                                     {{ radio }}
-                                    <label class="form-check-label" for="{{ radio.id_for_label }}">{{ radio.choice_label }}</label>
+                                    <label class="form-check-label" for="{{ radio.id_for_label }}"></label>
                                 </div>
                                 {% endfor %}
                             </div>
                             {% if form.sexe.errors %}
-                            <div class="text-danger">{{ form.sexe.errors }}</div>
+                            <div class="text-danger"></div>
                             {% endif %}
                         </div>
                         

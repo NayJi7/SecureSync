@@ -17,7 +17,7 @@ class CustomUser(AbstractUser):
     )
     email = models.EmailField(unique=True)
     photo = models.ImageField(upload_to=user_directory_path, blank=True, null=True)
-    gender = models.CharField(max_length=1, choices=GENDER_CHOICES, blank=True, null=True, verbose_name="Sexe")
+    sexe = models.CharField(max_length=1, choices=GENDER_CHOICES, blank=True, null=True, verbose_name="Sexe")
     date_naissance = models.DateField(null=True, blank=True)
 
     
