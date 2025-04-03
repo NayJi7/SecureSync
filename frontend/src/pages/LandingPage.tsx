@@ -1,14 +1,13 @@
-import React, { useEffect, useState } from 'react';
+import { useEffect, useState } from 'react';
 import { Link } from 'react-router-dom';
-import Particles from '../blocks/Backgrounds/Particles/Particles.tsx';
-import { useIsMobile } from '@/hooks/use-mobile';
+import { useDevice } from '@/hooks/use-device.ts';
 import SpotlightCard from '@/blocks/Components/SpotlightCard/SpotlightCard.tsx';
 import { Button } from '@/components/ui/button';
-import { Shield, Lock, Users, Building, Layers, Activity, Globe, Server, Menu, X } from 'lucide-react';
+import { Shield, Lock, Users, Building, Activity, Globe, Server, Menu, X } from 'lucide-react';
 import Squares from '../blocks/Backgrounds/Squares/squares.tsx';
 
 export default function LandingPage() {
-  const isMobile = useIsMobile();
+  const isMobile = useDevice();
   const [isScrolled, setIsScrolled] = useState(false);
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
   

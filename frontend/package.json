@@ -24,10 +24,7 @@
     "@radix-ui/react-tooltip": "^1.1.8",
     "@react-three/fiber": "^9.1.0",
     "@react-three/postprocessing": "^3.0.4",
-<<<<<<< HEAD
     "@react-spring/web": "^9.7.5",
-=======
->>>>>>> ca684861 (Started working on the landing page)
     "@tailwindcss/vite": "^4.0.17",
     "class-variance-authority": "^0.7.1",
     "clsx": "^2.1.1",
