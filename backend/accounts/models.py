@@ -21,6 +21,18 @@ class CustomUser(AbstractUser):
     date_naissance = models.DateField(null=True, blank=True)
 
     
+        # Définir un nom spécifique pour les relations inverses
+    groups = models.ManyToManyField(
+        'auth.Group',
+        related_name='customuser_set',  # Un nom unique pour la relation inverse
+        blank=True
+    )
+    user_permissions = models.ManyToManyField(
+        'auth.Permission',
+        related_name='customuser_permissions_set',  # Un nom unique pour la relation inverse
+        blank=True
+    )
+
     def save(self, *args, **kwargs):
         # On doit d'abord sauvegarder pour avoir un ID si c'est un nouvel utilisateur
         is_new = self.pk is None

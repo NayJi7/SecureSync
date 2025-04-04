@@ -7,6 +7,16 @@ from django.contrib.auth.decorators import login_required
 from .forms import CustomUserUpdateForm 
 from .models import CustomUser
 from django import forms
+
+from rest_framework import viewsets
+from .serializers import CustomUserSerializer
+
+class CustomUserViewSet(viewsets.ModelViewSet):
+    queryset = CustomUser.objects.all()
+    serializer_class = CustomUserSerializer
+
+
+
 def index(request):
     return render(request, 'index.html')
 

@@ -40,7 +40,6 @@ INSTALLED_APPS = [
     "accounts",
     "corsheaders",
     "rest_framework",
-    "home.apps.HomeConfig",
 ]
 
 MIDDLEWARE = [
@@ -60,7 +59,7 @@ CORS_ALLOWED_ORIGINS = [
     "http://localhost:5173",  # Frontend React Vite par défaut
 ]
 
-ROOT_URLCONF = "smarthub_backend.urls"
+ROOT_URLCONF = "backend.urls"
 
 TEMPLATES = [
     {
@@ -78,7 +77,7 @@ TEMPLATES = [
     },
 ]
 
-WSGI_APPLICATION = "smarthub_backend.wsgi.application"
+WSGI_APPLICATION = "backend.wsgi.application"
 
 
 # Database
