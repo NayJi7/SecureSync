@@ -41,9 +41,11 @@ export default function LoginPage() {
   const navigate = useNavigate();
   const [authStep, setAuthStep] = useState('login');
   const [email, setEmail] = useState('');
+  const [username, setusername] = useState('');
   const [password, setPassword] = useState('');
   const [repeatPassword, setRepeatPassword] = useState('');
   const [passwordError, setPasswordError] = useState('');
+  const [usernameError, setUsernameError] = useState('');
   const [emailError, setEmailError] = useState('');
   const [showPassword, setShowPassword] = useState(false);
   const [showRepeatPassword, setShowRepeatPassword] = useState(false);
@@ -54,6 +56,15 @@ export default function LoginPage() {
   const [countdown, setCountdown] = useState(10);
   const { isLessThan } = useDevice();
   const isLessThanWidth = isLessThan(1672);
+  
+  // Nouvel état pour gérer les erreurs d'API
+  const [apiError, setApiError] = useState('');
+  // État pour suivre le chargement
+  const [isLoading, setIsLoading] = useState(false);
+  // État pour stocker le token d'authentification
+  const [authToken, setAuthToken] = useState('');
+  // État pour stocker le code OTP
+  const [otpCode, setOtpCode] = useState('');
 
   const handleResendCode = () => {
     setResendDisabled(true);
@@ -83,19 +94,6 @@ export default function LoginPage() {
     };
   }, []);
 
-  const validateEmail = (email: string) => {
-    const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
-    if (!email) {
-      setEmailError("Veuillez saisir une adresse e-mail");
-      return false;
-    }
-    if (!emailRegex.test(email)) {
-      setEmailError("Veuillez saisir une adresse e-mail valide");
-      return false;
-    }
-    setEmailError('');
-    return true;
-  };
 
   const validatePasswords = () => {
     if (password === '' || repeatPassword === '') {
@@ -110,27 +108,105 @@ export default function LoginPage() {
     return true;
   };
 
-  const handleSubmit = (e: React.FormEvent) => {
-    e.preventDefault();
-    
-    // Validation de l'email
-    if (!validateEmail(email)) {
-      return;
+  const validateUsername = () => {
+    if (username === '') {
+      setPasswordError("Veuillez remplir tous les champs de mot de passe");
+      return false;
     }
+    setUsernameError('');
+    return true;
+  };
+
+  const handleSubmit = async (e: React.FormEvent) => {
+    e.preventDefault();
+    setApiError('');
+    
 
     if (!acceptedTerms) {
       alert("Veuillez accepter les conditions d'utilisation pour continuer");
       return;
     }
 
-    // Validation des mots de passe
     if (!validatePasswords()) {
       return;
     }
 
-    setAuthStep('verify');
-    // Lancer le timer dès qu'on passe à l'étape de vérification
-    handleResendCode();
+    try {
+      setIsLoading(true);
+      
+      // Appel à l'API d'authentification
+      const response = await fetch('http://localhost:8000/api/token/', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+          username: username, 
+          password: password,
+        }),
+      });
+
+      const data = await response.json();
+
+      if (!response.ok) {
+        setApiError(data.detail || 'Erreur d\'authentification. Veuillez vérifier vos identifiants.');
+        setIsLoading(false);
+        return;
+      }
+
+      setAuthToken(data.access || data.token);
+      
+      setAuthStep('verify');
+      handleResendCode();
+      
+    } catch (error) {
+      console.error('Erreur lors de l\'authentification:', error);
+      setApiError('Erreur de connexion au serveur. Veuillez réessayer plus tard.');
+    } finally {
+      setIsLoading(false);
+    }
+  };
+
+  const handleVerifyOTP = async () => {
+    if (!otpCode || otpCode.length !== 6) {
+      alert("Veuillez saisir un code de vérification valide à 6 chiffres");
+      return;
+    }
+
+    try {
+      setIsLoading(true);
+      
+      const response = await fetch('http://localhost:8000/api/verify-otp/', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          'Authorization': `Bearer ${authToken}` 
+        },
+        body: JSON.stringify({
+          code: otpCode
+        }),
+      });
+
+      if (!response.ok) {
+        const errorData = await response.json();
+        setApiError(errorData.detail || 'Code de vérification invalide');
+        setIsLoading(false);
+        return;
+      }
+
+      navigate('/home');
+      
+    } catch (error) {
+      console.error('Erreur lors de la vérification du code:', error);
+      setApiError('Erreur de connexion au serveur. Veuillez réessayer plus tard.');
+    } finally {
+      setIsLoading(false);
+    }
+  };
+
+  const handleOTPChange = (value: string) => {
+    setOtpCode(value);
+    setApiError('');
   };
 
   return (
@@ -210,6 +286,14 @@ export default function LoginPage() {
                       className="text-4xl md:text-6xl mb-auto mx-auto text-white"
                     />
                     <Separator className='bg-gray-400' />
+                    
+                    {/* Afficher les erreurs d'API s'il y en a */}
+                    {apiError && (
+                      <div className="bg-red-500/20 border border-red-500 text-red-100 px-4 py-2 rounded-md">
+                        {apiError}
+                      </div>
+                    )}
+                    
                     <div>
                       <div className="mb-3 block">
                         <Label className='text-white text-base md:text-lg' htmlFor="email2">Votre email</Label>
@@ -217,19 +301,13 @@ export default function LoginPage() {
                         <TextInput 
                         className={`pointer-events-auto text-lg`}
                         id="email2" 
-                        type="email" 
+                        type="text" 
                         icon={HiMail} 
-                        placeholder="nom@gmail.com" 
                         required 
                         shadow
-                        value={email}
-                        onChange={(e) => setEmail(e.target.value)}
-                        onBlur={() => validateEmail(email)}
-                        color={emailError ? 'failure' : undefined}
+                        value={username}
+                        onChange={(e) => setusername(e.target.value)}
                         />
-                      {emailError && (
-                        <p className="text-red-500 text-sm mt-1">{emailError}</p>
-                      )}
                     </div>
                     
                     <div>
@@ -344,11 +422,23 @@ export default function LoginPage() {
                       </ModalFooter>
                     </Modal>
                     <Button 
-                      className={`bg-black hover:bg-gray-900 cursor-pointer pointer-events-auto ${(!acceptedTerms || !email || !password || !repeatPassword) ? 'opacity-50' : ''}`} 
+                      className={`bg-black hover:bg-gray-900 cursor-pointer pointer-events-auto ${(!acceptedTerms || !username|| !password || !repeatPassword || isLoading) ? 'opacity-50' : ''}`} 
                       type="submit" 
-                      disabled={!acceptedTerms || !email || !password || !repeatPassword}
+                      disabled={!acceptedTerms || !username || !password || !repeatPassword || isLoading}
                     >
-                      <MdOutlineLogin className="mr-2" /> Se connecter
+                      {isLoading ? (
+                        <span className="flex items-center">
+                          <svg className="animate-spin -ml-1 mr-3 h-5 w-5 text-white" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
+                            <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4"></circle>
+                            <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
+                          </svg>
+                          Chargement...
+                        </span>
+                      ) : (
+                        <>
+                          <MdOutlineLogin className="mr-2" /> Se connecter
+                        </>
+                      )}
                     </Button>
                   </motion.form>
                 </SpotlightCard>
@@ -367,11 +457,24 @@ export default function LoginPage() {
                       className="text-4xl md:text-6xl mb-auto mx-auto text-white"
                     />
                     <Separator className='bg-gray-400' />
+                    
+                    {/* Afficher les erreurs d'API s'il y en a */}
+                    {apiError && (
+                      <div className="bg-red-500/20 border border-red-500 text-red-100 px-4 py-2 rounded-md">
+                        {apiError}
+                      </div>
+                    )}
+                    
                     <div className="text-center text-white text-base md:text-lg mb-4">
                       Un code de vérification a été envoyé à <span className='font-bold'>{email}</span>
                     </div>
                     <div className="flex justify-center w-full">
-                      <InputOTP maxLength={6} className="gap-2">
+                      <InputOTP 
+                        maxLength={6} 
+                        className="gap-2"
+                        value={otpCode}
+                        onChange={handleOTPChange}
+                      >
                         <InputOTPGroup>
                           <InputOTPSlot index={0} />
                           <InputOTPSlot index={1} />
@@ -394,11 +497,23 @@ export default function LoginPage() {
                         {resendDisabled ? `Veuillez patienter avant de réessayer (${countdown}s)` : 'Renvoyer le code'}
                       </button>
                       <Button 
-                        className='bg-black hover:bg-gray-900 cursor-pointer pointer-events-auto' 
-                        type="submit"
-                        onClick={() => navigate('/home')}
+                        className={`bg-black hover:bg-gray-900 cursor-pointer pointer-events-auto ${(otpCode.length !== 6 || isLoading) ? 'opacity-50' : ''}`}
+                        onClick={handleVerifyOTP}
+                        disabled={otpCode.length !== 6 || isLoading}
                       >
-                        <ArrowRight className="mr-2" /> Vérifier
+                        {isLoading ? (
+                          <span className="flex items-center">
+                            <svg className="animate-spin -ml-1 mr-3 h-5 w-5 text-white" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
+                              <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4"></circle>
+                              <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
+                            </svg>
+                            Chargement...
+                          </span>
+                        ) : (
+                          <>
+                            <ArrowRight className="mr-2" /> Vérifier
+                          </>
+                        )}
                       </Button>
                     </div>
                   </motion.form>
