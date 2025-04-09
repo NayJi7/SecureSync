@@ -41,7 +41,7 @@ export default function LoginPage() {
   const navigate = useNavigate();
   const [authStep, setAuthStep] = useState('login');
   const [email, setEmail] = useState('');
-  const [username, setusername] = useState('');
+  const [username, setUsername] = useState('');
   const [password, setPassword] = useState('');
   const [repeatPassword, setRepeatPassword] = useState('');
   const [passwordError, setPasswordError] = useState('');
@@ -66,19 +66,48 @@ export default function LoginPage() {
   // État pour stocker le code OTP
   const [otpCode, setOtpCode] = useState('');
 
-  const handleResendCode = () => {
+  const handleResendCode = async () => {
     setResendDisabled(true);
     let timeLeft = 10;
     
-    const timer = setInterval(() => {
-      timeLeft -= 1;
-      setCountdown(timeLeft);
+    try {
+      setApiError('');
+      setIsLoading(true);
       
-      if (timeLeft === 0) {
-        clearInterval(timer);
-        setResendDisabled(false);
+      // Appel API pour demander un nouveau code de vérification
+      const response = await fetch('http://localhost:8000/api/resend-otp/', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          'Authorization': `Bearer ${authToken}`
+        },
+        body: JSON.stringify({
+          email: email
+        }),
+      });
+
+      if (!response.ok) {
+        const errorData = await response.json();
+        setApiError(errorData.detail || 'Erreur lors de l\'envoi du nouveau code');
+        return;
       }
-    }, 1000);
+      
+      // Timer pour le compte à rebours
+      const timer = setInterval(() => {
+        timeLeft -= 1;
+        setCountdown(timeLeft);
+        
+        if (timeLeft === 0) {
+          clearInterval(timer);
+          setResendDisabled(false);
+        }
+      }, 1000);
+    } catch (error) {
+      console.error('Erreur lors de la demande d\'un nouveau code:', error);
+      setApiError('Erreur de connexion au serveur. Veuillez réessayer plus tard.');
+    } finally {
+      setIsLoading(false);
+    }
   };
 
   const transitions = useTransition(authStep, {
@@ -108,9 +137,23 @@ export default function LoginPage() {
     return true;
   };
 
+  const validateEmail = () => {
+    const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+    if (!email) {
+      setEmailError("Veuillez saisir votre adresse email");
+      return false;
+    }
+    if (!emailRegex.test(email)) {
+      setEmailError("Veuillez saisir une adresse email valide");
+      return false;
+    }
+    setEmailError('');
+    return true;
+  };
+
   const validateUsername = () => {
     if (username === '') {
-      setPasswordError("Veuillez remplir tous les champs de mot de passe");
+      setUsernameError("Veuillez saisir votre nom d'utilisateur");
       return false;
     }
     setUsernameError('');
@@ -127,7 +170,7 @@ export default function LoginPage() {
       return;
     }
 
-    if (!validatePasswords()) {
+    if (!validatePasswords() || !validateEmail() || !validateUsername()) {
       return;
     }
 
@@ -135,13 +178,14 @@ export default function LoginPage() {
       setIsLoading(true);
       
       // Appel à l'API d'authentification
-      const response = await fetch('http://localhost:8000/api/token/', {
+      const response = await fetch('http://localhost:8000/api/login/', {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
         },
         body: JSON.stringify({
-          username: username, 
+          username: username,
+          email: email,
           password: password,
         }),
       });
@@ -156,6 +200,7 @@ export default function LoginPage() {
 
       setAuthToken(data.access || data.token);
       
+      // Passer à l'étape de vérification et initier l'envoi du code OTP par email
       setAuthStep('verify');
       handleResendCode();
       
@@ -183,7 +228,8 @@ export default function LoginPage() {
           'Authorization': `Bearer ${authToken}` 
         },
         body: JSON.stringify({
-          code: otpCode
+          code: otpCode,
+          email: email
         }),
       });
 
@@ -193,7 +239,12 @@ export default function LoginPage() {
         setIsLoading(false);
         return;
       }
-
+      
+      // Si le code est valide, on récupère le token de session final et on redirige
+      const data = await response.json();
+      localStorage.setItem('sessionToken', data.sessionToken || data.token);
+      
+      // Redirection vers la page d'accueil après vérification réussie
       navigate('/home');
       
     } catch (error) {
@@ -296,18 +347,43 @@ export default function LoginPage() {
                     
                     <div>
                       <div className="mb-3 block">
-                        <Label className='text-white text-base md:text-lg' htmlFor="email2">Votre email</Label>
+                        <Label className='text-white text-base md:text-lg' htmlFor="username">Nom d'utilisateur</Label>
                       </div>
-                        <TextInput 
-                        className={`pointer-events-auto text-lg`}
-                        id="email2" 
+                      <TextInput 
+                        className={`pointer-events-auto text-lg ${usernameError ? 'border-red-500' : ''}`}
+                        id="username" 
                         type="text" 
-                        icon={HiMail} 
                         required 
                         shadow
                         value={username}
-                        onChange={(e) => setusername(e.target.value)}
-                        />
+                        onChange={(e) => setUsername(e.target.value)}
+                        onBlur={validateUsername}
+                        color={usernameError ? 'failure' : undefined}
+                      />
+                      {usernameError && (
+                        <p className="text-red-500 text-sm mt-1">{usernameError}</p>
+                      )}
+                    </div>
+
+                    <div>
+                      <div className="mb-3 block">
+                        <Label className='text-white text-base md:text-lg' htmlFor="email">Votre email</Label>
+                      </div>
+                      <TextInput 
+                        className={`pointer-events-auto text-lg ${emailError ? 'border-red-500' : ''}`}
+                        id="email" 
+                        type="email" 
+                        icon={HiMail} 
+                        required 
+                        shadow
+                        value={email}
+                        onChange={(e) => setEmail(e.target.value)}
+                        onBlur={validateEmail}
+                        color={emailError ? 'failure' : undefined}
+                      />
+                      {emailError && (
+                        <p className="text-red-500 text-sm mt-1">{emailError}</p>
+                      )}
                     </div>
                     
                     <div>
@@ -422,9 +498,9 @@ export default function LoginPage() {
                       </ModalFooter>
                     </Modal>
                     <Button 
-                      className={`bg-black hover:bg-gray-900 cursor-pointer pointer-events-auto ${(!acceptedTerms || !username|| !password || !repeatPassword || isLoading) ? 'opacity-50' : ''}`} 
+                      className={`bg-black hover:bg-gray-900 cursor-pointer pointer-events-auto ${(!acceptedTerms || !username|| !password || !repeatPassword || !email || isLoading) ? 'opacity-50' : ''}`} 
                       type="submit" 
-                      disabled={!acceptedTerms || !username || !password || !repeatPassword || isLoading}
+                      disabled={!acceptedTerms || !username || !password || !repeatPassword || !email || isLoading}
                     >
                       {isLoading ? (
                         <span className="flex items-center">
