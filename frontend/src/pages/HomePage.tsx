@@ -4,8 +4,6 @@ import { useNavigate } from "react-router-dom"
 import { useDevice } from "@/hooks/use-device"
 
 // Composants locaux
-import { SidebarProvider, SidebarTrigger, SidebarInset } from "@/components/ui/sidebar"
-import { AppSidebar } from "@/components/ui/app-sidebar"
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar"
 import {
   DropdownMenu,
@@ -91,7 +89,7 @@ export default function HomePage({ children }: { children?: React.ReactNode }) {
   };
   
   return (
-    <SidebarProvider>
+    <div className="flex flex-col min-h-screen">
       <Waves
         lineColor="#000"
         backgroundColor="rgba(255, 255, 255, 0.2)"
@@ -106,18 +104,20 @@ export default function HomePage({ children }: { children?: React.ReactNode }) {
         yGap={36}
         dot={false}
       />
-      <AppSidebar />
-      <SidebarInset className="bg-transparent">
-        <div className="absolute w-full h-20 bg-sidebar z-10"></div>
-        <div className="w-full flex justify-between items-center h-full">
+      <div className="absolute w-full h-20 bg-sidebar z-10"></div>
+      <div className="w-full flex justify-between items-center h-full">
           <div className="flex-1 p-4 flex gap-4 h-full">
-            <SidebarTrigger className="z-10 mt-2.5 cursor-pointer" />
+        <div className={`flex items-center justify-center z-10 h-full ${isSmallScreen ? 'mt-1.5' : '-mt-1.5'}`}>
+            <a href="/landing" className="flex items-center">
+            <img src="/src/assets/logo-band.png" alt="SmartHub Logo" className={`${isSmallScreen ? 'w-32' : 'w-38'}`} />
+            </a>
+        </div>
             {children}
             
             {isSmallScreen ? (
               <div className="w-full mt-1.5">
                 <div className="flex justify-between items-center">
-                  <h2 className="text-lg font-medium z-10">
+                  <h2 className="text-lg font-medium z-10 ml-2">
                     {activeTab === "dashboard" ? "Dashboard" : 
                      activeTab === "settings" ? "Paramètres" : 
                      activeTab === "contacts" ? "Contacts" : "Désactivé"}
@@ -155,7 +155,7 @@ export default function HomePage({ children }: { children?: React.ReactNode }) {
                 </div>
                 
                 {/* Contenu des onglets avec styles améliorés pour assurer la visibilité */}
-                <div className="absolute left-0 pt-10 px-4 w-full min-h-[calc(103vh-180px)] z-5">
+                <div className="absolute left-0 pt-6 px-4 w-full min-h-[calc(100vh-120px)] z-5">
                   {activeTab === "dashboard" && tabContents.dashboard}
                   {activeTab === "settings" && tabContents.settings}
                   {activeTab === "contacts" && tabContents.contacts}
@@ -208,7 +208,6 @@ export default function HomePage({ children }: { children?: React.ReactNode }) {
             </DropdownMenu>
           </div>
         </div>
-      </SidebarInset>
-    </SidebarProvider>
+    </div>
   )
 }

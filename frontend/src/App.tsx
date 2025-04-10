@@ -5,6 +5,9 @@ import { BrowserRouter as Router, Navigate, Route, Routes } from 'react-router-d
 import HomePage from '@/pages/HomePage';
 import LoginPage from '@/pages/LoginPage';
 import LandingPage from '@/pages/LandingPage';
+import FeaturesPage from '@/pages/FeaturesPage';
+import ContactPage from '@/pages/ContactPage';
+import AboutPage from '@/pages/AboutPage';
 import './App.css';
 
 export default function App() {
@@ -15,6 +18,9 @@ export default function App() {
         <Route path="/home" element={<HomePage />} />
         <Route path="/login" element={<LoginPage />} />
         <Route path="/landing" element={<LandingPage />} />
+        <Route path="/features" element={<FeaturesPage />} />
+        <Route path="/about" element={<AboutPage />} />
+        <Route path="/contact" element={<ContactPage />} />
         <Route path="*" element={<Navigate to="/" replace />} />
       </Routes>
     </Router>
