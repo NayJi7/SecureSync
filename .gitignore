@@ -3,7 +3,7 @@
 *.pot
 *.pyc
 __pycache__/
-backend/__pycache__/
+backend/accounts/__pycache__/
 */__pycache__/
 */migrations/__pycache__/
 *.py[cod]
