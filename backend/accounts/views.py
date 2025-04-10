@@ -172,3 +172,136 @@ def edit_profile(request):
         form = CustomUserUpdateForm(instance=request.user)
     
     return render(request, 'edit_profile.html', {'form': form})
+
+
+from rest_framework.views import APIView
+from rest_framework.response import Response
+from rest_framework import status
+from rest_framework.permissions import IsAuthenticated, AllowAny
+from rest_framework_simplejwt.tokens import RefreshToken
+from django.contrib.auth import authenticate
+from django.contrib.auth.models import User
+from .models import OTPCode
+from .serializers import UserLoginSerializer, OTPVerificationSerializer, ResendOTPSerializer
+from .utils import send_otp_email
+
+class LoginAPIView(APIView):
+    permission_classes = [AllowAny]
+    
+    def post(self, request):
+        serializer = UserLoginSerializer(data=request.data)
+        if not serializer.is_valid():
+            return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+        
+        username = serializer.validated_data.get('username')
+        email = serializer.validated_data.get('email')
+        password = serializer.validated_data.get('password')
+        
+        # Authentifier l'utilisateur
+        user = authenticate(username=username, password=password)
+        
+        if not user:
+            return Response({'detail': 'Identifiants invalides. Veuillez vérifier votre nom d\'utilisateur et mot de passe.'}, 
+                            status=status.HTTP_401_UNAUTHORIZED)
+        
+        # Vérifier que l'email correspond à l'utilisateur
+        if user.email != email:
+            return Response({'detail': 'L\'email ne correspond pas à cet utilisateur.'}, 
+                            status=status.HTTP_400_BAD_REQUEST)
+        
+        # Créer un token JWT
+        refresh = RefreshToken.for_user(user)
+        tokens = {
+            'refresh': str(refresh),
+            'access': str(refresh.access_token),
+        }
+        
+        # Créer un code OTP et l'envoyer par email
+        otp = OTPCode.objects.create(user=user, email=email)
+        send_otp_email(email, otp.code)
+        
+        return Response({
+            'tokens': tokens,
+            'access': str(refresh.access_token),  # Pour compatibilité avec votre frontend
+            'user': {
+                'id': user.id,
+                'username': user.username,
+                'email': user.email
+            }
+        }, status=status.HTTP_200_OK)
+
+
+class VerifyOTPView(APIView):
+    permission_classes = [IsAuthenticated]
+    
+    def post(self, request):
+        serializer = OTPVerificationSerializer(data=request.data)
+        if not serializer.is_valid():
+            return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+        
+        code = serializer.validated_data.get('code')
+        email = serializer.validated_data.get('email')
+        
+        # Récupérer le dernier code OTP valide pour cet utilisateur et cet email
+        try:
+            otp = OTPCode.objects.filter(
+                user=request.user,
+                email=email,
+                is_used=False
+            ).latest('created_at')
+        except OTPCode.DoesNotExist:
+            return Response({'detail': 'Aucun code de vérification valide trouvé.'}, 
+                            status=status.HTTP_400_BAD_REQUEST)
+        
+        # Vérifier la validité du code
+        if not otp.is_valid():
+            return Response({'detail': 'Le code de vérification a expiré.'}, 
+                            status=status.HTTP_400_BAD_REQUEST)
+        
+        if otp.code != code:
+            return Response({'detail': 'Code de vérification incorrect.'}, 
+                            status=status.HTTP_400_BAD_REQUEST)
+        
+        # Marquer le code comme utilisé
+        otp.is_used = True
+        otp.save()
+        
+        # Créer un token de session pour l'utilisateur authentifié
+        refresh = RefreshToken.for_user(request.user)
+        session_token = str(refresh.access_token)
+        
+        return Response({
+            'detail': 'Vérification réussie.',
+            'sessionToken': session_token,
+            'user': {
+                'id': request.user.id,
+                'username': request.user.username,
+                'email': request.user.email
+            }
+        }, status=status.HTTP_200_OK)
+
+
+class ResendOTPView(APIView):
+    permission_classes = [IsAuthenticated]
+    
+    def post(self, request):
+        serializer = ResendOTPSerializer(data=request.data)
+        if not serializer.is_valid():
+            return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+        
+        email = serializer.validated_data.get('email')
+        
+        # Vérifier que l'email correspond à l'utilisateur authentifié
+        if request.user.email != email:
+            return Response({'detail': 'L\'email ne correspond pas à votre compte.'}, 
+                            status=status.HTTP_400_BAD_REQUEST)
+        
+        # Créer un nouveau code OTP
+        otp = OTPCode.objects.create(user=request.user, email=email)
+        
+        # Envoyer le code par email
+        send_otp_email(email, otp.code)
+        
+        return Response({
+            'detail': 'Un nouveau code de vérification a été envoyé à votre adresse email.'
+        }, status=status.HTTP_200_OK)

@@ -68,3 +68,31 @@ class CustomUser(AbstractUser):
         content = ContentFile(image_io.getvalue(), name=f"default_{self.username}.png")
         print(f"Image générée pour {self.username}: {content.name}")  # Debug
         return content
+
+from django.db import models
+from django.conf import settings
+import random
+import string
+from datetime import timedelta
+from django.utils import timezone
+
+class OTPCode(models.Model):
+    user = models.ForeignKey(CustomUser, on_delete=models.CASCADE)
+    email = models.EmailField()
+    code = models.CharField(max_length=6)
+    created_at = models.DateTimeField(auto_now_add=True)
+    expires_at = models.DateTimeField()
+    is_used = models.BooleanField(default=False)
+
+    def save(self, *args, **kwargs):
+        # Si c'est un nouveau code
+        if not self.pk:
+            # Génère un code OTP à 6 chiffres
+            self.code = ''.join(random.choices(string.digits, k=6))
+            # Le code expire après 10 minutes
+            self.expires_at = timezone.now() + timedelta(minutes=10)
+        return super().save(*args, **kwargs)
+
+    def is_valid(self):
+        now = timezone.now()
+        return not self.is_used and now <= self.expires_at
