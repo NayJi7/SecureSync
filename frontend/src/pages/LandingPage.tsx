@@ -167,9 +167,7 @@ export default function LandingPage() {
             
             {/* Call to Action */}
             <div className="w-full max-w-4xl text-center mb-16">
-              <h2 className="text-2xl md:text-4xl font-bold mb-6 text-white">
-                Prêt à Transformer Votre Établissement Pénitentiaire ?
-              </h2>
+              <h2 className="text-2xl md:text-4xl font-bold mb-6 text-white">Prêt à Transformer Votre Établissement ?</h2>
               <p className="text-lg mb-8 text-gray-300">
                 Rejoignez le réseau croissant d'établissements pénitentiaires modernes et sécurisés propulsés par la technologie SecureSync.
               </p>
