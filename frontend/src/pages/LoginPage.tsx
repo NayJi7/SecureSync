@@ -37,6 +37,9 @@ const formVariants = {
   visible: { opacity: 1, y: 0, transition: { duration: 0.5 } }
 };
 
+// Configuration de l'API
+const API_BASE_URL = 'http://localhost:8000/api';
+
 export default function LoginPage() {
   const navigate = useNavigate();
   const [authStep, setAuthStep] = useState('login');
@@ -57,65 +60,25 @@ export default function LoginPage() {
   const { isLessThan } = useDevice();
   const isLessThanWidth = isLessThan(1672);
   
-  // Nouvel état pour gérer les erreurs d'API
+  // États pour gérer le processus d'authentification
   const [apiError, setApiError] = useState('');
-  // État pour suivre le chargement
   const [isLoading, setIsLoading] = useState(false);
-  // État pour stocker le token d'authentification
   const [authToken, setAuthToken] = useState('');
-  // État pour stocker le code OTP
   const [otpCode, setOtpCode] = useState('');
-
-  const handleResendCode = async () => {
-    setResendDisabled(true);
-    let timeLeft = 10;
-    
-    try {
-      setApiError('');
-      setIsLoading(true);
-      
-      // Appel API pour demander un nouveau code de vérification
-      const response = await fetch('http://localhost:8000/api/resend-otp/', {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-          'Authorization': `Bearer ${authToken}`
-        },
-        body: JSON.stringify({
-          email: email
-        }),
-      });
-
-      if (!response.ok) {
-        const errorData = await response.json();
-        setApiError(errorData.detail || 'Erreur lors de l\'envoi du nouveau code');
-        return;
+  
+  // Timer pour le countdown
+  const timerRef = useRef<NodeJS.Timeout | null>(null);
+  
+  // Nettoyer le timer lors du démontage du composant
+  useEffect(() => {
+    return () => {
+      if (timerRef.current) {
+        clearInterval(timerRef.current);
       }
-      
-      // Timer pour le compte à rebours
-      const timer = setInterval(() => {
-        timeLeft -= 1;
-        setCountdown(timeLeft);
-        
-        if (timeLeft === 0) {
-          clearInterval(timer);
-          setResendDisabled(false);
-        }
-      }, 1000);
-    } catch (error) {
-      console.error('Erreur lors de la demande d\'un nouveau code:', error);
-      setApiError('Erreur de connexion au serveur. Veuillez réessayer plus tard.');
-    } finally {
-      setIsLoading(false);
-    }
-  };
+    };
+  }, []);
 
-  const transitions = useTransition(authStep, {
-    from: { opacity: 0, transform: 'translate3d(100%,0,0)' },
-    enter: { opacity: 1, transform: 'translate3d(0%,0,0)' },
-    leave: { opacity: 0, transform: 'translate3d(-50%,0,0)' },
-  });
-
+  // Ajout d'une classe au body
   useEffect(() => {
     document.body.classList.add('login-page');
     return () => {
@@ -123,7 +86,91 @@ export default function LoginPage() {
     };
   }, []);
 
+  const transitions = useTransition(authStep, {
+    from: { opacity: 0, transform: 'translate3d(100%,0,0)' },
+    enter: { opacity: 1, transform: 'translate3d(0%,0,0)' },
+    leave: { opacity: 0, transform: 'translate3d(-50%,0,0)' },
+  });
 
+  // Fonction pour envoyer ou renvoyer le code OTP
+  const handleSendOTP = async (tokenParam = null) => {
+    const tokenToUse = tokenParam || authToken;
+    
+    if (!tokenToUse) {
+      setApiError("Aucun token d'authentification disponible.");
+      return false;
+    }
+    
+    if (!email) {
+      setApiError("Email requis pour envoyer le code de vérification.");
+      return false;
+    }
+    
+    setResendDisabled(true);
+    setCountdown(30); // Augmenté à 30 secondes pour donner plus de temps à l'email pour arriver
+    let timeLeft = 30;
+    
+    try {
+      setApiError('');
+      setIsLoading(true);
+      
+      console.log(`Envoi de la requête d'OTP à ${API_BASE_URL}/resend-otp/ avec l'email: ${email}`);
+      
+      const response = await fetch(`${API_BASE_URL}/resend-otp/`, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          'Authorization': `Bearer ${tokenToUse}`
+        },
+        body: JSON.stringify({ email }),
+      });
+      
+      const data = await response.json();
+      
+      if (!response.ok) {
+        console.error('Erreur de réponse API:', data);
+        setApiError(data.detail || `Erreur lors de l'envoi du code (${response.status})`);
+        setResendDisabled(false);
+        setIsLoading(false);
+        return false;
+      }
+      
+      console.log('Code OTP envoyé avec succès:', data);
+      
+      // Nettoyer l'ancien timer s'il existe
+      if (timerRef.current) {
+        clearInterval(timerRef.current);
+      }
+      
+      // Démarrer le compte à rebours
+      timerRef.current = setInterval(() => {
+        timeLeft -= 1;
+        setCountdown(timeLeft);
+        
+        if (timeLeft <= 0) {
+          if (timerRef.current) clearInterval(timerRef.current);
+          setResendDisabled(false);
+        }
+      }, 1000);
+      
+      setIsLoading(false);
+      return true;
+      
+    } catch (error) {
+      console.error('Erreur lors de la demande du code OTP:', error);
+      setApiError('Erreur de connexion au serveur. Veuillez réessayer plus tard.');
+      setResendDisabled(false);
+      setIsLoading(false);
+      return false;
+    }
+  };
+
+  // Gestionnaire pour le bouton "Renvoyer le code"
+  const handleResendCode = async () => {
+    await handleSendOTP();
+  };
+
+  // Validation des mots de passe
   const validatePasswords = () => {
     if (password === '' || repeatPassword === '') {
       setPasswordError("Veuillez remplir tous les champs de mot de passe");
@@ -137,6 +184,7 @@ export default function LoginPage() {
     return true;
   };
 
+  // Validation de l'email
   const validateEmail = () => {
     const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
     if (!email) {
@@ -151,6 +199,7 @@ export default function LoginPage() {
     return true;
   };
 
+  // Validation du nom d'utilisateur
   const validateUsername = () => {
     if (username === '') {
       setUsernameError("Veuillez saisir votre nom d'utilisateur");
@@ -160,16 +209,18 @@ export default function LoginPage() {
     return true;
   };
 
+  // Soumission du formulaire d'authentification
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setApiError('');
     
-
+    // Vérification des conditions d'utilisation
     if (!acceptedTerms) {
-      alert("Veuillez accepter les conditions d'utilisation pour continuer");
+      setApiError("Veuillez accepter les conditions d'utilisation pour continuer");
       return;
     }
 
+    // Validation des champs
     if (!validatePasswords() || !validateEmail() || !validateUsername()) {
       return;
     }
@@ -177,8 +228,10 @@ export default function LoginPage() {
     try {
       setIsLoading(true);
       
+      console.log(`Envoi de la requête d'authentification à ${API_BASE_URL}/login/`);
+      
       // Appel à l'API d'authentification
-      const response = await fetch('http://localhost:8000/api/login/', {
+      const response = await fetch(`${API_BASE_URL}/login/`, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
@@ -190,42 +243,68 @@ export default function LoginPage() {
         }),
       });
 
-      const data = await response.json();
-
+      // Traitement de la réponse
       if (!response.ok) {
-        setApiError(data.detail || 'Erreur d\'authentification. Veuillez vérifier vos identifiants.');
+        const data = await response.json();
+        console.error('Erreur d\'authentification:', data);
+        setApiError(data.detail || `Erreur d'authentification (${response.status}). Veuillez vérifier vos identifiants.`);
         setIsLoading(false);
         return;
       }
 
-      setAuthToken(data.access || data.token);
+      const data = await response.json();
+      console.log('Authentification réussie:', data);
+
+      // Extraction et stockage du token
+      const token = data.access || data.token;
+      if (!token) {
+        setApiError("Token d'authentification non trouvé dans la réponse");
+        setIsLoading(false);
+        return;
+      }
       
-      // Passer à l'étape de vérification et initier l'envoi du code OTP par email
-      setAuthStep('verify');
-      handleResendCode();
+      setAuthToken(token);
+      localStorage.setItem("authToken", token);
+      
+      // Envoi du code OTP
+      const otpSent = await handleSendOTP(token);
+      
+      if (otpSent) {
+        setAuthStep('verify');
+      }
       
     } catch (error) {
-      console.error('Erreur lors de l\'authentification:', error);
+      console.error('Exception lors de l\'authentification:', error);
       setApiError('Erreur de connexion au serveur. Veuillez réessayer plus tard.');
     } finally {
       setIsLoading(false);
     }
   };
 
+  // Vérification du code OTP
   const handleVerifyOTP = async () => {
     if (!otpCode || otpCode.length !== 6) {
-      alert("Veuillez saisir un code de vérification valide à 6 chiffres");
+      setApiError("Veuillez saisir un code de vérification valide à 6 chiffres");
+      return;
+    }
+
+    if (!authToken) {
+      setApiError("Session expirée. Veuillez vous reconnecter.");
+      setAuthStep('login');
       return;
     }
 
     try {
       setIsLoading(true);
+      setApiError('');
       
-      const response = await fetch('http://localhost:8000/api/verify-otp/', {
+      console.log(`Envoi de la requête de vérification à ${API_BASE_URL}/verify-otp/`);
+      
+      const response = await fetch(`${API_BASE_URL}/verify-otp/`, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
-          'Authorization': `Bearer ${authToken}` 
+          'Authorization': `Bearer ${authToken}`
         },
         body: JSON.stringify({
           code: otpCode,
@@ -235,26 +314,32 @@ export default function LoginPage() {
 
       if (!response.ok) {
         const errorData = await response.json();
-        setApiError(errorData.detail || 'Code de vérification invalide');
+        console.error('Erreur de vérification OTP:', errorData);
+        setApiError(errorData.detail || `Code de vérification invalide (${response.status})`);
         setIsLoading(false);
         return;
       }
       
-      // Si le code est valide, on récupère le token de session final et on redirige
+      // Traitement de la réponse réussie
       const data = await response.json();
-      localStorage.setItem('sessionToken', data.sessionToken || data.token);
+      console.log('Vérification OTP réussie:', data);
+      
+      // Stockage du token de session final
+      const sessionToken = data.sessionToken || data.token || authToken;
+      localStorage.setItem('sessionToken', sessionToken);
       
       // Redirection vers la page d'accueil après vérification réussie
       navigate('/home');
       
     } catch (error) {
-      console.error('Erreur lors de la vérification du code:', error);
+      console.error('Exception lors de la vérification du code:', error);
       setApiError('Erreur de connexion au serveur. Veuillez réessayer plus tard.');
     } finally {
       setIsLoading(false);
     }
   };
 
+  // Mise à jour du code OTP
   const handleOTPChange = (value: string) => {
     setOtpCode(value);
     setApiError('');

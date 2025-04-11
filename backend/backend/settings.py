@@ -41,6 +41,7 @@ INSTALLED_APPS = [
     "accounts",
     "corsheaders",
     "rest_framework",
+    'rest_framework_simplejwt',
 ]
 
 CORS_ALLOWED_ORIGINS = [
@@ -162,7 +163,7 @@ EMAIL_PORT = 587
 EMAIL_USE_TLS = True
 EMAIL_HOST_USER =   "89f96d002@smtp-brevo.com"
 EMAIL_HOST_PASSWORD =   "gmdWROfhZrQFN5JL"
-DEFAULT_FROM_EMAIL = 'SecureSync <no-reply@securesync.com>'
+DEFAULT_FROM_EMAIL = 'SecureSync <securesynccytech@gmail.com>'
 
 # Configuration pour Django REST Framework et JWT
 REST_FRAMEWORK = {
