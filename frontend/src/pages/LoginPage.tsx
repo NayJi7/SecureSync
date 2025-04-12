@@ -30,7 +30,7 @@ import { FiRepeat } from "react-icons/fi";
 import { MdOutlineLogin } from "react-icons/md";
 import { LuEyeClosed, LuEye } from "react-icons/lu";
 
-const AnimatedDiv = animated.div as React.FC<AnimatedProps<React.HTMLAttributes<HTMLDivElement>>>;
+const AnimatedDiv = animated.div;
 
 const formVariants = {
   hidden: { opacity: 0, y: 20 },
@@ -54,7 +54,7 @@ export default function LoginPage() {
   const [showRepeatPassword, setShowRepeatPassword] = useState(false);
   const [openModal, setOpenModal] = useState(false);
   const [acceptedTerms, setAcceptedTerms] = useState(false);
-  const titleContainerRef = useRef<HTMLDivElement>(null);
+  const titleContainerRef = useRef(null);
   const [resendDisabled, setResendDisabled] = useState(false);
   const [countdown, setCountdown] = useState(10);
   const { isLessThan } = useDevice();
@@ -67,7 +67,7 @@ export default function LoginPage() {
   const [otpCode, setOtpCode] = useState('');
   
   // Timer pour le countdown
-  const timerRef = useRef<NodeJS.Timeout | null>(null);
+  const timerRef = useRef(null);
   
   // Nettoyer le timer lors du démontage du composant
   useEffect(() => {
@@ -107,7 +107,7 @@ export default function LoginPage() {
     }
     
     setResendDisabled(true);
-    setCountdown(30); // Augmenté à 30 secondes pour donner plus de temps à l'email pour arriver
+    setCountdown(30);
     let timeLeft = 30;
     
     try {
@@ -115,6 +115,7 @@ export default function LoginPage() {
       setIsLoading(true);
       
       console.log(`Envoi de la requête d'OTP à ${API_BASE_URL}/resend-otp/ avec l'email: ${email}`);
+      console.log('Token utilisé:', tokenToUse);
       
       const response = await fetch(`${API_BASE_URL}/resend-otp/`, {
         method: 'POST',
@@ -126,6 +127,7 @@ export default function LoginPage() {
       });
       
       const data = await response.json();
+      console.log('Réponse brute de resend-otp:', data);
       
       if (!response.ok) {
         console.error('Erreur de réponse API:', data);
@@ -210,7 +212,7 @@ export default function LoginPage() {
   };
 
   // Soumission du formulaire d'authentification
-  const handleSubmit = async (e: React.FormEvent) => {
+  const handleSubmit = async (e) => {
     e.preventDefault();
     setApiError('');
     
@@ -243,26 +245,71 @@ export default function LoginPage() {
         }),
       });
 
+      const data = await response.json();
+      
+      // Debug: affichage de la structure complète de la réponse
+      console.log('Structure complète de la réponse:', data);
+      console.log('Clés disponibles dans la réponse:', Object.keys(data));
+
       // Traitement de la réponse
       if (!response.ok) {
-        const data = await response.json();
         console.error('Erreur d\'authentification:', data);
         setApiError(data.detail || `Erreur d'authentification (${response.status}). Veuillez vérifier vos identifiants.`);
         setIsLoading(false);
         return;
       }
 
-      const data = await response.json();
       console.log('Authentification réussie:', data);
 
-      // Extraction et stockage du token
-      const token = data.access || data.token;
+      // Recherche du token dans différentes structures possibles de réponse
+      // Cette partie est plus flexible pour s'adapter à différentes structures d'API
+      // Recherche du token dans différentes structures possibles de réponse
+      let token = null;
+
+      // Nouvelle vérification pour la structure que vous recevez
+      if (data.tokens) {
+        // Essayez de trouver le token dans l'objet tokens
+        if (data.tokens.access) token = data.tokens.access;
+        else if (data.tokens.token) token = data.tokens.token;
+        else if (data.tokens.accessToken) token = data.tokens.accessToken;
+        else if (data.tokens.access_token) token = data.tokens.access_token;
+        // Si le token est l'objet lui-même (cas rare mais possible)
+        else if (typeof data.tokens === 'string') token = data.tokens;
+        
+        // Debug - afficher le contenu de l'objet tokens pour voir sa structure
+        console.log("Contenu de l'objet tokens:", data.tokens);
+        console.log("Clés dans l'objet tokens:", Object.keys(data.tokens));
+      }
+
+      // Garder les vérifications précédentes en fallback
       if (!token) {
-        setApiError("Token d'authentification non trouvé dans la réponse");
+        if (data.access) token = data.access;
+        else if (data.token) token = data.token;
+        else if (data.accessToken) token = data.accessToken;
+        else if (data.access_token) token = data.access_token;
+        else if (data.auth && data.auth.token) token = data.auth.token;
+        else if (data.data && data.data.token) token = data.data.token;
+      }
+      
+      // Si aucun token n'est trouvé dans les structures standard, parcourir les clés de premier niveau
+      if (!token) {
+        Object.keys(data).forEach(key => {
+          // Si une clé ressemble à un token (chaîne longue), l'utiliser
+          if (typeof data[key] === 'string' && data[key].length > 20) {
+            console.log(`Utilisation de la clé ${key} comme token potentiel`);
+            token = data[key];
+          }
+        });
+      }
+      
+      if (!token) {
+        console.error("Token non trouvé dans la réponse. Structure de la réponse:", data);
+        setApiError("Token d'authentification non trouvé dans la réponse. Veuillez contacter le support.");
         setIsLoading(false);
         return;
       }
       
+      console.log("Token trouvé:", token);
       setAuthToken(token);
       localStorage.setItem("authToken", token);
       
@@ -299,6 +346,8 @@ export default function LoginPage() {
       setApiError('');
       
       console.log(`Envoi de la requête de vérification à ${API_BASE_URL}/verify-otp/`);
+      console.log('Données envoyées:', { code: otpCode, email: email });
+      console.log('Token utilisé:', authToken);
       
       const response = await fetch(`${API_BASE_URL}/verify-otp/`, {
         method: 'POST',
@@ -312,21 +361,30 @@ export default function LoginPage() {
         }),
       });
 
+      const data = await response.json();
+      console.log('Réponse brute de verify-otp:', data);
+      
       if (!response.ok) {
-        const errorData = await response.json();
-        console.error('Erreur de vérification OTP:', errorData);
-        setApiError(errorData.detail || `Code de vérification invalide (${response.status})`);
+        console.error('Erreur de vérification OTP:', data);
+        setApiError(data.detail || `Code de vérification invalide (${response.status})`);
         setIsLoading(false);
         return;
       }
       
-      // Traitement de la réponse réussie
-      const data = await response.json();
       console.log('Vérification OTP réussie:', data);
       
+      // Recherche du token de session dans différentes structures possibles
+      let sessionToken = authToken; // Par défaut, utiliser le token existant
+      
+      if (data.sessionToken) sessionToken = data.sessionToken;
+      else if (data.token) sessionToken = data.token;
+      else if (data.access) sessionToken = data.access;
+      else if (data.accessToken) sessionToken = data.accessToken;
+      else if (data.access_token) sessionToken = data.access_token;
+      
       // Stockage du token de session final
-      const sessionToken = data.sessionToken || data.token || authToken;
       localStorage.setItem('sessionToken', sessionToken);
+      console.log('Token de session stocké:', sessionToken);
       
       // Redirection vers la page d'accueil après vérification réussie
       navigate('/home');
@@ -340,7 +398,7 @@ export default function LoginPage() {
   };
 
   // Mise à jour du code OTP
-  const handleOTPChange = (value: string) => {
+  const handleOTPChange = (value) => {
     setOtpCode(value);
     setApiError('');
   };

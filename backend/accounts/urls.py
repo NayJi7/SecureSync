@@ -3,6 +3,7 @@ from django.urls import path, include
 from rest_framework.routers import DefaultRouter
 from .views import CustomUserViewSet, register
 from . import views
+from .views import RegisterView
 
 router = DefaultRouter()
 router.register(r'users', CustomUserViewSet)
@@ -15,5 +16,7 @@ urlpatterns = [
     path('register/', register, name='register'),
     path('api/verify-otp/', VerifyOTPView.as_view(), name='verify-otp'),
     path('api/resend-otp/', ResendOTPView.as_view(), name='resend-otp'),
+    path('api/register/', RegisterView.as_view(), name='register'),
 ]
+
 
