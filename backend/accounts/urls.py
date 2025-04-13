@@ -17,6 +17,8 @@ urlpatterns = [
     path('api/verify-otp/', VerifyOTPView.as_view(), name='verify-otp'),
     path('api/resend-otp/', ResendOTPView.as_view(), name='resend-otp'),
     path('api/register/', RegisterView.as_view(), name='register'),
+    path('api/profile/', views.profile_api_view, name='profile_api'),
+    path('api/profile/update/', views.update_profile_api_view, name='update_profile_api'),
 ]
 
 

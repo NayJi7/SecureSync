@@ -13,6 +13,11 @@ from rest_framework.views import APIView
 from rest_framework.response import Response
 from rest_framework.permissions import AllowAny, IsAuthenticated
 from rest_framework_simplejwt.tokens import RefreshToken
+from rest_framework.decorators import api_view, permission_classes
+from .serializers import ProfileSerializer
+
+
+
 
 from .serializers import (
     CustomUserSerializer, 
@@ -209,3 +214,30 @@ def edit_profile(request):
         form = CustomUserUpdateForm(instance=request.user)
 
     return render(request, 'edit_profile.html', {'form': form})
+
+# Ajoutez ces endpoints à views.py
+@api_view(['GET'])
+@permission_classes([IsAuthenticated])
+def profile_api_view(request):
+    """Endpoint pour récupérer les informations du profil"""
+    serializer = ProfileSerializer(request.user)
+    return Response(serializer.data)
+
+@api_view(['PUT'])
+@permission_classes([IsAuthenticated])
+def update_profile_api_view(request):
+    """Endpoint pour mettre à jour le profil avec vérification du mot de passe"""
+    # Récupération du mot de passe pour vérification
+    password = request.data.get('password', '')
+    
+    # Vérification du mot de passe
+    if not check_password(password, request.user.password):
+        return Response({'detail': 'Mot de passe incorrect'}, status=status.HTTP_403_FORBIDDEN)
+    
+    # Mise à jour du profil
+    serializer = ProfileSerializer(request.user, data=request.data, partial=True)
+    if serializer.is_valid():
+        serializer.save()
+        return Response(serializer.data)
+    
+    return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)

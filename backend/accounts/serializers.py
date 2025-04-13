@@ -2,6 +2,11 @@ from rest_framework import serializers
 from .models import CustomUser
 from .models import CustomUser
 from django.contrib.auth.password_validation import validate_password
+from django.contrib.auth.hashers import check_password
+from rest_framework.decorators import api_view, permission_classes
+from rest_framework.response import Response
+from rest_framework.permissions import IsAuthenticated
+
 
 class CustomUserSerializer(serializers.ModelSerializer):
     class Meta:
@@ -52,3 +57,13 @@ class RegisterSerializer(serializers.ModelSerializer):
         user.set_password(password)
         user.save()
         return user
+
+
+# Créez un serializer pour le profil dans serializers.py
+class ProfileSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = CustomUser
+        fields = ['username', 'email', 'first_name', 'last_name', 
+                  'date_naissance', 'sexe', 'photo']
+        read_only_fields = ['username']  # Nom d'utilisateur ne peut pas être modifié
+

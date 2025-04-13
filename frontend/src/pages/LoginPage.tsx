@@ -1,10 +1,10 @@
 // React et hooks
 import { useState, useRef, useEffect } from 'react';
-import { useNavigate } from 'react-router-dom';
+import { useNavigate, useLocation } from 'react-router-dom';
 import { useDevice } from "@/hooks/use-device";
 
 // Librairies externes
-import { animated, useTransition, AnimatedProps } from '@react-spring/web';
+import { animated, useTransition } from '@react-spring/web';
 import { Label, TextInput, Modal, ModalBody, ModalFooter, ModalHeader } from "flowbite-react";
 import { motion } from 'framer-motion';
 
@@ -42,6 +42,7 @@ const API_BASE_URL = 'http://localhost:8000/api';
 
 export default function LoginPage() {
   const navigate = useNavigate();
+  const location = useLocation(); // Récupère l'emplacement actuel
   const [authStep, setAuthStep] = useState('login');
   const [email, setEmail] = useState('');
   const [username, setUsername] = useState('');
@@ -262,8 +263,6 @@ export default function LoginPage() {
       console.log('Authentification réussie:', data);
 
       // Recherche du token dans différentes structures possibles de réponse
-      // Cette partie est plus flexible pour s'adapter à différentes structures d'API
-      // Recherche du token dans différentes structures possibles de réponse
       let token = null;
 
       // Nouvelle vérification pour la structure que vous recevez
@@ -386,8 +385,9 @@ export default function LoginPage() {
       localStorage.setItem('sessionToken', sessionToken);
       console.log('Token de session stocké:', sessionToken);
       
-      // Redirection vers la page d'accueil après vérification réussie
-      navigate('/home');
+      // Redirection vers la page d'origine ou la page d'accueil
+      const from = location.state?.from?.pathname || '/home';
+      navigate(from, { replace: true });
       
     } catch (error) {
       console.error('Exception lors de la vérification du code:', error);
@@ -402,6 +402,7 @@ export default function LoginPage() {
     setOtpCode(value);
     setApiError('');
   };
+
 
   return (
     <div className="absolute inset-0 w-full h-screen overflow-hidden bg-black">
