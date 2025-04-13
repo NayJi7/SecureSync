@@ -15,10 +15,53 @@ class CustomUser(AbstractUser):
         ('O', 'Autre'),
         ('N', 'Préfère ne pas préciser')
     )
+    ROLE_CHOICES = [
+        ('admin', 'Administrateur'),
+        ('gestionnaire', 'Gestionnaire'),
+        ('employe', 'Employé')
+    ]
+
+    SECTION_CHOICES = [
+        ('a', 'Section A'),
+        ('b', 'Section B'),
+        ('c', 'Section C'),
+        ('toutes', 'Toutes')
+    ]   
+
+    PRISON_CHOICES = [
+        ('paris', 'Paris'),
+        ('lyon', 'Lyon'),
+        ('marseille', 'Marseille'),
+        ('cergy', 'Cergy')
+    ]
+    points = models.IntegerField(default=0)
     email = models.EmailField(unique=True)
     photo = models.ImageField(upload_to=user_directory_path, blank=True, null=True)
     sexe = models.CharField(max_length=1, choices=GENDER_CHOICES, blank=True, null=True, verbose_name="Sexe")
     date_naissance = models.DateField(null=True, blank=True)
+    role = models.CharField(
+        max_length=12,  # "gestionnaire"
+        choices=ROLE_CHOICES,
+        blank=True,
+        null=True,
+        verbose_name="Role"
+    )
+
+    section = models.CharField(
+        max_length=6,  # "toutes"
+        choices=SECTION_CHOICES,
+        blank=True,
+        null=True,
+        verbose_name="Section"
+    )
+
+    Prison_id = models.CharField(
+        max_length=10,  # "marseille"
+        choices=PRISON_CHOICES,
+        blank=True,
+        null=True,
+        verbose_name="Prison ID"
+    )
 
     
         # Définir un nom spécifique pour les relations inverses

@@ -9,13 +9,35 @@ class CustomUserCreationForm(UserCreationForm):
         ('F', 'Femme'),
         ('O', 'Autre'),
     ]
-    
+    ROLE_CHOICES = [
+        ('admin', 'Administrateur'),
+        ('gestionnaire', 'Gestionnaire'),
+        ('employe', 'Employé')
+    ]
+
+    SECTION_CHOICES = [
+    ('a', 'Section A'),
+    ('b', 'Section B'),
+    ('c', 'Section C'),
+    ('toutes', 'Toutes')
+]   
+
+    PRISON_CHOICES = [
+        ('paris', 'Paris'),
+        ('lyon', 'Lyon'),
+        ('marseille', 'Marseille'),
+        ('cergy', 'Cergy')
+    ]
+
     email = forms.EmailField(required=True)
     photo = forms.ImageField(required=False)
-    sexe = forms.ChoiceField(choices=GENDER_CHOICES, required=False)
+    sexe = forms.ChoiceField(choices=GENDER_CHOICES, required=True)
     nom = forms.CharField(max_length=100)
     prenom = forms.CharField(max_length=100)
     date_naissance = forms.DateField(required=False, widget=forms.DateInput(attrs={'type': 'date', 'class': 'form-control'}), label="Date de naissance")
+    roles = forms.ChoiceField(choices=ROLE_CHOICES, required=True)
+    section = forms.ChoiceField(choices=SECTION_CHOICES, required=True)
+    Prison_id = forms.ChoiceField(choices=PRISON_CHOICES, required=True)
     
     class Meta:
         model = CustomUser
