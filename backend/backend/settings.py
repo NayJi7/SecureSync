@@ -42,6 +42,7 @@ INSTALLED_APPS = [
     "corsheaders",
     "rest_framework",
     'rest_framework_simplejwt',
+    'object',
 ]
 
 CORS_ALLOWED_ORIGINS = [

@@ -9,6 +9,7 @@ import ContactPage from '@/pages/ContactPage';
 import AboutPage from '@/pages/AboutPage';
 import RegisterPage from '@/pages/Register';
 import ProfilePage from '@/pages/ProfilePage';
+import CreateObjetPage from '@/pages/CreateObjetPage';
 // Composant de protection des routes
 import ProtectedRoute from '@/components/ProtectedRoute';
 import './App.css';
@@ -35,6 +36,11 @@ export default function App() {
         <Route path="/profile" element={
           <ProtectedRoute>
             <ProfilePage />
+          </ProtectedRoute>
+        } />
+        <Route path="/Createobjet" element={
+          <ProtectedRoute>
+            <CreateObjetPage />
           </ProtectedRoute>
         } />
         
