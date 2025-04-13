@@ -55,12 +55,12 @@ class CustomUser(AbstractUser):
         verbose_name="Section"
     )
 
-    Prison_id = models.CharField(
+    Prison= models.CharField(
         max_length=10,  # "marseille"
         choices=PRISON_CHOICES,
         blank=True,
         null=True,
-        verbose_name="Prison ID"
+        verbose_name="Prison"
     )
 
     
@@ -120,7 +120,7 @@ from datetime import timedelta
 from django.utils import timezone
 
 class OTPCode(models.Model):
-    user = models.ForeignKey(CustomUser, on_delete=models.CASCADE)
+    user = models.ForeignKey(CustomUser, on_delete=models.CASCADE,  related_name='otps')
     email = models.EmailField()
     code = models.CharField(max_length=6)
     created_at = models.DateTimeField(auto_now_add=True)

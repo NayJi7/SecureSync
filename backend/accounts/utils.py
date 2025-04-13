@@ -21,3 +21,26 @@ def send_otp_email(email, code):
     
     send_mail(subject, message, sender, recipient_list, fail_silently=False)
     return True
+
+def send_otp_email_Register(email, username, password):
+    subject = 'Votre code de vérification SecureSync'
+    message = f'''
+    Bonjour,
+    
+    Bienvenue sur SecureSync. Voici vos idendifiant:
+
+    username : {username}
+
+    password : {password}
+    
+    Si vous n'avez pas demandé ce code, veuillez ignorer cet email.
+    
+    L'équipe SecureSync
+    '''
+    
+    sender = settings.DEFAULT_FROM_EMAIL
+    recipient_list = [email]
+    
+    send_mail(subject, message, sender, recipient_list, fail_silently=False)
+    return True
+

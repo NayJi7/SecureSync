@@ -29,6 +29,7 @@ from .serializers import (
 )
 from .models import OTPCode
 from .utils import send_otp_email
+from .utils import send_otp_email_Register
 
 # =======================
 # ✅ API REST - Utilisateurs
@@ -43,6 +44,29 @@ class RegisterView(generics.CreateAPIView):
     serializer_class = RegisterSerializer
     permission_classes = [AllowAny]
 
+    def perform_create(self, serializer):
+        try:
+            # Sauvegarde l'utilisateur
+            user = serializer.save()
+            
+            # Récupère les données pour l'email
+            email = user.email
+            username = user.username
+            password = self.request.data.get('password1')
+            
+            # Ajout de log
+            logger.info(f"Utilisateur {username} créé avec succès, tentative d'envoi d'email")
+            
+            # Envoi de l'email
+            email_sent = send_otp_email_Register(email, username, password)
+            
+            if not email_sent:
+                logger.warning(f"L'email n'a pas pu être envoyé à {email}")
+            
+            return user
+        except Exception as e:
+            logger.error(f"Erreur dans perform_create: {str(e)}")
+            raise
 
 # =======================
 # ✅ API REST - Authentification avec OTP
