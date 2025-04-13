@@ -3,6 +3,7 @@ import { useEffect, useState } from "react"
 import { useNavigate } from "react-router-dom"
 import { useDevice } from "@/hooks/use-device"
 import { Button } from '@/components/ui/button';
+import axios from 'axios';
 
 // Composants locaux
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar"
@@ -18,12 +19,24 @@ import { TabItem, Tabs } from "flowbite-react"
 import Waves from '../blocks/Backgrounds/Waves/Waves'
 import Dock from '../blocks/Components/Dock/Dock'
 import TeamModal from '../mycomponents/TeamModal'
+import ProfileModal from '../mycomponents/ProfileModal'
 
 // Icônes
 import { HiAdjustments, HiClipboardList, HiDotsVertical, HiTrash } from "react-icons/hi"
 import { MdDashboard, MdSecurity, MdOutlinePersonAdd } from "react-icons/md"
 import { VscHome, VscArchive, VscAccount, VscSettingsGear } from "react-icons/vsc"
 
+// Interface pour le profil utilisateur
+interface UserProfile {
+  id: number;
+  username: string;
+  email: string;
+  first_name: string;
+  last_name: string;
+  date_naissance: string;
+  sexe: string;
+  photo: string | null;
+}
 
 // Types pour les données du personnel
 type StaffMember = {
@@ -40,6 +53,7 @@ export default function HomePage({ children }: { children?: React.ReactNode }) {
   const { isMobile, isTablet } = useDevice();
   const [activeTab, setActiveTab] = useState("dashboard");
   const [teamModalOpen, setTeamModalOpen] = useState(false);
+  const [profileModalOpen, setProfileModalOpen] = useState(false);
   const [staff, setStaff] = useState<StaffMember[]>([
     { id: 1, name: "Jean Dupont", role: "Directeur", isLeader: true, photo: "/profile_pics/user_1/default_kiki.png" },
     { id: 2, name: "Marie Martin", role: "Directrice adjointe", isLeader: true, photo: "/profile_pics/user_2/default_kiki.png" },
@@ -50,6 +64,34 @@ export default function HomePage({ children }: { children?: React.ReactNode }) {
     { id: 7, name: "Thomas Petit", role: "Garde", department: "Section C", isLeader: false, photo: "/profile_pics/user_None/default_test.png" },
   ]);
   const isSmallScreen = isMobile || isTablet;
+  
+  // État pour stocker les données du profil utilisateur
+  const [profile, setProfile] = useState<UserProfile | null>(null);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState('');
+
+  // Récupération des données du profil au chargement du composant
+  useEffect(() => {
+    const fetchProfile = async () => {
+      try {
+        const token = localStorage.getItem('sessionToken');
+        const response = await axios.get('http://localhost:8000/api/profile/', {
+          headers: {
+            'Authorization': `Bearer ${token}` 
+          }
+        });
+        console.log("API response data:", response.data);
+        setProfile(response.data);
+        setLoading(false);
+      } catch (err) {
+        console.error("Erreur API:", err);
+        setError('Erreur lors du chargement du profil');
+        setLoading(false);
+      }
+    };
+
+    fetchProfile();
+  }, []);
 
   // Configuration du dock
   const dockItems = [
@@ -214,14 +256,24 @@ export default function HomePage({ children }: { children?: React.ReactNode }) {
             <DropdownMenu>
               <DropdownMenuTrigger className="mt-2 rounded-full h-8 z-10">
                 <Avatar className="cursor-pointer">
-                  <AvatarImage src="https://lh3.googleusercontent.com/ogw/AF2bZyhd184Wz5LlpcbpEbmK8TIg73_K9X5kKiP_EvFsDVHit4Gj=s32-c-mo" />
-                  <AvatarFallback className="bg-gray-300">AT</AvatarFallback>
+                  {/* Si chargement ou erreur, afficher une fallback */}
+                  {loading || error || !profile ? (
+                    <AvatarFallback className="bg-gray-300">?</AvatarFallback>
+                  ) : (
+                    <div className="w-8 h-8 flex-shrink-0">
+                      <div className="w-8 h-8 rounded-full bg-blue-100 flex items-center justify-center text-blue-600 font-bold text-sm border-2 border-gray-200">
+                        {(profile.first_name || profile.last_name) ? 
+                          `${profile.first_name?.charAt(0).toUpperCase() || ''}${profile.last_name?.charAt(0).toUpperCase() || ''}` : 
+                          profile.username?.charAt(0).toUpperCase() || '?'}
+                      </div>                      
+                    </div>
+                  )}
                 </Avatar>
               </DropdownMenuTrigger>
               <DropdownMenuContent>
                 <DropdownMenuLabel>Mon Compte</DropdownMenuLabel>
                 <DropdownMenuSeparator />
-                <DropdownMenuItem className="cursor-pointer">Profil</DropdownMenuItem>
+                <DropdownMenuItem className="cursor-pointer" onClick={() => setProfileModalOpen(true)}>Profil</DropdownMenuItem>
                 <DropdownMenuItem className="cursor-pointer" onClick={() => setTeamModalOpen(true)}>Équipe</DropdownMenuItem>
                 <DropdownMenuSeparator />
                 <DropdownMenuItem variant="danger" className="cursor-pointer transition-colors duration-200" onClick={handleLogout}>Déconnexion</DropdownMenuItem>
@@ -236,6 +288,14 @@ export default function HomePage({ children }: { children?: React.ReactNode }) {
           onClose={() => setTeamModalOpen(false)} 
           staff={staff} 
           setStaff={setStaff} 
+        />
+
+        {/* "Profil" section in user parameters */}
+        <ProfileModal
+          isOpen={profileModalOpen}
+          onClose={() => setProfileModalOpen(false)}
+          existingProfile={profile} // Passer le profil au composant modal
+          setProfile={setProfile} // Permettre au modal de mettre à jour le profil parent
         />
     </div>
   )

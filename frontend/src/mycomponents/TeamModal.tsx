@@ -343,17 +343,6 @@ const TeamModal: React.FC<TeamModalProps> = ({ isOpen, onClose, staff, setStaff 
                     </div>
                   </div>
                   
-                  <div>
-                    <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Photo</label>
-                    <input 
-                      type="file" 
-                      name="photo" 
-                      onChange={handleGuardFormChange} 
-                      className="w-full p-2 border rounded-md bg-white dark:bg-gray-700 dark:text-white" 
-                      accept="image/*"
-                    />
-                  </div>
-                  
                   <div className="flex justify-end gap-2 pt-2">
                     <button 
                       type="button"

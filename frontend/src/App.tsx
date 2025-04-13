@@ -11,7 +11,7 @@ import RegisterPage from '@/pages/Register';
 import ProfilePage from '@/pages/ProfilePage';
 import CreateObjetPage from '@/pages/CreateObjetPage';
 // Composant de protection des routes
-import ProtectedRoute from '@/components/ProtectedRoute';
+import ProtectedRoute from './components/ProtectedRoute';
 import './App.css';
 
 export default function App() {

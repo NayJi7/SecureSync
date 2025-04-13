@@ -19,6 +19,7 @@ urlpatterns = [
     path('api/register/', RegisterView.as_view(), name='register'),
     path('api/profile/', views.profile_api_view, name='profile_api'),
     path('api/profile/update/', views.update_profile_api_view, name='update_profile_api'),
+    path('api/verify-password/', views.verify_password_view, name='verify_password'),
 ]
 
 

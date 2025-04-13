@@ -5,6 +5,7 @@ from django.contrib.auth import login, authenticate, logout
 from django.contrib import messages
 from django.contrib.auth.decorators import login_required
 from django import forms
+from django.contrib.auth.hashers import check_password
 from .models import CustomUser
 from .forms import CustomUserCreationForm, CustomAuthenticationForm, CustomUserUpdateForm
 
@@ -241,3 +242,23 @@ def update_profile_api_view(request):
         return Response(serializer.data)
     
     return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+
+@api_view(['POST'])
+@permission_classes([IsAuthenticated])
+def verify_password_view(request):
+    """Endpoint pour vérifier uniquement le mot de passe de l'utilisateur connecté sans déclencher de connexion/OTP"""
+    password = request.data.get('password', '')
+    
+    # Vérification du mot de passe de l'utilisateur connecté
+    if not check_password(password, request.user.password):
+        return Response({'detail': 'Mot de passe incorrect'}, status=status.HTTP_401_UNAUTHORIZED)
+    
+    # Si le mot de passe est correct, on renvoie une réponse positive
+    return Response({
+        'detail': 'Mot de passe vérifié avec succès',
+        'user': {
+            'id': request.user.id,
+            'username': request.user.username,
+            'email': request.user.email
+        }
+    })
