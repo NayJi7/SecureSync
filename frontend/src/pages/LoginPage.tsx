@@ -213,119 +213,156 @@ export default function LoginPage() {
   };
 
   // Soumission du formulaire d'authentification
-  const handleSubmit = async (e) => {
-    e.preventDefault();
-    setApiError('');
+  // Soumission du formulaire d'authentification
+const handleSubmit = async (e) => {
+  e.preventDefault();
+  setApiError('');
+  
+  // Vérification des conditions d'utilisation
+  if (!acceptedTerms) {
+    setApiError("Veuillez accepter les conditions d'utilisation pour continuer");
+    return;
+  }
+
+  // Validation des champs
+  if (!validatePasswords() || !validateEmail() || !validateUsername()) {
+    return;
+  }
+
+  try {
+    setIsLoading(true);
     
-    // Vérification des conditions d'utilisation
-    if (!acceptedTerms) {
-      setApiError("Veuillez accepter les conditions d'utilisation pour continuer");
+    console.log(`Envoi de la requête d'authentification à ${API_BASE_URL}/login/`);
+    
+    // Appel à l'API d'authentification
+    const response = await fetch(`${API_BASE_URL}/login/`, {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+      },
+      body: JSON.stringify({
+        username: username,
+        email: email,
+        password: password,
+        // Ajout d'un paramètre pour indiquer que l'API doit envoyer elle-même l'OTP
+        // et ne pas attendre que le frontend le fasse
+        sendOtp: true
+      }),
+    });
+
+    const data = await response.json();
+    
+    // Debug: affichage de la structure complète de la réponse
+    console.log('Structure complète de la réponse:', data);
+    console.log('Clés disponibles dans la réponse:', Object.keys(data));
+
+    // Traitement de la réponse
+    if (!response.ok) {
+      console.error('Erreur d\'authentification:', data);
+      setApiError(data.detail || `Erreur d'authentification (${response.status}). Veuillez vérifier vos identifiants.`);
+      setIsLoading(false);
       return;
     }
 
-    // Validation des champs
-    if (!validatePasswords() || !validateEmail() || !validateUsername()) {
-      return;
+    console.log('Authentification réussie:', data);
+
+    // Recherche du token dans différentes structures possibles de réponse
+    let token = null;
+
+    // Nouvelle vérification pour la structure que vous recevez
+    if (data.tokens) {
+      // Essayez de trouver le token dans l'objet tokens
+      if (data.tokens.access) token = data.tokens.access;
+      else if (data.tokens.token) token = data.tokens.token;
+      else if (data.tokens.accessToken) token = data.tokens.accessToken;
+      else if (data.tokens.access_token) token = data.tokens.access_token;
+      // Si le token est l'objet lui-même (cas rare mais possible)
+      else if (typeof data.tokens === 'string') token = data.tokens;
+      
+      // Debug - afficher le contenu de l'objet tokens pour voir sa structure
+      console.log("Contenu de l'objet tokens:", data.tokens);
+      console.log("Clés dans l'objet tokens:", Object.keys(data.tokens));
     }
 
-    try {
-      setIsLoading(true);
-      
-      console.log(`Envoi de la requête d'authentification à ${API_BASE_URL}/login/`);
-      
-      // Appel à l'API d'authentification
-      const response = await fetch(`${API_BASE_URL}/login/`, {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify({
-          username: username,
-          email: email,
-          password: password,
-        }),
+    // Garder les vérifications précédentes en fallback
+    if (!token) {
+      if (data.access) token = data.access;
+      else if (data.token) token = data.token;
+      else if (data.accessToken) token = data.accessToken;
+      else if (data.access_token) token = data.access_token;
+      else if (data.auth && data.auth.token) token = data.auth.token;
+      else if (data.data && data.data.token) token = data.data.token;
+    }
+    
+    // Si aucun token n'est trouvé dans les structures standard, parcourir les clés de premier niveau
+    if (!token) {
+      Object.keys(data).forEach(key => {
+        // Si une clé ressemble à un token (chaîne longue), l'utiliser
+        if (typeof data[key] === 'string' && data[key].length > 20) {
+          console.log(`Utilisation de la clé ${key} comme token potentiel`);
+          token = data[key];
+        }
       });
-
-      const data = await response.json();
+    }
+    
+    if (!token) {
+      console.error("Token non trouvé dans la réponse. Structure de la réponse:", data);
+      setApiError("Token d'authentification non trouvé dans la réponse. Veuillez contacter le support.");
+      setIsLoading(false);
+      return;
+    }
+    
+    console.log("Token trouvé:", token);
+    setAuthToken(token);
+    localStorage.setItem("authToken", token);
+    
+    // Vérifier si l'API backend indique si un OTP a été envoyé
+    // Si l'API ne fournit pas cette information, supposer que oui puisque
+    // nous avons demandé sendOtp: true dans la requête
+    const otpAlreadySent = data.otpSent !== false;
+    
+    if (otpAlreadySent) {
+      // L'OTP a déjà été envoyé par l'API, pas besoin de le renvoyer
+      console.log("L'OTP a été envoyé automatiquement par l'API");
       
-      // Debug: affichage de la structure complète de la réponse
-      console.log('Structure complète de la réponse:', data);
-      console.log('Clés disponibles dans la réponse:', Object.keys(data));
-
-      // Traitement de la réponse
-      if (!response.ok) {
-        console.error('Erreur d\'authentification:', data);
-        setApiError(data.detail || `Erreur d'authentification (${response.status}). Veuillez vérifier vos identifiants.`);
-        setIsLoading(false);
-        return;
+      // Si nous utilisons le resendDisabled pour éviter des tentatives trop fréquentes,
+      // initialisons-le ici aussi
+      setResendDisabled(true);
+      setCountdown(30);
+      let timeLeft = 30;
+      
+      // Démarrer le compte à rebours pour le bouton "Renvoyer le code"
+      if (timerRef.current) {
+        clearInterval(timerRef.current);
       }
-
-      console.log('Authentification réussie:', data);
-
-      // Recherche du token dans différentes structures possibles de réponse
-      let token = null;
-
-      // Nouvelle vérification pour la structure que vous recevez
-      if (data.tokens) {
-        // Essayez de trouver le token dans l'objet tokens
-        if (data.tokens.access) token = data.tokens.access;
-        else if (data.tokens.token) token = data.tokens.token;
-        else if (data.tokens.accessToken) token = data.tokens.accessToken;
-        else if (data.tokens.access_token) token = data.tokens.access_token;
-        // Si le token est l'objet lui-même (cas rare mais possible)
-        else if (typeof data.tokens === 'string') token = data.tokens;
+      
+      timerRef.current = setInterval(() => {
+        timeLeft -= 1;
+        setCountdown(timeLeft);
         
-        // Debug - afficher le contenu de l'objet tokens pour voir sa structure
-        console.log("Contenu de l'objet tokens:", data.tokens);
-        console.log("Clés dans l'objet tokens:", Object.keys(data.tokens));
-      }
-
-      // Garder les vérifications précédentes en fallback
-      if (!token) {
-        if (data.access) token = data.access;
-        else if (data.token) token = data.token;
-        else if (data.accessToken) token = data.accessToken;
-        else if (data.access_token) token = data.access_token;
-        else if (data.auth && data.auth.token) token = data.auth.token;
-        else if (data.data && data.data.token) token = data.data.token;
-      }
+        if (timeLeft <= 0) {
+          if (timerRef.current) clearInterval(timerRef.current);
+          setResendDisabled(false);
+        }
+      }, 1000);
       
-      // Si aucun token n'est trouvé dans les structures standard, parcourir les clés de premier niveau
-      if (!token) {
-        Object.keys(data).forEach(key => {
-          // Si une clé ressemble à un token (chaîne longue), l'utiliser
-          if (typeof data[key] === 'string' && data[key].length > 20) {
-            console.log(`Utilisation de la clé ${key} comme token potentiel`);
-            token = data[key];
-          }
-        });
-      }
-      
-      if (!token) {
-        console.error("Token non trouvé dans la réponse. Structure de la réponse:", data);
-        setApiError("Token d'authentification non trouvé dans la réponse. Veuillez contacter le support.");
-        setIsLoading(false);
-        return;
-      }
-      
-      console.log("Token trouvé:", token);
-      setAuthToken(token);
-      localStorage.setItem("authToken", token);
-      
-      // Envoi du code OTP
+      // Passer à l'étape de vérification
+      setAuthStep('verify');
+    } else {
+      // Si pour une raison quelconque l'API n'a pas envoyé d'OTP, le faire manuellement
       const otpSent = await handleSendOTP(token);
       
       if (otpSent) {
         setAuthStep('verify');
       }
-      
-    } catch (error) {
-      console.error('Exception lors de l\'authentification:', error);
-      setApiError('Erreur de connexion au serveur. Veuillez réessayer plus tard.');
-    } finally {
-      setIsLoading(false);
     }
-  };
+  } catch (error) {
+    console.error('Exception lors de l\'authentification:', error);
+    setApiError('Erreur de connexion au serveur. Veuillez réessayer plus tard.');
+  } finally {
+    setIsLoading(false);
+  }
+};
 
   // Vérification du code OTP
   const handleVerifyOTP = async () => {

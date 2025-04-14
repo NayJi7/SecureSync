@@ -36,32 +36,44 @@ const RegisterForm: React.FC = () => {
     }
   };
 
+
+
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
+    
     const data = new FormData();
-    for (const key in formData) {
-      if ((formData as any)[key] !== null) {
-        data.append(key, (formData as any)[key]);
-      }
+    // Assurer que chaque champ est ajouté de manière correcte
+    data.append("username", formData.username);
+    data.append("email", formData.email);
+    data.append("password1", formData.password1);
+    data.append("password2", formData.password2);
+    data.append("nom", formData.nom);
+    data.append("prenom", formData.prenom);
+    data.append("sexe", formData.sexe);
+    data.append("date_naissance", formData.date_naissance);
+    if (formData.photo) {
+      data.append("photo", formData.photo);
     }
-
     try {
-      const response = await axios.post('http://localhost:8000/api/register/', data, {
-        headers: {
-          'Content-Type': 'multipart/form-data',
-        },
-      });
-      console.log('Inscription réussie !', response.data);
-    } 
+        const response = await axios.post('http://localhost:8000/api/register/', data, {
+            headers: {
+                'Content-Type': 'multipart/form-data',
+            },
+        });
+        console.log('Inscription réussie !', response.data);
+        alert('Inscription réussie ! Veuillez vérifier votre email pour vos identifiants.'); 
+        // Redirection éventuelle vers la page de connexion
+        // window.location.href = '/login';
+    }
     catch (error: any) {
         if (error.response) {
-          console.error('Erreur lors de l’inscription :', error.response.data); // <= Ajoute bien cette ligne
-          alert(JSON.stringify(error.response.data, null, 2)); // tu peux aussi voir en popup pour debug
+            console.error("Erreur lors de l'inscription :", error.response.data);
+            alert(JSON.stringify(error.response.data, null, 2));
         } else {
-          console.error('Erreur inconnue :', error);
+            console.error('Erreur inconnue :', error);
         }
-      }
-  };
+    }
+};
 
   return (
     <form onSubmit={handleSubmit}>
