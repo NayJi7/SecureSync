@@ -55,7 +55,7 @@ class CustomUser(AbstractUser):
         verbose_name="Section"
     )
 
-    Prison= models.CharField(
+    prison= models.CharField(
         max_length=10,  # "marseille"
         choices=PRISON_CHOICES,
         blank=True,

@@ -1,4 +1,3 @@
-// src/components/RegisterForm.tsx
 import React, { useState } from 'react';
 import axios from 'axios';
 
@@ -11,6 +10,9 @@ interface FormData {
   prenom: string;
   sexe: string;
   date_naissance: string;
+  section: string;
+  prison: string;
+  role: string;
   photo: File | null;
 }
 
@@ -24,11 +26,14 @@ const RegisterForm: React.FC = () => {
     prenom: '',
     sexe: '',
     date_naissance: '',
+    section: '',
+    prison: '',
+    role: '',
     photo: null,
   });
 
   const handleChange = (e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement>) => {
-    const { name, value, files } = e.target;
+    const { name, value, files } = e.target as HTMLInputElement;
     if (files) {
       setFormData({ ...formData, [name]: files[0] });
     } else {
@@ -36,12 +41,10 @@ const RegisterForm: React.FC = () => {
     }
   };
 
-
-
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    
     const data = new FormData();
+    
     // Assurer que chaque champ est ajouté de manière correcte
     data.append("username", formData.username);
     data.append("email", formData.email);
@@ -51,29 +54,34 @@ const RegisterForm: React.FC = () => {
     data.append("prenom", formData.prenom);
     data.append("sexe", formData.sexe);
     data.append("date_naissance", formData.date_naissance);
+    data.append("section", formData.section);
+    data.append("prison", formData.prison);
+    data.append("role", formData.role);
+    
     if (formData.photo) {
       data.append("photo", formData.photo);
     }
+
     try {
-        const response = await axios.post('http://localhost:8000/api/register/', data, {
-            headers: {
-                'Content-Type': 'multipart/form-data',
-            },
-        });
-        console.log('Inscription réussie !', response.data);
-        alert('Inscription réussie ! Veuillez vérifier votre email pour vos identifiants.'); 
-        // Redirection éventuelle vers la page de connexion
-        // window.location.href = '/login';
+      const response = await axios.post('http://localhost:8000/api/register/', data, {
+        headers: {
+          'Content-Type': 'multipart/form-data',
+        },
+      });
+      console.log('Inscription réussie !', response.data);
+      alert('Inscription réussie ! Veuillez vérifier votre email pour vos identifiants.');
+      // Redirection éventuelle vers la page de connexion
+      // window.location.href = '/login';
     }
     catch (error: any) {
-        if (error.response) {
-            console.error("Erreur lors de l'inscription :", error.response.data);
-            alert(JSON.stringify(error.response.data, null, 2));
-        } else {
-            console.error('Erreur inconnue :', error);
-        }
+      if (error.response) {
+        console.error("Erreur lors de l'inscription :", error.response.data);
+        alert(JSON.stringify(error.response.data, null, 2));
+      } else {
+        console.error('Erreur inconnue :', error);
+      }
     }
-};
+  };
 
   return (
     <form onSubmit={handleSubmit}>
@@ -83,6 +91,21 @@ const RegisterForm: React.FC = () => {
       <input type="password" name="password2" placeholder="Confirmez le mot de passe" onChange={handleChange} required />
       <input type="text" name="nom" placeholder="Nom" onChange={handleChange} />
       <input type="text" name="prenom" placeholder="Prénom" onChange={handleChange} />
+      <select name="section" onChange={handleChange}>
+        <option value="">Choisir un Secteur</option>
+        <option value="a">Section A</option>
+      </select>
+      <select name="prison" onChange={handleChange}>
+        <option value="">Choisir une Prison</option>
+        <option value="cergy">Cergy</option>
+      </select>
+      <select name="role" onChange={handleChange}>
+        <option value="">Choisir un rôle</option>
+        <option value="admin">Administrateur</option>
+        <option value="staff">Personnel</option>
+        <option value="inmate">Gardes</option>
+      </select>
+      
       <select name="sexe" onChange={handleChange}>
         <option value="">Choisir le sexe</option>
         <option value="M">Homme</option>

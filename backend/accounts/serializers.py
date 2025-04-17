@@ -41,7 +41,7 @@ class RegisterSerializer(serializers.ModelSerializer):
 
     class Meta:
         model = CustomUser
-        fields = ['username', 'email', 'password1', 'password2', 'photo', 'sexe', 'date_naissance', 'nom', 'prenom']
+        fields = ['username', 'email', 'password1', 'password2', 'photo', 'sexe', 'date_naissance', 'nom', 'prenom','section', 'prison', 'role']
 
     def validate(self, attrs):
         if attrs['password1'] != attrs['password2']:
@@ -66,4 +66,15 @@ class ProfileSerializer(serializers.ModelSerializer):
         fields = ['username', 'email', 'first_name', 'last_name', 
                   'date_naissance', 'sexe', 'photo']
         read_only_fields = ['username']  # Nom d'utilisateur ne peut pas être modifié
+
+
+# serializers.py
+from rest_framework import serializers
+from .models import CustomUser
+
+class StaffSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = CustomUser
+        fields = ['username', 'first_name', 'last_name', 'sexe', 'date_naissance', 'role', 'section', 'Prison']
+
 

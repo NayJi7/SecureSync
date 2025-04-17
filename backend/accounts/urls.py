@@ -4,6 +4,7 @@ from rest_framework.routers import DefaultRouter
 from .views import CustomUserViewSet, register
 from . import views
 from .views import RegisterView
+from .views import StaffView
 
 router = DefaultRouter()
 router.register(r'users', CustomUserViewSet)
@@ -20,6 +21,7 @@ urlpatterns = [
     path('api/profile/', views.profile_api_view, name='profile_api'),
     path('api/profile/update/', views.update_profile_api_view, name='update_profile_api'),
     path('api/verify-password/', views.verify_password_view, name='verify_password'),
+     path('api/staff/', StaffView.as_view(), name='staff-list'),  
 ]
 
 

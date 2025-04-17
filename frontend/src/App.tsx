@@ -11,6 +11,7 @@ import RegisterPage from '@/pages/Register';
 import ProfilePage from '@/pages/ProfilePage';
 import CreateObjetPage from '@/pages/CreateObjetPage';
 import ObjectPage from '@/pages/ObjectDashboard';
+import StaffPage from '@/pages/StaffPage';
 // Composant de protection des routes
 import ProtectedRoute from './components/ProtectedRoute';
 import './App.css';
@@ -28,6 +29,8 @@ export default function App() {
         <Route path="/about" element={<AboutPage />} />
         <Route path="/contact" element={<ContactPage />} />
         <Route path="/object" element={<ObjectPage />} />
+        <Route path="/CreateObject" element={<CreateObjetPage />} />
+        <Route path="/Staff" element={<StaffPage />} />
         
         {/* Routes protégées nécessitant une authentification */}
         <Route path="/home" element={
@@ -40,11 +43,7 @@ export default function App() {
             <ProfilePage />
           </ProtectedRoute>
         } />
-        <Route path="/Createobject" element={
-          <ProtectedRoute>
-            <CreateObjetPage />
-          </ProtectedRoute>
-        } />
+        
         
         {/* Redirection pour les routes non définies */}
         <Route path="*" element={<Navigate to="/" replace />} />
