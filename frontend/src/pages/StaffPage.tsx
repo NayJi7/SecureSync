@@ -1,9 +1,11 @@
 import React, { useState, useEffect } from 'react';
 import { useNavigate, Link } from 'react-router-dom';
 import axios from 'axios';
+import DeleteUserModal from '@/components/DeleteUserModal'; // Import du composant modal
 
 // Définir le type pour les membres du personnel
 interface StaffMember {
+  id: string;
   username: string;
   first_name: string;
   last_name: string;
@@ -14,63 +16,92 @@ interface StaffMember {
   Prison: string;
 }
 
+interface CurrentUser {
+  role: string;
+}
+
 const StaffPage: React.FC = () => {
   const [staff, setStaff] = useState<StaffMember[]>([]);
   const [loading, setLoading] = useState<boolean>(true);
   const [error, setError] = useState<string | null>(null);
+  const [currentUser, setCurrentUser] = useState<CurrentUser | null>(null);
+  const [deleteModal, setDeleteModal] = useState<{isOpen: boolean, username: string, userId: string}>({
+    isOpen: false,
+    username: '',
+    userId: ''
+  });
   const navigate = useNavigate();
 
   // Récupération des données du personnel depuis l'API
-  useEffect(() => {
-    const fetchStaffData = async () => {
-      try {
-        // Récupérer le token JWT du stockage local
-        const token = localStorage.getItem('sessionToken');
-        
-        if (!token) {
-           //Rediriger vers la page de connexion si non authentifié
-          navigate('/login');
-          return;
-        }
-
-        const response = await axios.get('http://localhost:8000/api/staff/', {
-          headers: {
-            Authorization: `Bearer ${token}`
-          }
-        });
-        console.log('Réponse brute de l\'API:', response.data);
-
-        // Vérifier si la réponse est un tableau
-        if (Array.isArray(response.data)) {
-          setStaff(response.data);
-        } else {
-          // Si la réponse n'est pas un tableau, vérifier s'il y a un champ dans la réponse qui contient les données
-          // Par exemple, la réponse pourrait être { results: [...] }
-          if (response.data && typeof response.data === 'object') {
-            // Chercher un champ qui pourrait contenir les données (results, data, etc.)
-            const dataField = Object.keys(response.data).find(key => Array.isArray(response.data[key]));
-            if (dataField) {
-              setStaff(response.data[dataField]);
-            } else {
-              // Si aucun tableau n'est trouvé, considérer comme une erreur
-              console.error('Format de réponse inattendu:', response.data);
-              setError('Format de données inattendu reçu du serveur');
-            }
-          } else {
-            console.error('Format de réponse inattendu:', response.data);
-            setError('Format de données inattendu reçu du serveur');
-          }
-        }
-        setLoading(false);
-      } catch (err) {
-        console.error('Erreur de chargement:', err);
-        setError('Erreur lors du chargement des données du personnel');
-        setLoading(false);
+  const fetchStaffData = async () => {
+    try {
+      // Récupérer le token JWT du stockage local
+      const token = localStorage.getItem('sessionToken');
+      
+      if (!token) {
+        // Rediriger vers la page de connexion si non authentifié
+        navigate('/login');
+        return;
       }
-    };
 
+      const [staffResponse, userResponse] = await Promise.all([
+        axios.get('http://localhost:8000/api/staff/', {
+          headers: { Authorization: `Bearer ${token}` }
+        }),
+        axios.get('http://localhost:8000/api/profile/', {
+          headers: { Authorization: `Bearer ${token}` }
+        })
+      ]);
+      console.log('Profil utilisateur récupéré:', userResponse.data);
+      // Définir les membres du staff
+      if (Array.isArray(staffResponse.data)) {
+        setStaff(staffResponse.data);
+      } else if (staffResponse.data && typeof staffResponse.data === 'object') {
+        const dataField = Object.keys(staffResponse.data).find(key => Array.isArray(staffResponse.data[key]));
+        if (dataField) {
+          setStaff(staffResponse.data[dataField]);
+        } else {
+          console.error('Format de réponse inattendu:', staffResponse.data);
+          setError('Format de données inattendu reçu du serveur');
+        }
+      }
+
+      // Définir l'utilisateur courant
+      setCurrentUser(userResponse.data);
+      
+      setLoading(false);
+    } catch (err) {
+      console.error('Erreur de chargement:', err);
+      setError('Erreur lors du chargement des données du personnel');
+      setLoading(false);
+    }
+  };
+
+  useEffect(() => {
     fetchStaffData();
   }, [navigate]);
+
+  // Gérer la suppression d'un utilisateur
+  const handleOpenDeleteModal = (username: string, userId: string) => {
+    setDeleteModal({
+      isOpen: true,
+      username,
+      userId
+    });
+  };
+
+  const handleCloseDeleteModal = () => {
+    setDeleteModal({
+      isOpen: false,
+      username: '',
+      userId: ''
+    });
+  };
+
+  const handleUserDeleted = () => {
+    // Rafraîchir la liste après suppression
+    fetchStaffData();
+  };
 
   // Fonction pour formater la date de naissance
   const formatDate = (dateString: string) => {
@@ -95,10 +126,6 @@ const StaffPage: React.FC = () => {
     
     return age;
   };
-
-  // Déboguer la valeur de staff
-  console.log('Type de staff:', typeof staff);
-  console.log('Contenu de staff:', staff);
 
   // Affichage pendant le chargement
   if (loading) {
@@ -129,6 +156,7 @@ const StaffPage: React.FC = () => {
 
   // S'assurer que staff est un tableau avant d'utiliser .map()
   const staffList = Array.isArray(staff) ? staff : [];
+  const isAdmin = currentUser?.role === 'admin';
 
   return (
     <div className="min-h-screen bg-gray-100 p-4 md:p-8">
@@ -192,7 +220,7 @@ const StaffPage: React.FC = () => {
                     </div>
                     <div>
                       <p className="text-sm font-medium text-gray-500">Prison</p>
-                      <p className="text-sm text-gray-900">{member.Prison || 'Non spécifié'}</p>
+                      <p className="text-sm text-gray-900">{member.prison || 'Non spécifié'}</p>
                     </div>
                     <div>
                       <p className="text-sm font-medium text-gray-500">Âge</p>
@@ -204,13 +232,22 @@ const StaffPage: React.FC = () => {
                 </div>
               </div>
               
-              <div className="bg-gray-50 px-4 py-3 flex justify-end">
+              <div className="bg-gray-50 px-4 py-3 flex justify-between">
                 <Link 
                   to={`/staff/${member.username}`}
                   className="px-3 py-1 text-sm text-blue-600 hover:text-blue-800 hover:underline"
                 >
                   Voir profil détaillé
                 </Link>
+                
+                {isAdmin && (
+                  <button
+                    onClick={() => handleOpenDeleteModal(member.username, member.id)}
+                    className="px-3 py-1 text-sm text-red-600 hover:text-red-800 hover:underline"
+                  >
+                    Supprimer
+                  </button>
+                )}
               </div>
             </div>
           ))}
@@ -227,6 +264,15 @@ const StaffPage: React.FC = () => {
           </div>
         )}
       </div>
+
+      {/* Modal de suppression */}
+      <DeleteUserModal
+        isOpen={deleteModal.isOpen}
+        username={deleteModal.username}
+        userId={deleteModal.userId}
+        onClose={handleCloseDeleteModal}
+        onUserDeleted={handleUserDeleted}
+      />
     </div>
   );
 };

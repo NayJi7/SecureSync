@@ -64,7 +64,7 @@ class ProfileSerializer(serializers.ModelSerializer):
     class Meta:
         model = CustomUser
         fields = ['username', 'email', 'first_name', 'last_name', 
-                  'date_naissance', 'sexe', 'photo']
+                  'date_naissance', 'sexe', 'photo','role']
         read_only_fields = ['username']  # Nom d'utilisateur ne peut pas être modifié
 
 
@@ -75,6 +75,6 @@ from .models import CustomUser
 class StaffSerializer(serializers.ModelSerializer):
     class Meta:
         model = CustomUser
-        fields = ['username', 'first_name', 'last_name', 'sexe', 'date_naissance', 'role', 'section', 'Prison']
+        fields = ['username', 'first_name', 'last_name', 'sexe', 'date_naissance', 'role', 'section', 'prison']
 
 

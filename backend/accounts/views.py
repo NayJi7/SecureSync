@@ -20,18 +20,20 @@ import logging
 logger = logging.getLogger(__name__)
 
 
-
-
 from .serializers import (
     CustomUserSerializer, 
     RegisterSerializer,
     UserLoginSerializer, 
     OTPVerificationSerializer, 
-    ResendOTPSerializer
+    ResendOTPSerializer,
+    StaffSerializer
 )
 from .models import OTPCode
 from .utils import send_otp_email
 from .utils import send_otp_email_Register
+
+
+from django.contrib.auth import get_user_model
 
 # =======================
 # ✅ API REST - Utilisateurs
@@ -188,6 +190,7 @@ def register(request):
             user.first_name = form.cleaned_data['prenom']
             user.last_name = form.cleaned_data['nom']
             user.date_naissance = form.cleaned_data['date_naissance']
+            user.section = form.cleaned_data['section']
             user.save()
             login(request, user)
             messages.success(request, "Compte créé avec succès.")
@@ -288,3 +291,41 @@ def verify_password_view(request):
             'email': request.user.email
         }
     })
+
+class StaffView(APIView):
+    permission_classes = [AllowAny]
+    
+    def get(self, request):
+        # Récupère tous les utilisateurs
+        users = CustomUser.objects.all()
+        # Sérialiser les utilisateurs
+        serializer = StaffSerializer(users, many=True)
+        # Pour déboguer
+        print("Données renvoyées:", serializer.data)
+        return Response(serializer.data)
+
+
+User = get_user_model()
+
+@api_view(['DELETE'])
+@permission_classes([IsAuthenticated])
+def delete_account(request, username=None):
+    """
+    Supprime le compte de l'utilisateur connecté.
+    Ou un administrateur peut supprimer le compte d'un autre utilisateur par username.
+    """
+    if username and request.user.role == 'admin':
+        try:
+            user_to_delete = User.objects.get(username=username)
+            user_to_delete.delete()
+            return Response({"message": f"Le compte de {username} a été supprimé avec succès."}, 
+                          status=status.HTTP_200_OK)
+        except User.DoesNotExist:
+            return Response({"error": "Utilisateur non trouvé."}, 
+                          status=status.HTTP_404_NOT_FOUND)
+    
+    # Sinon, l'utilisateur supprime son propre compte
+    username = request.user.username
+    request.user.delete()
+    return Response({"message": f"Votre compte ({username}) a été supprimé avec succès."}, 
+                  status=status.HTTP_200_OK)
