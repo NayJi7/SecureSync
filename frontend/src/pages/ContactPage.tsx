@@ -234,14 +234,16 @@ export default function ContactPage() {
                 </div>
               </div>
               
-              {/* Carte */}
+              {/* Section de la carte */}
               <div className="w-full h-64 md:h-96 rounded-lg overflow-hidden border border-green-900/30">
-                <div className="w-full h-full bg-green-900/20 flex items-center justify-center">
-                  <p className="text-green-300 text-center px-4">
-                    Carte interactive de notre emplacement<br />
-                    <span className="text-sm text-gray-400">(Intégration de carte à implémenter)</span>
-                  </p>
-                </div>
+                <iframe
+                  src="https://www.google.com/maps/embed?pb=!1m18!1m12!1m3!1d6600.589234947048!2d2.067171476913903!3d49.03505808825709!2m3!1f0!2f0!3f0!3m2!1i1024!2i768!4f13.1!3m3!1m2!1s0x47e6f5265bbc2f79%3A0x301dd6c7102e1852!2sCy%20Tech!5e1!3m2!1sen!2sfr!4v1744546910410!5m2!1sen!2sfr"
+                  width="100%"
+                  height="100%"
+                  style={{ border: 0 }}
+                  allowFullScreen={true}
+                  loading="lazy"
+                ></iframe>
               </div>
             </div>
           </main>
