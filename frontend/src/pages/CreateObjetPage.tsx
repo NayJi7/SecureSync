@@ -36,9 +36,14 @@ const CreateObjetPage: React.FC = () => {
       });
     } catch (error) {
       console.error('Erreur création objet:', error);
+      if (error.response) {
+        // Le serveur a répondu avec un code d'erreur
+        console.error('Détails de l\'erreur:', error.response.data);
+      }
       setMessage('Erreur lors de la création de l\'objet.');
     }
-  };
+       };
+      // Reste du code...
 
   return (
     <div className="max-w-xl mx-auto p-6 bg-white shadow-md rounded">
