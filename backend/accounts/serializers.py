@@ -52,6 +52,19 @@ class RegisterSerializer(serializers.ModelSerializer):
         validated_data.pop('password2')
         password = validated_data.pop('password1')
 
+        # Définir les valeurs par défaut si les champs sont vides
+        if 'sexe' not in validated_data or validated_data['sexe'] == '':
+            validated_data['sexe'] = 'M'
+        
+        if 'role' not in validated_data or validated_data['role'] == '':
+            validated_data['role'] = 'employe'
+            
+        if 'prison' not in validated_data or validated_data['prison'] == '':
+            validated_data['prison'] = 'paris'
+            
+        if 'section' not in validated_data or validated_data['section'] == '':
+            validated_data['section'] = 'a'
+
         # Crée un utilisateur avec les données validées
         user = CustomUser(**validated_data)
         user.set_password(password)

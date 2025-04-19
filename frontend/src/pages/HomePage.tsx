@@ -18,8 +18,8 @@ import {
 import { TabItem, Tabs } from "flowbite-react"
 import Waves from '../blocks/Backgrounds/Waves/Waves'
 import Dock from '../blocks/Components/Dock/Dock'
-import TeamModal from '../mycomponents/TeamModal'
-import ProfileModal from '../mycomponents/ProfileModal'
+import TeamModal from '../components/TeamModal'
+import ProfileModal from '../components/ProfileModal'
 
 // Icônes
 import { HiAdjustments, HiClipboardList, HiDotsVertical, HiTrash } from "react-icons/hi"
@@ -54,15 +54,8 @@ export default function HomePage({ children }: { children?: React.ReactNode }) {
   const [activeTab, setActiveTab] = useState("dashboard");
   const [teamModalOpen, setTeamModalOpen] = useState(false);
   const [profileModalOpen, setProfileModalOpen] = useState(false);
-  const [staff, setStaff] = useState<StaffMember[]>([
-    { id: 1, name: "Jean Dupont", role: "Directeur", isLeader: true, photo: "/profile_pics/user_1/default_kiki.png" },
-    { id: 2, name: "Marie Martin", role: "Directrice adjointe", isLeader: true, photo: "/profile_pics/user_2/default_kiki.png" },
-    { id: 3, name: "Pierre Dubois", role: "Chef de la sécurité", isLeader: true, photo: "/profile_pics/user_3/default_a.png" },
-    { id: 4, name: "Sophie Leroy", role: "Garde", department: "Section A", isLeader: false, photo: "/profile_pics/user_4/default_adam.png" },
-    { id: 5, name: "Lucas Moreau", role: "Garde", department: "Section B", isLeader: false, photo: "/profile_pics/user_5/default_ad.png" },
-    { id: 6, name: "Camille Bernard", role: "Garde", department: "Section A", isLeader: false, photo: "/profile_pics/user_None/default_toto.png" },
-    { id: 7, name: "Thomas Petit", role: "Garde", department: "Section C", isLeader: false, photo: "/profile_pics/user_None/default_test.png" },
-  ]);
+  const [staffModalOpen, setStaffModalOpen] = useState(false);
+  const [staff, setStaff] = useState<StaffMember[]>([]);
   const isSmallScreen = isMobile || isTablet;
   
   // État pour stocker les données du profil utilisateur
@@ -274,7 +267,7 @@ export default function HomePage({ children }: { children?: React.ReactNode }) {
                 <DropdownMenuLabel>Mon Compte</DropdownMenuLabel>
                 <DropdownMenuSeparator />
                 <DropdownMenuItem className="cursor-pointer" onClick={() => setProfileModalOpen(true)}>Profil</DropdownMenuItem>
-                <DropdownMenuItem className="cursor-pointer" onClick={() => setTeamModalOpen(true)}>Équipe</DropdownMenuItem>
+                <DropdownMenuItem className="cursor-pointer" onClick={() => setStaffModalOpen(true)}>Équipe</DropdownMenuItem>
                 <DropdownMenuSeparator />
                 <DropdownMenuItem variant="danger" className="cursor-pointer transition-colors duration-200" onClick={handleLogout}>Déconnexion</DropdownMenuItem>
               </DropdownMenuContent>
@@ -283,11 +276,9 @@ export default function HomePage({ children }: { children?: React.ReactNode }) {
         </div>
       
         {/* "Equipe" section in user parameters (handled by TeamModal.tsx component which is a home made component) */}
-        <TeamModal 
-          isOpen={teamModalOpen} 
-          onClose={() => setTeamModalOpen(false)} 
-          staff={staff} 
-          setStaff={setStaff} 
+        <TeamModal
+          isOpen={staffModalOpen}
+          onClose={() => setStaffModalOpen(false)}
         />
 
         {/* "Profil" section in user parameters */}

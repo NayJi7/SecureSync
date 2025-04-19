@@ -4,8 +4,8 @@ import { Button } from '@/components/ui/button';
 import { CheckCircle, Users, Award, Landmark } from 'lucide-react';
 import Squares from '../blocks/Backgrounds/Squares/squares.tsx';
 import { useDevice } from '@/hooks/use-device';
-import Footer from '@/mycomponents/Footer.tsx';
-import Header from '@/mycomponents/Header.tsx';
+import Footer from '@/components/Footer.tsx';
+import Header from '@/components/Header.tsx';
 
 export default function AboutPage() {
   const { isMobile } = useDevice();

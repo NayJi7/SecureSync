@@ -7,8 +7,8 @@ import { Check, Shield, Lock, Users, Building, Server, Eye, Database, BellRing, 
 import Squares from '../blocks/Backgrounds/Squares/squares.tsx';
 import SpotlightCard from '@/blocks/Components/SpotlightCard/SpotlightCard.tsx';
 import { useDevice } from '@/hooks/use-device';
-import Footer from '@/mycomponents/Footer.tsx';
-import Header from '@/mycomponents/Header.tsx';
+import Footer from '@/components/Footer.tsx';
+import Header from '@/components/Header.tsx';
 
 export default function FeaturesPage() {
   const [activeTab, setActiveTab] = useState('security');

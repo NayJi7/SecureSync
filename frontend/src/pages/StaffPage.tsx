@@ -1,7 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { useNavigate, Link } from 'react-router-dom';
 import axios from 'axios';
-import DeleteUserModal from '@/components/DeleteUserModal'; // Import du composant modal
 
 // Définir le type pour les membres du personnel
 interface StaffMember {
@@ -30,6 +29,35 @@ const StaffPage: React.FC = () => {
     username: '',
     userId: ''
   });
+  // États pour le formulaire d'ajout de membre
+  const [showAddMemberForm, setShowAddMemberForm] = useState<boolean>(false);
+  const [formData, setFormData] = useState<{
+    username: string;
+    email: string;
+    password1: string;
+    password2: string;
+    nom: string;
+    prenom: string;
+    sexe: string;
+    date_naissance: string;
+    section: string;
+    prison: string;
+    role: string;
+  }>({
+    username: '',
+    email: '',
+    password1: '',
+    password2: '',
+    nom: '',
+    prenom: '',
+    sexe: 'M',
+    date_naissance: '',
+    section: 'a',
+    prison: 'paris',
+    role: 'employe'
+  });
+  const [formError, setFormError] = useState<string | null>(null);
+  const [formSuccess, setFormSuccess] = useState<string | null>(null);
   const navigate = useNavigate();
 
   // Récupération des données du personnel depuis l'API
@@ -102,6 +130,105 @@ const StaffPage: React.FC = () => {
     // Rafraîchir la liste après suppression
     fetchStaffData();
   };
+  
+  // Gestion du formulaire d'ajout de membre
+  const handleInputChange = (e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement>) => {
+    const { name, value } = e.target;
+    setFormData({
+      ...formData,
+      [name]: value
+    });
+  };
+
+  // Fonction pour ajouter un nouveau membre
+  const handleAddMember = async (e: React.FormEvent) => {
+    e.preventDefault();
+    setFormError(null);
+    setFormSuccess(null);
+    
+    // Vérifications basiques
+    if (formData.password1 !== formData.password2) {
+      setFormError("Les mots de passe ne correspondent pas.");
+      return;
+    }
+    
+    if (!formData.username || !formData.email || !formData.nom || !formData.prenom) {
+      setFormError("Veuillez remplir tous les champs obligatoires.");
+      return;
+    }
+    
+    try {
+      const token = localStorage.getItem('sessionToken');
+      if (!token) {
+        setFormError("Session expirée, veuillez vous reconnecter.");
+        return;
+      }
+      
+      await axios.post('http://localhost:8000/api/register/', formData, {
+        headers: { 
+          Authorization: `Bearer ${token}`,
+          'Content-Type': 'application/json'
+        }
+      });
+      
+      setFormSuccess("Le membre a été ajouté avec succès !");
+      
+      // Réinitialiser le formulaire
+      setFormData({
+        username: '',
+        email: '',
+        password1: '',
+        password2: '',
+        nom: '',
+        prenom: '',
+        sexe: 'M',
+        date_naissance: '',
+        section: 'a',
+        prison: 'paris',
+        role: 'employe'
+      });
+      
+      // Fermer le formulaire et rafraîchir la liste
+      setTimeout(() => {
+        setShowAddMemberForm(false);
+        fetchStaffData();
+        setFormSuccess(null);
+      }, 2000);
+      
+    } catch (err: any) {
+      console.error("Erreur lors de l'ajout d'un membre:", err);
+      if (err.response && err.response.data) {
+        // Extraire les messages d'erreur de la réponse
+        const errorsData = err.response.data;
+        const errorMessages = Object.keys(errorsData)
+          .map(key => `${key}: ${errorsData[key].join(', ')}`)
+          .join('; ');
+        setFormError(errorMessages || "Erreur lors de l'ajout du membre.");
+      } else {
+        setFormError("Une erreur s'est produite lors de l'ajout du membre.");
+      }
+    }
+  };
+
+  // Fonction pour réinitialiser le formulaire
+  const handleCancelAdd = () => {
+    setShowAddMemberForm(false);
+    setFormError(null);
+    setFormSuccess(null);
+    setFormData({
+      username: '',
+      email: '',
+      password1: '',
+      password2: '',
+      nom: '',
+      prenom: '',
+      sexe: 'M',
+      date_naissance: '',
+      section: 'a',
+      prison: 'paris',
+      role: 'employe'
+    });
+  };
 
   // Fonction pour formater la date de naissance
   const formatDate = (dateString: string) => {
@@ -161,7 +288,234 @@ const StaffPage: React.FC = () => {
   return (
     <div className="min-h-screen bg-gray-100 p-4 md:p-8">
       <div className="container mx-auto">
-        <h1 className="text-3xl font-bold text-gray-800 mb-6">Équipe</h1>
+        <div className="flex justify-between items-center mb-6">
+          <h1 className="text-3xl font-bold text-gray-800">Équipe</h1>
+          <button 
+            onClick={() => setShowAddMemberForm(true)}
+            className="px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors"
+          >
+            Ajouter un membre
+          </button>
+        </div>
+        
+        {/* Formulaire d'ajout de membre */}
+        {showAddMemberForm && (
+          <div className="bg-white p-6 rounded-lg shadow-md mb-6">
+            <h2 className="text-xl font-bold text-gray-900 mb-4">Ajouter un nouveau membre</h2>
+            
+            {formSuccess && (
+              <div className="p-4 mb-4 text-sm text-green-700 bg-green-100 rounded-lg">
+                {formSuccess}
+              </div>
+            )}
+            
+            {formError && (
+              <div className="p-4 mb-4 text-sm text-red-700 bg-red-100 rounded-lg">
+                {formError}
+              </div>
+            )}
+            
+            <form onSubmit={handleAddMember} className="space-y-4">
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                {/* Informations de base */}
+                <div>
+                  <label htmlFor="username" className="block text-sm font-medium text-gray-700 mb-1">
+                    Nom d'utilisateur *
+                  </label>
+                  <input
+                    type="text"
+                    id="username"
+                    name="username"
+                    value={formData.username}
+                    onChange={handleInputChange}
+                    className="w-full p-2.5 text-sm text-gray-900 bg-gray-50 rounded-lg border border-gray-300 focus:ring-blue-500 focus:border-blue-500"
+                    required
+                  />
+                </div>
+                
+                <div>
+                  <label htmlFor="email" className="block text-sm font-medium text-gray-700 mb-1">
+                    Email *
+                  </label>
+                  <input
+                    type="email"
+                    id="email"
+                    name="email"
+                    value={formData.email}
+                    onChange={handleInputChange}
+                    className="w-full p-2.5 text-sm text-gray-900 bg-gray-50 rounded-lg border border-gray-300 focus:ring-blue-500 focus:border-blue-500"
+                    required
+                  />
+                </div>
+                
+                <div>
+                  <label htmlFor="prenom" className="block text-sm font-medium text-gray-700 mb-1">
+                    Prénom *
+                  </label>
+                  <input
+                    type="text"
+                    id="prenom"
+                    name="prenom"
+                    value={formData.prenom}
+                    onChange={handleInputChange}
+                    className="w-full p-2.5 text-sm text-gray-900 bg-gray-50 rounded-lg border border-gray-300 focus:ring-blue-500 focus:border-blue-500"
+                    required
+                  />
+                </div>
+                
+                <div>
+                  <label htmlFor="nom" className="block text-sm font-medium text-gray-700 mb-1">
+                    Nom *
+                  </label>
+                  <input
+                    type="text"
+                    id="nom"
+                    name="nom"
+                    value={formData.nom}
+                    onChange={handleInputChange}
+                    className="w-full p-2.5 text-sm text-gray-900 bg-gray-50 rounded-lg border border-gray-300 focus:ring-blue-500 focus:border-blue-500"
+                    required
+                  />
+                </div>
+                
+                {/* Mots de passe */}
+                <div>
+                  <label htmlFor="password1" className="block text-sm font-medium text-gray-700 mb-1">
+                    Mot de passe *
+                  </label>
+                  <input
+                    type="password"
+                    id="password1"
+                    name="password1"
+                    value={formData.password1}
+                    onChange={handleInputChange}
+                    className="w-full p-2.5 text-sm text-gray-900 bg-gray-50 rounded-lg border border-gray-300 focus:ring-blue-500 focus:border-blue-500"
+                    required
+                    minLength={8}
+                  />
+                </div>
+                
+                <div>
+                  <label htmlFor="password2" className="block text-sm font-medium text-gray-700 mb-1">
+                    Confirmer le mot de passe *
+                  </label>
+                  <input
+                    type="password"
+                    id="password2"
+                    name="password2"
+                    value={formData.password2}
+                    onChange={handleInputChange}
+                    className="w-full p-2.5 text-sm text-gray-900 bg-gray-50 rounded-lg border border-gray-300 focus:ring-blue-500 focus:border-blue-500"
+                    required
+                    minLength={8}
+                  />
+                </div>
+                
+                {/* Informations supplémentaires */}
+                <div>
+                  <label htmlFor="sexe" className="block text-sm font-medium text-gray-700 mb-1">
+                    Sexe
+                  </label>
+                  <select
+                    id="sexe"
+                    name="sexe"
+                    value={formData.sexe}
+                    onChange={handleInputChange}
+                    className="w-full p-2.5 text-sm text-gray-900 bg-gray-50 rounded-lg border border-gray-300 focus:ring-blue-500 focus:border-blue-500"
+                  >
+                    <option value="M">Masculin</option>
+                    <option value="F">Féminin</option>
+                    <option value="O">Autre</option>
+                    <option value="N">Préfère ne pas préciser</option>
+                  </select>
+                </div>
+                
+                <div>
+                  <label htmlFor="date_naissance" className="block text-sm font-medium text-gray-700 mb-1">
+                    Date de naissance
+                  </label>
+                  <input
+                    type="date"
+                    id="date_naissance"
+                    name="date_naissance"
+                    value={formData.date_naissance}
+                    onChange={handleInputChange}
+                    className="w-full p-2.5 text-sm text-gray-900 bg-gray-50 rounded-lg border border-gray-300 focus:ring-blue-500 focus:border-blue-500"
+                  />
+                </div>
+                
+                <div>
+                  <label htmlFor="role" className="block text-sm font-medium text-gray-700 mb-1">
+                    Rôle
+                  </label>
+                  <select
+                    id="role"
+                    name="role"
+                    value={formData.role}
+                    onChange={handleInputChange}
+                    className="w-full p-2.5 text-sm text-gray-900 bg-gray-50 rounded-lg border border-gray-300 focus:ring-blue-500 focus:border-blue-500"
+                  >
+                    <option value="employe">Employé</option>
+                    <option value="gestionnaire">Gestionnaire</option>
+                    <option value="admin">Administrateur</option>
+                  </select>
+                </div>
+                
+                <div>
+                  <label htmlFor="section" className="block text-sm font-medium text-gray-700 mb-1">
+                    Section
+                  </label>
+                  <select
+                    id="section"
+                    name="section"
+                    value={formData.section}
+                    onChange={handleInputChange}
+                    className="w-full p-2.5 text-sm text-gray-900 bg-gray-50 rounded-lg border border-gray-300 focus:ring-blue-500 focus:border-blue-500"
+                  >
+                    <option value="a">Section A</option>
+                    <option value="b">Section B</option>
+                    <option value="c">Section C</option>
+                    <option value="toutes">Toutes les sections</option>
+                  </select>
+                </div>
+                
+                <div>
+                  <label htmlFor="prison" className="block text-sm font-medium text-gray-700 mb-1">
+                    Prison
+                  </label>
+                  <select
+                    id="prison"
+                    name="prison"
+                    value={formData.prison}
+                    onChange={handleInputChange}
+                    className="w-full p-2.5 text-sm text-gray-900 bg-gray-50 rounded-lg border border-gray-300 focus:ring-blue-500 focus:border-blue-500"
+                  >
+                    <option value="paris">Paris</option>
+                    <option value="lyon">Lyon</option>
+                    <option value="marseille">Marseille</option>
+                    <option value="cergy">Cergy</option>
+                  </select>
+                </div>
+              </div>
+              
+              <div className="flex justify-end space-x-2 pt-4">
+                <button
+                  type="button"
+                  onClick={handleCancelAdd}
+                  className="px-4 py-2 bg-gray-200 text-gray-800 rounded-lg hover:bg-gray-300 transition-colors"
+                >
+                  Annuler
+                </button>
+                <button
+                  type="submit"
+                  className="px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors"
+                >
+                  Ajouter
+                </button>
+              </div>
+            </form>
+          </div>
+        )}
         
         {/* Statistiques */}
         <div className="grid grid-cols-1 md:grid-cols-3 gap-4 mb-6">
@@ -220,7 +574,7 @@ const StaffPage: React.FC = () => {
                     </div>
                     <div>
                       <p className="text-sm font-medium text-gray-500">Prison</p>
-                      <p className="text-sm text-gray-900">{member.prison || 'Non spécifié'}</p>
+                      <p className="text-sm text-gray-900">{member.Prison || 'Non spécifié'}</p>
                     </div>
                     <div>
                       <p className="text-sm font-medium text-gray-500">Âge</p>

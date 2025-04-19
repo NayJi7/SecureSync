@@ -311,21 +311,43 @@ User = get_user_model()
 @permission_classes([IsAuthenticated])
 def delete_account(request, username=None):
     """
-    Supprime le compte de l'utilisateur connecté.
-    Ou un administrateur peut supprimer le compte d'un autre utilisateur par username.
+    Supprime le compte de l'utilisateur spécifié par username si l'utilisateur connecté
+    en a le droit (admin pour tous ou gestionnaire pour les employés).
+    L'utilisateur peut aussi supprimer son propre compte s'il fournit son username.
     """
-    if username and request.user.role == 'admin':
+    User = get_user_model()  # Utilisation correcte du modèle utilisateur
+    
+    # Si un username est fourni (suppression d'un autre utilisateur)
+    if username:
+        # Vérification que l'utilisateur à supprimer existe
         try:
             user_to_delete = User.objects.get(username=username)
-            user_to_delete.delete()
-            return Response({"message": f"Le compte de {username} a été supprimé avec succès."}, 
-                          status=status.HTTP_200_OK)
         except User.DoesNotExist:
             return Response({"error": "Utilisateur non trouvé."}, 
                           status=status.HTTP_404_NOT_FOUND)
-    
-    # Sinon, l'utilisateur supprime son propre compte
-    username = request.user.username
-    request.user.delete()
-    return Response({"message": f"Votre compte ({username}) a été supprimé avec succès."}, 
-                  status=status.HTTP_200_OK)
+        
+        # Vérification des permissions
+        current_user = request.user
+        if current_user.username == username:
+            # L'utilisateur supprime son propre compte
+            user_to_delete.delete()
+            return Response({"message": f"Votre compte a été supprimé avec succès."}, 
+                          status=status.HTTP_200_OK)
+        elif current_user.role == 'admin':
+            # Un admin peut supprimer n'importe quel compte
+            user_to_delete.delete()
+            return Response({"message": f"Le compte de {username} a été supprimé avec succès."}, 
+                          status=status.HTTP_200_OK)
+        elif current_user.role == 'gestionnaire' and user_to_delete.role == 'employe':
+            # Un gestionnaire peut supprimer uniquement les employés
+            user_to_delete.delete()
+            return Response({"message": f"Le compte de {username} a été supprimé avec succès."}, 
+                          status=status.HTTP_200_OK)
+        else:
+            # Autres cas : permission refusée
+            return Response({"error": "Vous n'avez pas les permissions nécessaires pour supprimer cet utilisateur."}, 
+                          status=status.HTTP_403_FORBIDDEN)
+    else:
+        # Aucun username fourni, ce cas ne devrait pas arriver avec l'API actuelle
+        return Response({"error": "Nom d'utilisateur non spécifié."}, 
+                      status=status.HTTP_400_BAD_REQUEST)

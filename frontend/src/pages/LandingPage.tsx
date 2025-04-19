@@ -5,8 +5,8 @@ import SpotlightCard from '@/blocks/Components/SpotlightCard/SpotlightCard.tsx';
 import { Button } from '@/components/ui/button';
 import { Shield, Lock, Users, Building, Activity, Globe, Server } from 'lucide-react';
 import Squares from '../blocks/Backgrounds/Squares/squares.tsx';
-import Header from '@/mycomponents/Header';
-import Footer from '@/mycomponents/Footer';
+import Header from '@/components/Header.tsx';
+import Footer from '@/components/Footer.tsx';
 
 export default function LandingPage() {
   const { isMobile } = useDevice();

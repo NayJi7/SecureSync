@@ -6,8 +6,8 @@ import { Textarea } from '@/components/ui/textarea';
 import { Mail, Phone, MapPin } from 'lucide-react';
 import Squares from '../blocks/Backgrounds/Squares/squares.tsx';
 import { useDevice } from '@/hooks/use-device';
-import Header from '@/mycomponents/Header.tsx';
-import Footer from '@/mycomponents/Footer.tsx';
+import Header from '@/components/Header.tsx';
+import Footer from '@/components/Footer.tsx';
 
 export default function ContactPage() {
   const [formData, setFormData] = useState({
