@@ -67,7 +67,7 @@ const StaffModal: React.FC<StaffModalProps> = ({ isOpen, onClose }) => {
     date_naissance: '',
     section: 'a',
     prison: 'paris',
-    role: 'employe'
+    role: 'employe' // Rôle par défaut le plus bas
   });
   const [formError, setFormError] = useState<string | null>(null);
   const [formSuccess, setFormSuccess] = useState<string | null>(null);
@@ -75,6 +75,9 @@ const StaffModal: React.FC<StaffModalProps> = ({ isOpen, onClose }) => {
   // États pour l'affichage des mots de passe
   const [showPassword1, setShowPassword1] = useState<boolean>(false);
   const [showPassword2, setShowPassword2] = useState<boolean>(false);
+  
+  // État pour le système de tri
+  const [sortCriteria, setSortCriteria] = useState<string>("none"); // Valeurs possibles: "none", "role", "section"
 
   // Récupération des données du personnel depuis l'API
   const fetchStaffData = async () => {
@@ -188,7 +191,7 @@ const StaffModal: React.FC<StaffModalProps> = ({ isOpen, onClose }) => {
         }
       });
       
-      setFormSuccess("Le membre a été ajouté avec succès !");
+      setFormSuccess("L'employé a été ajouté avec succès !");
       
       // Réinitialiser le formulaire
       setFormData({
@@ -213,16 +216,16 @@ const StaffModal: React.FC<StaffModalProps> = ({ isOpen, onClose }) => {
       }, 2000);
       
     } catch (err: any) {
-      console.error("Erreur lors de l'ajout d'un membre:", err);
+      console.error("Erreur lors de l'ajout de l'employé:", err);
       if (err.response && err.response.data) {
         // Extraire les messages d'erreur de la réponse
         const errorsData = err.response.data;
         const errorMessages = Object.keys(errorsData)
           .map(key => `${key}: ${errorsData[key].join(', ')}`)
           .join('; ');
-        setFormError(errorMessages || "Erreur lors de l'ajout du membre.");
+        setFormError(errorMessages || "Erreur lors de l'ajout de l'employé.");
       } else {
-        setFormError("Une erreur s'est produite lors de l'ajout du membre.");
+        setFormError("Une erreur s'est produite lors de l'ajout de l'employé.");
       }
     }
   };
@@ -299,9 +302,27 @@ const StaffModal: React.FC<StaffModalProps> = ({ isOpen, onClose }) => {
     }
 
     // S'assurer que staff est un tableau avant d'utiliser .map()
-    const staffList = Array.isArray(staff) ? staff : [];
+    const allStaffList = Array.isArray(staff) ? staff : [];
     const isAdmin = currentUser?.role === 'admin';
-
+    
+    // Filtrer les employés dont le rôle n'est pas spécifié
+    const filteredStaffList = allStaffList.filter(member => member.role && member.role !== 'Non spécifié');
+    
+    // Trier les employés selon le critère choisi
+    let staffList = [...filteredStaffList];
+    if (sortCriteria === "role") {
+      staffList.sort((a, b) => {
+        // Ordre personnalisé pour les rôles: admin > gerant > gestionnaire > employe
+        const roleOrder = { 'admin': 1, 'gerant': 2, 'gestionnaire': 3, 'employe': 4 };
+        return (roleOrder[a.role as keyof typeof roleOrder] || 999) - (roleOrder[b.role as keyof typeof roleOrder] || 999);
+      });
+    } else if (sortCriteria === "section") {
+      staffList.sort((a, b) => {
+        // Tri alphabétique par section
+        return (a.section || '').localeCompare(b.section || '');
+      });
+    }
+    
     // Filtrer les valeurs non spécifiées pour les statistiques
     const validSections = staffList
       .map(member => member.section)
@@ -321,70 +342,93 @@ const StaffModal: React.FC<StaffModalProps> = ({ isOpen, onClose }) => {
           <svg xmlns="http://www.w3.org/2000/svg" className="h-16 w-16 text-gray-400 mx-auto mb-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
             <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 4.354a4 4 0 110 5.292M15 21H3v-1a6 6 0 0112 0v1zm0 0h6v-1a6 6 0 00-9-5.197M13 7a4 4 0 11-8 0 4 4 0 018 0z" />
           </svg>
-          <h2 className="text-xl font-semibold text-gray-700 mb-2">Aucun membre trouvé</h2>
+          <h2 className="text-xl font-semibold text-gray-700 mb-2">Aucun employé trouvé</h2>
           <p className="text-gray-500">Il n'y a actuellement aucun membre du personnel enregistré dans le système.</p>
         </div>
       );
     }
 
     return (
-      <div className="container mx-auto p-4">
+      <div className="container mx-auto p-4 -mt-6">
+        
         {/* Statistiques */}
-        <div className="grid grid-cols-1 md:grid-cols-3 gap-4 mb-6">
-          <div className="bg-white p-4 rounded-lg shadow">
-            <h2 className="text-lg font-semibold text-gray-700">Total des membres</h2>
-            <p className="text-3xl font-bold text-blue-600">{staffList.length}</p>
+        <div className="flex justify-around gap-2 mb-6">
+          <div className="bg-white p-2 rounded-lg shadow flex-1 text-center">
+        <h2 className="text-sm font-semibold text-gray-700">Employés</h2>
+        <p className="text-xl font-bold text-blue-600">{staffList.length}</p>
           </div>
-          <div className="bg-white p-4 rounded-lg shadow">
-            <h2 className="text-lg font-semibold text-gray-700">Sections</h2>
-            <p className="text-3xl font-bold text-green-600">
-              {uniqueSections}
-            </p>
+          <div className="bg-white p-2 rounded-lg shadow flex-1 text-center">
+        <h2 className="text-sm font-semibold text-gray-700">Sections</h2>
+        <p className="text-xl font-bold text-green-600">
+          {uniqueSections}
+        </p>
           </div>
-          <div className="bg-white p-4 rounded-lg shadow">
-            <h2 className="text-lg font-semibold text-gray-700">Rôles</h2>
-            <p className="text-3xl font-bold text-purple-600">
-              {uniqueRoles}
-            </p>
+          <div className="bg-white p-2 rounded-lg shadow flex-1 text-center">
+        <h2 className="text-sm font-semibold text-gray-700">Postes</h2>
+        <p className="text-xl font-bold text-purple-600">
+          {uniqueRoles}
+        </p>
           </div>
         </div>
+
+        {/* Affichage du bouton de tri des membres sur mobile */}
+        {isMobile && (
+          <div className={`flex items-center mb-4`}>
+        {!showAddMemberForm && (
+          <div className="flex items-center">
+            <span className="mr-2 text-sm font-medium text-gray-700">Trier par :</span>
+            <select
+          value={sortCriteria}
+          onChange={(e) => setSortCriteria(e.target.value)}
+          className="p-2 text-sm bg-gray-100 border border-gray-300 rounded-lg focus:ring-blue-500 focus:border-blue-500"
+            >
+          <option value="role">Poste</option>
+          <option value="section">Section</option>
+          <option value="date_joined">Embauche</option>
+            </select>
+          </div>
+        )}
+          </div>
+        )}
         
         {/* Liste du personnel */}
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
           {staffList.map((member) => (
-            <div key={member.username} className="bg-white rounded-lg shadow-md overflow-hidden">
-              <div className="p-4">
-                <div className="flex items-center mb-4">
-                  <div className="w-12 h-12 rounded-full bg-blue-100 flex items-center justify-center text-blue-600 font-bold text-lg border-2 border-gray-200 overflow-hidden">
-                    {(member.first_name || member.last_name) ? 
-                      `${member.first_name?.charAt(0).toUpperCase() || ''}${member.last_name?.charAt(0).toUpperCase() || ''}` : 
-                      member.username?.charAt(0).toUpperCase() || '?'}
-                  </div>
-                  <div className="ml-3">
-                    <h3 className="text-xl font-semibold text-gray-800">
-                      {member.first_name} {member.last_name}
-                    </h3>
-                    <p className="text-sm text-gray-500">@{member.username}</p>
-                  </div>
-                
-                  <div className="flex-grow flex justify-end items-center">
-                      {/* Règles de suppression:
-                        - Admins peuvent supprimer tout le monde sauf eux-mêmes
-                        - Gestionnaires peuvent supprimer tous les employés
-                        - Employés ne peuvent supprimer personne
-                        - Personne ne peut se supprimer soi-même */}
-                      {((isAdmin && (member.username !== currentUser?.username)) || 
-                        (currentUser?.role === 'gestionnaire' && member.role === 'employe')) && (
-                        <button
-                          onClick={() => handleOpenDeleteModal(member.username, member.id || member.username)}
-                          className="text-red-500 hover:text-red-700 cursor-pointer"
-                          title="Supprimer"
-                        >
-                          <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" />
-                          </svg>
-                        </button>
-                      )}
+        <div key={member.username} className="bg-white rounded-lg shadow-md overflow-hidden">
+          <div className="p-4">
+            <div className="flex items-center mb-4">
+          <div className="w-12 h-12 rounded-full bg-blue-100 flex items-center justify-center text-blue-600 font-bold text-lg border-2 border-gray-200 overflow-hidden">
+            {(member.first_name || member.last_name) ? 
+              `${member.first_name?.charAt(0).toUpperCase() || ''}${member.last_name?.charAt(0).toUpperCase() || ''}` : 
+              member.username?.charAt(0).toUpperCase() || '?'}
+          </div>
+          <div className="ml-3">
+            <h3 className="text-xl font-semibold text-gray-800">
+              {member.first_name} {member.last_name}
+            </h3>
+            <p className="text-sm text-gray-500">@{member.username}</p>
+          </div>
+            
+          <div className="flex-grow flex justify-end items-center">
+              {/* Règles de suppression:
+            - Admins peuvent supprimer tout le monde sauf eux-mêmes
+            - Gérants peuvent supprimer gestionnaires et employés
+            - Gestionnaires peuvent supprimer tous les employés
+            - Employés ne peuvent supprimer personne
+            - Personne ne peut se supprimer soi-même */}
+              {((isAdmin && (member.username !== currentUser?.username)) || 
+            (currentUser?.role === 'gerant' && (member.role === 'gestionnaire' || member.role === 'employe')) ||
+            (currentUser?.role === 'gestionnaire' && member.role === 'employe')) && (
+            <button
+              onClick={() => handleOpenDeleteModal(member.username, member.id || member.username)}
+              className="text-red-500 hover:text-red-700 cursor-pointer"
+              title="Supprimer"
+            >
+              <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" />
+              </svg>
+            </button>
+              )}
                   </div>
                 
                 </div>
@@ -392,7 +436,7 @@ const StaffModal: React.FC<StaffModalProps> = ({ isOpen, onClose }) => {
                 <div className="border-t border-gray-200 pt-3">
                   <div className="grid grid-cols-2 gap-2">
                     <div>
-                      <p className="text-sm font-medium text-gray-500">Rôle</p>
+                      <p className="text-sm font-medium text-gray-500">Poste</p>
                       <p className="text-sm text-gray-900">{member.role || 'Non spécifié'}</p>
                     </div>
                     <div>
@@ -429,14 +473,36 @@ const StaffModal: React.FC<StaffModalProps> = ({ isOpen, onClose }) => {
     >
       <ModalHeader className="border-b border-gray-200">
         <div className={`${isMobile ? 'flex-col' : 'flex'} justify-between items-center w-full`}>
-          <div className="text-xl font-bold text-gray-900">Gestion de l'équipe</div>
-          {(currentUser?.role === 'admin' || currentUser?.role === 'gestionnaire') && !showAddMemberForm && (
-            <button 
-              onClick={() => setShowAddMemberForm(true)}
-              className={`px-4 py-2 ${isMobile ? 'mt-3' : 'ml-5'} bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors text-sm`}
-            >
-              Ajouter un nouvel employé
-            </button>
+          <div className={`${isMobile ? 'flex-col' : 'flex'} items-center`}>
+            <div className="text-xl font-bold text-gray-900 mr-4">Gestion de l'équipe</div>
+            {(currentUser?.role === 'admin' || currentUser?.role === 'gerant' || currentUser?.role === 'gestionnaire') && !showAddMemberForm && (
+              <button 
+                onClick={() => setShowAddMemberForm(true)}
+                className={`${isMobile ? 'mt-3' : ''} px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors text-sm`}
+              >
+                Ajouter un nouvel employé
+              </button>
+            )}
+          </div>
+          
+          {/* Affichage du bouton de tri des membres sur desktop */}
+          {!isMobile && (
+            <div className={`justify-end w-150 flex items-center`}>
+            {!showAddMemberForm && (
+              <div className="flex items-center">
+                <span className="mr-2 text-sm font-medium text-gray-700">Trier par :</span>
+                <select
+                  value={sortCriteria}
+                  onChange={(e) => setSortCriteria(e.target.value)}
+                  className="p-2 text-sm bg-gray-100 border border-gray-300 rounded-lg focus:ring-blue-500 focus:border-blue-500"
+                >
+                  <option value="role">Poste</option>
+                  <option value="section">Section</option>
+                  <option value="date_joined">Embauche</option>
+                </select>
+              </div>
+            )}
+          </div>  
           )}
         </div>
       </ModalHeader>
@@ -624,9 +690,8 @@ const StaffModal: React.FC<StaffModalProps> = ({ isOpen, onClose }) => {
                 
                 <div>
                   <label htmlFor="role" className="block text-sm font-medium text-gray-700 mb-1">
-                    Rôle
-                  </label>
-                  <select
+                    Poste
+                  </label>                    <select
                     id="role"
                     name="role"
                     value={formData.role}
@@ -634,9 +699,14 @@ const StaffModal: React.FC<StaffModalProps> = ({ isOpen, onClose }) => {
                     className="w-full p-2.5 text-sm text-gray-900 bg-gray-50 rounded-lg border border-gray-300 focus:ring-blue-500 focus:border-blue-500"
                   >
                     <option value="employe">Employé</option>
-                    {currentUser?.role === 'admin' && (
+                    {(currentUser?.role === 'admin' || currentUser?.role === 'gerant') && (
                       <>
                         <option value="gestionnaire">Gestionnaire</option>
+                      </>
+                    )}
+                    {currentUser?.role === 'admin' && (
+                      <>
+                        <option value="gerant">Gérant</option>
                         <option value="admin">Administrateur</option>
                       </>
                     )}
