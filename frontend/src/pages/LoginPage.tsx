@@ -422,9 +422,49 @@ const handleSubmit = async (e) => {
       localStorage.setItem('sessionToken', sessionToken);
       console.log('Token de session stocké:', sessionToken);
       
-      // Redirection vers la page d'origine ou la page d'accueil
-      const from = location.state?.from?.pathname || '/home';
-      navigate(from, { replace: true });
+      // Extraire les informations de profil de la réponse si disponibles
+      const userProfile = data.user || data.profile || {};
+      
+      // Déboguer les informations du profil utilisateur
+      console.log('Profil utilisateur reçu:', userProfile);
+      console.log('Type de rôle:', typeof userProfile.role, 'Valeur:', userProfile.role);
+      console.log('is_admin:', userProfile.is_admin, 'is_superuser:', userProfile.is_superuser);
+      
+      // Vérifier le rôle et la prison associée de l'utilisateur
+      // Vérification améliorée pour détecter correctement les administrateurs
+      const role = userProfile.role?.toLowerCase?.() || '';
+      const isAdmin = role === 'admin' || 
+                      userProfile.is_admin === true || 
+                      userProfile.is_superuser === true ||
+                      userProfile.role === 1 ||  // Si le rôle est stocké comme un nombre
+                      userProfile.admin === true;
+      
+      const prisonId = userProfile.prison?.id || userProfile.prison || '';
+      
+      console.log('isAdmin détecté:', isAdmin, 'prisonId:', prisonId);
+
+      // Stocker temporairement les informations importantes
+      if (userProfile) {
+        localStorage.setItem('userRole', isAdmin ? 'admin' : 'staff');
+        if (prisonId) {
+          localStorage.setItem('userPrison', String(prisonId));
+        }
+      }
+      
+      // Si c'est un administrateur, toujours rediriger vers la page de sélection de prison
+      if (isAdmin) {
+        console.log('Redirection vers /prison-selection pour admin');
+        navigate('/prison-selection', { replace: true });
+      } else if (prisonId) {
+        // Si l'utilisateur appartient à une prison spécifique, le rediriger vers celle-ci
+        console.log(`Redirection vers /${prisonId}/home pour utilisateur standard`);
+        navigate(`/${prisonId}/home`, { replace: true });
+      } else {
+        // Modification de la redirection par défaut pour éviter /home
+        console.log('Redirection par défaut');
+        // On redirige vers la page de sélection de prison par défaut plutôt que /home
+        navigate('/prison-selection', { replace: true });
+      }
       
     } catch (error) {
       console.error('Exception lors de la vérification du code:', error);

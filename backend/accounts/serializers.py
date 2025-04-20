@@ -11,7 +11,7 @@ from rest_framework.permissions import IsAuthenticated
 class CustomUserSerializer(serializers.ModelSerializer):
     class Meta:
         model = CustomUser
-        fields = ['id', 'username', 'email', 'photo', 'sexe', 'date_naissance','password']
+        fields = ['id', 'username', 'email', 'photo', 'sexe', 'date_naissance', 'date_joined', 'password']
 
 from rest_framework import serializers
 from django.contrib.auth.models import User
@@ -28,8 +28,6 @@ class OTPVerificationSerializer(serializers.Serializer):
 
 class ResendOTPSerializer(serializers.Serializer):
     email = serializers.EmailField(required=True)
-
-
 
 class RegisterSerializer(serializers.ModelSerializer):
     password1 = serializers.CharField(write_only=True, required=True, validators=[validate_password])

@@ -1,4 +1,3 @@
-// filepath: /home/aterrak/gitstore/SecureSync/frontend/src/mycomponents/StaffModal.tsx
 import React, { useState, useEffect } from 'react';
 import { Modal, ModalBody, ModalHeader } from "flowbite-react";
 import axios from 'axios';
@@ -12,6 +11,7 @@ interface StaffMember {
   last_name: string;
   sexe: string;
   date_naissance: string;
+  date_joined?: string; // Date d'embauche (optionnelle)
   role: string;
   section: string;
   prison: string; // "p" minuscule pour correspondre au sérialiseur
@@ -101,11 +101,15 @@ const StaffModal: React.FC<StaffModalProps> = ({ isOpen, onClose }) => {
       ]);
       
       // Définir les membres du staff
+      console.log('Réponse API staff:', staffResponse.data);
       if (Array.isArray(staffResponse.data)) {
+        // Vérifier si les utilisateurs ont une date d'embauche
+        console.log('Premier utilisateur:', staffResponse.data[0]);
         setStaff(staffResponse.data);
       } else if (staffResponse.data && typeof staffResponse.data === 'object') {
         const dataField = Object.keys(staffResponse.data).find(key => Array.isArray(staffResponse.data[key]));
         if (dataField) {
+          console.log('Premier utilisateur:', staffResponse.data[dataField][0]);
           setStaff(staffResponse.data[dataField]);
         } else {
           setError('Format de données inattendu reçu du serveur');
@@ -321,6 +325,13 @@ const StaffModal: React.FC<StaffModalProps> = ({ isOpen, onClose }) => {
         // Tri alphabétique par section
         return (a.section || '').localeCompare(b.section || '');
       });
+    } else if (sortCriteria === "date_joined") {
+      staffList.sort((a, b) => {
+        // Tri par date d'embauche (du plus récent au plus ancien)
+        const dateA = a.date_joined ? new Date(a.date_joined) : new Date(0);
+        const dateB = b.date_joined ? new Date(b.date_joined) : new Date(0);
+        return dateB.getTime() - dateA.getTime();
+      });
     }
     
     // Filtrer les valeurs non spécifiées pour les statistiques
@@ -451,6 +462,14 @@ const StaffModal: React.FC<StaffModalProps> = ({ isOpen, onClose }) => {
                       <p className="text-sm font-medium text-gray-500">Âge</p>
                       <p className="text-sm text-gray-900">
                         {member.date_naissance ? `${calculateAge(member.date_naissance)} ans` : 'Non spécifié'}
+                      </p>
+                    </div>
+                    <div className="col-span-2 border-t border-gray-200 mt-2 pt-2">
+                      <p className="text-sm font-medium text-gray-500">Date d'embauche</p>
+                      <p className="text-sm text-gray-900">
+                        {member.date_joined ? formatDate(member.date_joined) : 
+                         (member as any).date_joined ? formatDate((member as any).date_joined) : 
+                         formatDate((member as any)?.dateJoined || new Date().toISOString())}
                       </p>
                     </div>
                   </div>

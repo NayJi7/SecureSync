@@ -338,6 +338,11 @@ def delete_account(request, username=None):
             user_to_delete.delete()
             return Response({"message": f"Le compte de {username} a été supprimé avec succès."}, 
                           status=status.HTTP_200_OK)
+        elif current_user.role == 'gerant' and (user_to_delete.role == 'gestionnaire' or user_to_delete.role == 'employe'):
+            # Un gérant peut supprimer les gestionnaires et les employés
+            user_to_delete.delete()
+            return Response({"message": f"Le compte de {username} a été supprimé avec succès."}, 
+                          status=status.HTTP_200_OK)
         elif current_user.role == 'gestionnaire' and user_to_delete.role == 'employe':
             # Un gestionnaire peut supprimer uniquement les employés
             user_to_delete.delete()

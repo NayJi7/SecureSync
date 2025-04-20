@@ -23,17 +23,17 @@ def send_otp_email(email, code):
     return True
 
 def send_otp_email_Register(email, username, password):
-    subject = 'Votre code de vérification SecureSync'
+    subject = 'Bienvenue chez SecureSync !'
     message = f'''
     Bonjour,
     
-    Bienvenue sur SecureSync. Voici vos idendifiant:
+    Bienvenue chez SecureSync. Voici vos identifiants:
 
     username : {username}
 
     password : {password}
     
-    Si vous n'avez pas demandé ce code, veuillez ignorer cet email.
+    Connectez vous une première fois pour activer votre compte et changez votre mot de passe dans votre espace personnel si vous le souhaitez.
     
     L'équipe SecureSync
     '''

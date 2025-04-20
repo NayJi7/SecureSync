@@ -7,11 +7,9 @@ import LandingPage from '@/pages/LandingPage';
 import FeaturesPage from '@/pages/FeaturesPage';
 import ContactPage from '@/pages/ContactPage';
 import AboutPage from '@/pages/AboutPage';
-import RegisterPage from '@/pages/Register';
-import ProfilePage from '@/pages/ProfilePage';
 import CreateObjetPage from '@/pages/CreateObjetPage';
 import ObjectPage from '@/pages/ObjectDashboard';
-import StaffPage from '@/pages/StaffPage';
+import PrisonSelectionPage from '@/pages/PrisonSelectionPage';
 // Composant de protection des routes
 import ProtectedRoute from './components/ProtectedRoute';
 import './App.css';
@@ -23,24 +21,41 @@ export default function App() {
         {/* Routes publiques */}
         <Route path="/" element={<LandingPage />} />
         <Route path="/login" element={<LoginPage />} />
-        <Route path="/register" element={<RegisterPage />} />
         <Route path="/landing" element={<LandingPage />} />
         <Route path="/features" element={<FeaturesPage />} />
         <Route path="/about" element={<AboutPage />} />
         <Route path="/contact" element={<ContactPage />} />
         <Route path="/object" element={<ObjectPage />} />
         <Route path="/CreateObject" element={<CreateObjetPage />} />
-        <Route path="/Staff" element={<StaffPage />} />
         
-        {/* Routes protégées nécessitant une authentification */}
-        <Route path="/home" element={
+        {/* Route de sélection de prison pour les administrateurs */}
+        <Route path="/prison-selection" element={
+          <ProtectedRoute>
+            <PrisonSelectionPage />
+          </ProtectedRoute>
+        } />
+
+        {/* Routes spécifiques aux prisons - le paramètre prisonId sera disponible dans les composants */}
+        <Route path="/:prisonId/home" element={
           <ProtectedRoute>
             <HomePage />
           </ProtectedRoute>
         } />
-        <Route path="/profile" element={
+        <Route path="/:prisonId/object" element={
           <ProtectedRoute>
-            <ProfilePage />
+            <ObjectPage />
+          </ProtectedRoute>
+        } />
+        <Route path="/:prisonId/createobject" element={
+          <ProtectedRoute>
+            <CreateObjetPage />
+          </ProtectedRoute>
+        } />
+        
+        {/* Routes legacy maintenues pour compatibilité */}
+        <Route path="/home" element={
+          <ProtectedRoute>
+            <HomePage />
           </ProtectedRoute>
         } />
         

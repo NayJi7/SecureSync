@@ -1,6 +1,6 @@
 // React et hooks
 import { useEffect, useState } from "react"
-import { useNavigate } from "react-router-dom"
+import { useNavigate, useParams } from "react-router-dom"
 import { useDevice } from "@/hooks/use-device"
 import { Button } from '@/components/ui/button';
 import axios from 'axios';
@@ -50,10 +50,12 @@ type StaffMember = {
 
 export default function HomePage({ children }: { children?: React.ReactNode }) {
   const navigate = useNavigate();
+  const { prisonId } = useParams<{ prisonId?: string }>();
   const { isMobile, isTablet } = useDevice();
   const [activeTab, setActiveTab] = useState("dashboard");
   const [teamModalOpen, setTeamModalOpen] = useState(false);
   const [profileModalOpen, setProfileModalOpen] = useState(false);
+  const [currentPrison, setCurrentPrison] = useState<string>(prisonId || localStorage.getItem('userPrison') || '');
   const [staffModalOpen, setStaffModalOpen] = useState(false);
   const [staff, setStaff] = useState<StaffMember[]>([]);
   const isSmallScreen = isMobile || isTablet;
@@ -88,10 +90,10 @@ export default function HomePage({ children }: { children?: React.ReactNode }) {
 
   // Configuration du dock
   const dockItems = [
-    { icon: <VscHome size={20} />, label: 'Home', onClick: () => alert('Home!') },
-    { icon: <VscArchive size={20} />, label: 'Archive', onClick: () => alert('Archive!') },
-    { icon: <VscAccount size={20} />, label: 'Profile', onClick: () =>navigate('/profile') },
-    { icon: <VscSettingsGear size={20} />, label: 'Settings', onClick: () => alert('Settings!') },
+    { icon: <VscHome size={20} />, label: 'Home', onClick: () => navigate(`/${currentPrison}/home`) },
+    { icon: <VscArchive size={20} />, label: 'Archive', onClick: () => navigate(`/${currentPrison}/object`) },
+    { icon: <VscAccount size={20} />, label: 'Profile', onClick: () => navigate(`/${currentPrison}/profile`) },
+    { icon: <VscSettingsGear size={20} />, label: 'Settings', onClick: () => navigate(`/${currentPrison}/staff`) },
   ];
 
   // Contenu des tabs/menu
@@ -136,12 +138,28 @@ export default function HomePage({ children }: { children?: React.ReactNode }) {
 
   useEffect(() => {
     document.body.classList.add('home-page');
+    
+    // Mettre à jour le titre de la page et le prison ID en fonction de l'URL
+    if (prisonId) {
+      setCurrentPrison(prisonId);
+      
+      // On pourrait charger les informations spécifiques à la prison ici
+      console.log(`Page chargée pour l'établissement: ${prisonId}`);
+    }
+    
     return () => {
       document.body.classList.remove('home-page');
     };
-  }, []);
+  }, [prisonId]);
 
   const handleLogout = () => {
+    // Nettoyer les données de session
+    localStorage.removeItem('sessionToken');
+    localStorage.removeItem('authToken');
+    localStorage.removeItem('userRole');
+    localStorage.removeItem('userPrison');
+    localStorage.removeItem('selectedPrison');
+    
     navigate('/login');
   };
   

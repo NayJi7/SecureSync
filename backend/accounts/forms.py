@@ -11,6 +11,7 @@ class CustomUserCreationForm(UserCreationForm):
     ]
     ROLE_CHOICES = [
         ('admin', 'Administrateur'),
+        ('gerant', 'Gérant'),
         ('gestionnaire', 'Gestionnaire'),
         ('employe', 'Employé')
     ]
