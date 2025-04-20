@@ -1,6 +1,7 @@
 from django.db import models
 from django.dispatch import receiver
 from django.db.models.signals import post_save
+from django.db.models.signals import pre_delete , pre_save
 
 
 class Object(models.Model):
@@ -50,7 +51,7 @@ class ObjetLog(models.Model):
         ('off', 'Off'),
     )
 
-    objet = models.ForeignKey(Object, on_delete=models.CASCADE, related_name='logs')
+    objet = models.ForeignKey( Object, on_delete=models.SET_NULL, null=True, blank=True, related_name='logs')
     type = models.CharField(max_length=50, choices=TYPE_CHOICES, verbose_name="Type d'objet")
     nom = models.CharField(max_length=255)  # Nom de l'objet connecté
     etat = models.CharField(max_length=50, choices=ETAT_CHOICES, verbose_name="État")
@@ -77,3 +78,32 @@ def create_objet_log(sender, instance, created, **kwargs):
             commentaire="Création"  # Commentaire automatique pour la création
         )
 
+
+@receiver(pre_save, sender=Object)
+def log_object_state_change(sender, instance, **kwargs):
+    if not instance.pk:
+        return  # Ce n'est pas une mise à jour
+
+    try:
+        old_instance = Object.objects.get(pk=instance.pk)
+        if old_instance.etat != instance.etat:
+            # L'état a changé
+            ObjetLog.objects.create(
+                objet=instance,
+                type=instance.type,
+                nom=instance.nom,
+                etat=instance.etat,
+                commentaire=f"Changement d'état: {old_instance.etat} ➜ {instance.etat}"
+            )
+    except Object.DoesNotExist:
+        pass  # l'objet n'existait pas encore 
+
+@receiver(pre_delete, sender=Object)
+def log_object_deletion(sender, instance, **kwargs):
+    ObjetLog.objects.create(
+        objet=instance,
+        type=instance.type,
+        nom=instance.nom,
+        etat=instance.etat,
+        commentaire="Suppression"
+    )

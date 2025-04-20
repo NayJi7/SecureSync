@@ -11,27 +11,18 @@ from .models import Object, ObjetLog
 @permission_classes([IsAuthenticated])
 def create_object(request):
     serializer = ObjectSerializer(data=request.data)
-    
+
     if serializer.is_valid():
         try:
-            # Sauvegarder l'objet
+            # Sauvegarder l'objet — le signal post_save créera le log automatiquement
             obj = serializer.save()
-            
-            # Création manuelle du log si vous n'utilisez pas les signaux
-            ObjetLog.objects.create(
-                objet=obj,
-                type=obj.type,
-                nom=obj.nom,
-                etat=obj.etat,
-                commentaire="Création"
-            )
-            
+
             return Response(serializer.data, status=status.HTTP_201_CREATED)
         except Exception as e:
             return Response({"error": str(e)}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
     
     return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
-
+    
 class ObjectViewSet(viewsets.ModelViewSet):
     queryset = Object.objects.all()
     serializer_class = ObjectSerializer
