@@ -10,6 +10,7 @@ import AboutPage from '@/pages/AboutPage';
 import CreateObjetPage from '@/pages/CreateObjetPage';
 import ObjectPage from '@/pages/ObjectDashboard';
 import PrisonSelectionPage from '@/pages/PrisonSelectionPage';
+import LogsPage from '@/pages/LogsPage';
 // Composant de protection des routes
 import ProtectedRoute from './components/ProtectedRoute';
 import './App.css';
@@ -27,6 +28,7 @@ export default function App() {
         <Route path="/contact" element={<ContactPage />} />
         <Route path="/object" element={<ObjectPage />} />
         <Route path="/CreateObject" element={<CreateObjetPage />} />
+        <Route path="/logs" element={<LogsPage />} />
         
         {/* Route de sélection de prison pour les administrateurs */}
         <Route path="/prison-selection" element={

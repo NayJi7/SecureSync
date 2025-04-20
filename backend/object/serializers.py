@@ -1,8 +1,5 @@
 from rest_framework import serializers
-from .models import Object
-from rest_framework import viewsets
 from .models import Object, ObjetLog
-
 
 class ObjectSerializer(serializers.ModelSerializer):
     class Meta:
