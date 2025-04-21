@@ -356,3 +356,41 @@ def delete_account(request, username=None):
         # Aucun username fourni, ce cas ne devrait pas arriver avec l'API actuelle
         return Response({"error": "Nom d'utilisateur non spécifié."}, 
                       status=status.HTTP_400_BAD_REQUEST)
+
+
+@api_view(['POST'])
+@permission_classes([IsAuthenticated])
+def add_point(request):
+    try:
+        # Récupérer l'utilisateur courant
+        user = request.user
+        # Vérifier si le modèle a un champ 'points' directement
+        if hasattr(user, 'points'):
+            points_to_add = int(request.data.get('points', 0))
+            user.points += points_to_add
+            user.save()
+            return Response({'status': 'success', 'new_total': user.points})
+        # Si le champ 'points' n'existe pas directement sur l'utilisateur
+        elif hasattr(user, 'profile') and hasattr(user.profile, 'points'):
+            # Si on a une relation 'profile' avec un champ 'points'
+            user_profile = user.profile
+            points_to_add = int(request.data.get('points', 0))
+            user_profile.points += points_to_add
+            user_profile.save()
+            return Response({'status': 'success', 'new_total': user_profile.points})
+        else:
+            # Si aucun des cas ci-dessus ne correspond
+            return Response(
+                {'status': 'error', 'message': 'Impossible de trouver le champ points'},
+                status=status.HTTP_500_INTERNAL_SERVER_ERROR
+            )
+    except Exception as e:
+        # Logging de l'erreur
+        import logging
+        logger = logging.getLogger(__name__)
+        logger.error(f"Erreur dans add_point: {str(e)}")
+        # Retourner une réponse d'erreur
+        return Response(
+            {'status': 'error', 'message': str(e)}, 
+            status=status.HTTP_500_INTERNAL_SERVER_ERROR
+        )
