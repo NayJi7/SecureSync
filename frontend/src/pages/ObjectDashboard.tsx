@@ -1,6 +1,5 @@
 import { useState, useEffect } from "react";
 
-// Types selon ton modèle Django
 type ObjectType = "porte" | "lumiere" | "camera" | "chauffage" | "climatisation" | "panneau d'affichage";
 type ObjectState = "on" | "off";
 type ConnectionType = "wifi" | "filaire" | null;
@@ -40,7 +39,6 @@ export default function ObjectDashboard() {
         setLoading(true);
         const response = await fetch("http://localhost:8000/api/objects/");
         const rawText = await response.text();
-        console.log("Réponse API brute:", rawText);
 
         if (!response.ok) throw new Error(`Erreur HTTP: ${response.status}`);
 
@@ -62,16 +60,10 @@ export default function ObjectDashboard() {
     fetchObjects();
   }, []);
 
-  // Fonction pour ajouter des points
   const addPoints = async (points: number) => {
     try {
-      // Récupérer le token d'accès du stockage local
       const accessToken = localStorage.getItem('sessionToken');
-      
-      if (!accessToken) {
-        console.error("Token d'accès non trouvé");
-        return;
-      }
+      if (!accessToken) return;
 
       const response = await fetch("http://localhost:8000/api/user/add_point/", {
         method: "POST",
@@ -86,20 +78,14 @@ export default function ObjectDashboard() {
 
       const data: UserPoints = await response.json();
       setPointsTotal(data.new_total);
-      
-      // Afficher le message de points gagnés
       setPointsMessage(`+${points} points ! Total: ${data.new_total} points`);
       setShowPointsMessage(true);
-      
-      // Cacher le message après 3 secondes
+
       setTimeout(() => {
         setShowPointsMessage(false);
       }, 3000);
-
-      return data;
     } catch (err) {
       console.error("Erreur lors de l'ajout de points:", err);
-      return null;
     }
   };
 
@@ -107,28 +93,81 @@ export default function ObjectDashboard() {
     try {
       const objectToUpdate = objects.find(obj => obj.id === id);
       if (!objectToUpdate) return;
-
+  
+      if (objectToUpdate.durabilité <= 0) {
+        console.warn("Objet hors service, impossible de changer l'état.");
+        return;
+      }
+  
       const newState: ObjectState = objectToUpdate.etat === "on" ? "off" : "on";
+      let newDurability = objectToUpdate.durabilité;
+  
+      // Si on l'active, on réduit la durabilité de façon aléatoire
+      if (newState === "on") {
+        newDurability = Math.max(0, objectToUpdate.durabilité - Math.floor(Math.random() * 10 + 1));
+      }
+  
+      // Si la durabilité atteint 0, on le passe en panne
+      const newMaintenance: MaintenanceState = newDurability <= 0 ? "en panne" : objectToUpdate.maintenance;
+  
+      const response = await fetch(`http://localhost:8000/api/objects/${id}/`, {
+        method: "PATCH",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({
+          etat: newState,
+          durabilité: newDurability,
+          maintenance: newMaintenance
+        }),
+      });
+  
+      if (!response.ok) throw new Error(`Erreur mise à jour: ${response.status}`);
+  
+      const updatedRes = await fetch(`http://localhost:8000/api/objects/${id}/`);
+      const updatedObject: SmartObject = await updatedRes.json();
+  
+      setObjects(prev =>
+        prev.map(obj => (obj.id === id ? updatedObject : obj))
+      );
+  
+      await addPoints(1);
+    } catch (err) {
+      console.error("Erreur changement d'état:", err);
+      setError("Erreur lors du changement d'état");
+    }
+  };
 
-      setObjects(objects.map(obj =>
-        obj.id === id ? { ...obj, etat: newState } : obj
-      ));
+  const repairObject = async (id: number) => {
+    try {
+      const objectToRepair = objects.find(obj => obj.id === id);
+      if (!objectToRepair) return;
 
       const response = await fetch(`http://localhost:8000/api/objects/${id}/`, {
         method: "PATCH",
         headers: {
           "Content-Type": "application/json",
         },
-        body: JSON.stringify({ etat: newState }),
+        body: JSON.stringify({
+          durabilité: 100,
+          maintenance: "fonctionnel"
+        }),
       });
 
-      if (!response.ok) throw new Error(`Erreur mise à jour: ${response.status}`);
-      
-      // Ajouter 1 point pour changement d'état
-      await addPoints(1);
+      if (!response.ok) throw new Error(`Erreur réparation: ${response.status}`);
+
+      const updatedRes = await fetch(`http://localhost:8000/api/objects/${id}/`);
+      const updatedObject: SmartObject = await updatedRes.json();
+
+      setObjects(prev =>
+        prev.map(obj => (obj.id === id ? updatedObject : obj))
+      );
+
+      // Ajouter des points pour la réparation
+      await addPoints(5);
     } catch (err) {
-      console.error("Erreur changement d'état:", err);
-      setError("Erreur lors du changement d'état");
+      console.error("Erreur réparation:", err);
+      setError("Erreur lors de la réparation de l'objet");
     }
   };
 
@@ -168,8 +207,7 @@ export default function ObjectDashboard() {
   return (
     <div className="container mx-auto p-4">
       <h1 className="text-2xl font-bold mb-6">Tableau de bord des objets connectés</h1>
-      
-      {/* Message de points gagnés */}
+
       {showPointsMessage && (
         <div className="fixed top-4 right-4 bg-green-500 text-white px-4 py-2 rounded-lg shadow-lg transition-opacity">
           {pointsMessage}
@@ -196,7 +234,7 @@ export default function ObjectDashboard() {
                 <p><strong>Valeur actuelle</strong> : {obj.valeur_actuelle ?? "—"}</p>
                 <p><strong>Valeur cible</strong> : {obj.valeur_cible ?? "—"}</p>
                 <p><strong>Durabilité</strong> : {obj.durabilité} %</p>
-                <p><strong>Maintenance</strong> : {obj.maintenance}</p>
+                <p><strong>Maintenance</strong> : <span className={obj.maintenance === "en panne" ? "text-red-600 font-semibold" : "text-green-600"}>{obj.maintenance}</span></p>
               </div>
 
               <div className="flex items-center justify-between mt-4">
@@ -206,21 +244,34 @@ export default function ObjectDashboard() {
                   {obj.etat === "on" ? "Activé" : "Désactivé"}
                 </span>
 
-                <div className="flex gap-2">
-                  <button
-                    onClick={() => toggleObjectState(obj.id)}
-                    className={`px-3 py-1 rounded text-white text-sm ${
-                      obj.etat === "on"
-                        ? "bg-red-500 hover:bg-red-600"
-                        : "bg-green-500 hover:bg-green-600"
-                    }`}
-                  >
-                    {obj.etat === "on" ? "Désactiver" : "Activer"}
-                  </button>
+                <div className="flex flex-col items-end gap-1">
+                  {obj.durabilité <= 0 || obj.maintenance === "en panne" ? (
+                    <button
+                      onClick={() => repairObject(obj.id)}
+                      className="px-3 py-1 rounded text-white bg-blue-500 hover:bg-blue-600 text-sm"
+                    >
+                      Réparer
+                    </button>
+                  ) : (
+                    <button
+                      onClick={() => toggleObjectState(obj.id)}
+                      className={`px-3 py-1 rounded text-white text-sm ${
+                        obj.etat === "on"
+                          ? "bg-red-500 hover:bg-red-600"
+                          : "bg-green-500 hover:bg-green-600"
+                      }`}
+                    >
+                      {obj.etat === "on" ? "Désactiver" : "Activer"}
+                    </button>
+                  )}
+
+                  {obj.durabilité <= 0 && (
+                    <span className="text-xs text-red-500">Durabilité à 0%</span>
+                  )}
 
                   <button
                     onClick={() => deleteObject(obj.id)}
-                    className="px-3 py-1 rounded text-white bg-gray-600 hover:bg-gray-700 text-sm"
+                    className="px-3 py-1 rounded text-white bg-gray-600 hover:bg-gray-700 text-sm mt-1"
                   >
                     Supprimer
                   </button>

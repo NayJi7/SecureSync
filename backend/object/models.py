@@ -109,16 +109,18 @@ def create_objet_log(sender, instance, created, **kwargs):
             commentaire="Création"  # Commentaire automatique pour la création
         )
 
+import random
 
 @receiver(pre_save, sender=Object)
 def log_object_state_change(sender, instance, **kwargs):
+    
     if not instance.pk:
         return  # Ce n'est pas une mise à jour
 
     try:
         old_instance = Object.objects.get(pk=instance.pk)
         if old_instance.etat != instance.etat:
-            # L'état a changé
+            # Log du changement
             ObjetLog.objects.create(
                 objet=instance,
                 type=instance.type,
@@ -126,8 +128,20 @@ def log_object_state_change(sender, instance, **kwargs):
                 etat=instance.etat,
                 commentaire=f"Changement d'état: {old_instance.etat} ➜ {instance.etat}"
             )
+
+            # 💡 Si on passe de off ➜ on, on diminue la durabilité
+            if old_instance.etat == "off" and instance.etat == "on":
+                perte = random.randint(1, 10)
+                instance.durabilité = max(0, old_instance.durabilité - perte)
+                
+                # 🛠️ Mise à jour de la maintenance si durabilité = 0
+                if instance.durabilité <= 0:
+                    instance.maintenance = 'en panne'
+                    
     except Object.DoesNotExist:
-        pass  # l'objet n'existait pas encore 
+        pass  # l'objet n'existait pas encore
+
+ 
 
 @receiver(pre_delete, sender=Object)
 def log_object_deletion(sender, instance, **kwargs):
@@ -138,3 +152,24 @@ def log_object_deletion(sender, instance, **kwargs):
         etat=instance.etat,
         commentaire="Suppression"
     )
+
+@receiver(pre_save, sender=Object)
+def log_object_repair(sender, instance, **kwargs):
+    if not instance.pk:
+        return  # Ce n'est pas une mise à jour
+    
+    try:
+        old_instance = Object.objects.get(pk=instance.pk)
+        
+        # Si on passe de "en panne" à "fonctionnel" ou si la durabilité passe de <= 0 à 100
+        if (old_instance.maintenance == 'en panne' and instance.maintenance == 'fonctionnel') or \
+           (old_instance.durabilité <= 0 and instance.durabilité == 100):
+            ObjetLog.objects.create(
+                objet=instance,
+                type=instance.type,
+                nom=instance.nom,
+                etat=instance.etat,
+                commentaire="Réparation de l'objet"
+            )
+    except Object.DoesNotExist:
+        pass  # l'objet n'existait pas encore
