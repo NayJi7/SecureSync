@@ -12,26 +12,26 @@ export default function LandingPage() {
   const { isMobile } = useDevice();
   const [isScrolled, setIsScrolled] = useState(false);
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
-  
+
   useEffect(() => {
     // Set direct styles instead of just adding a class
     document.body.style.margin = '0';
     document.body.style.padding = '0';
     document.body.style.backgroundColor = '#000';
     document.body.style.overflow = 'hidden'; // Start with hidden
-    
+
     // Add scroll listener for header
     const handleScroll = () => {
       setIsScrolled(window.scrollY > 20);
     };
-    
+
     window.addEventListener('scroll', handleScroll);
-    
+
     // Allow scrolling after a brief period to ensure rendering
     const timer = setTimeout(() => {
       document.body.style.overflow = 'auto';
     }, 100);
-    
+
     return () => {
       clearTimeout(timer);
       window.removeEventListener('scroll', handleScroll);
@@ -44,21 +44,21 @@ export default function LandingPage() {
 
   return (
     <div className="absolute inset-0 w-full min-h-screen overflow-x-hidden bg-black">
-      <Squares 
-       speed={0.3} 
-       squareSize={60}
-       direction='diagonal' // up, down, left, right, diagonal
-       borderColor='#fff'
-       hoverFillColor='#222'
-       />
+      <Squares
+        speed={0.3}
+        squareSize={50}
+        direction='diagonal' // up, down, left, right, diagonal
+        borderColor='#fff'
+        hoverFillColor='#222'
+      />
       <div className="absolute inset-0 z-10 pointer-events-none">
         <div className="relative z-10 flex flex-col min-h-screen pointer-events-auto">
-          <Header 
-            isScrolled={isScrolled} 
-            mobileMenuOpen={mobileMenuOpen} 
-            setMobileMenuOpen={setMobileMenuOpen} 
+          <Header
+            isScrolled={isScrolled}
+            mobileMenuOpen={mobileMenuOpen}
+            setMobileMenuOpen={setMobileMenuOpen}
           />
-          
+
           {/* Main content - added top padding to account for fixed header */}
           <main className="flex-grow flex flex-col items-center justify-center p-4 pt-24 md:pt-28">
             {/* Hero Section */}
@@ -80,7 +80,7 @@ export default function LandingPage() {
                 </Button>
               </div>
             </div>
-            
+
             {/* Key Features Section */}
             <div className="w-full md:w-4/5 lg:w-3/4 max-w-6xl mb-20 px-4">
               <h2 className="text-3xl font-bold mb-12 text-center text-white">Système de Contrôle Complet</h2>
@@ -130,14 +130,14 @@ export default function LandingPage() {
                 </SpotlightCard>
               </div>
             </div>
-            
+
             {/* Facilities and Expansion */}
             <div className="w-full max-w-6xl mb-20 bg-black/60 backdrop-blur-md p-8 rounded-lg border border-green-900/50">
               <h2 className="text-3xl font-bold mb-6 text-center text-white">Réseau Croissant d'Établissements Sécurisés</h2>
               <p className="text-lg text-center text-gray-300 mb-8">
                 SecureSync est actuellement déployé dans de nombreux établissements pénitentiaires à travers le pays avec des plans d'expansion ambitieux.
               </p>
-              
+
               <div className="flex flex-col md:flex-row items-center justify-between gap-8">
                 <div className="flex-1">
                   <div className="flex items-center justify-center mb-4">
@@ -146,7 +146,7 @@ export default function LandingPage() {
                   </div>
                   <p className="text-center text-gray-300">Établissements Utilisant SecureSync</p>
                 </div>
-                
+
                 <div className="flex-1">
                   <div className="flex items-center justify-center mb-4">
                     <Globe className="h-10 w-10 text-green-400 mr-3" />
@@ -154,7 +154,7 @@ export default function LandingPage() {
                   </div>
                   <p className="text-center text-gray-300">Régions avec Implémentation SecureSync</p>
                 </div>
-                
+
                 <div className="flex-1">
                   <div className="flex items-center justify-center mb-4">
                     <Users className="h-10 w-10 text-green-400 mr-3" />
@@ -164,7 +164,7 @@ export default function LandingPage() {
                 </div>
               </div>
             </div>
-            
+
             {/* Call to Action */}
             <div className="w-full max-w-4xl text-center mb-16">
               <h2 className="text-2xl md:text-4xl font-bold mb-6 text-white">Prêt à Transformer Votre Établissement ?</h2>
@@ -185,7 +185,7 @@ export default function LandingPage() {
               </div>
             </div>
           </main>
-          
+
           <Footer />
         </div>
       </div>

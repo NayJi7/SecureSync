@@ -115,7 +115,8 @@
 }
 
 /* Styles de base pour s'assurer qu'il n'y a pas de marges ou de rembourrages par défaut */
-html, body {
+html,
+body {
   margin: 0;
   padding: 0;
   width: 100%;
@@ -151,6 +152,7 @@ html, body {
   * {
     @apply border-border outline-ring/50;
   }
+
   body {
     @apply bg-background text-foreground;
   }

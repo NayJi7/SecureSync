@@ -58,6 +58,16 @@ def create_object(request):
         try:
             # Sauvegarder l'objet — le signal post_save créera le log automatiquement
             obj = serializer.save()
+            
+            # Créer un log avec l'utilisateur actuel
+            ObjetLog.objects.create(
+                objet=obj,
+                type=obj.type,
+                nom=obj.nom,
+                etat=obj.etat,
+                commentaire="Création",
+                user=request.user  # Ajouter l'utilisateur courant
+            )
 
             return Response(serializer.data, status=status.HTTP_201_CREATED)
         except Exception as e:
@@ -68,7 +78,51 @@ def create_object(request):
 class ObjectViewSet(viewsets.ModelViewSet):
     queryset = Object.objects.all()
     serializer_class = ObjectSerializer
-
+    permission_classes = [IsAuthenticated]
+    
+    def perform_create(self, serializer):
+        # Créer l'objet
+        instance = serializer.save()
+        
+        # Ajouter un log avec l'utilisateur actuel
+        ObjetLog.objects.create(
+            objet=instance,
+            type=instance.type,
+            nom=instance.nom,
+            etat=instance.etat,
+            commentaire="Création",
+            user=self.request.user
+        )
+    
+    def perform_update(self, serializer):
+        old_instance = self.get_object()
+        old_etat = old_instance.etat
+        
+        # Sauvegarder les changements
+        instance = serializer.save()
+        
+        # Détecter si l'état a changé
+        if old_etat != instance.etat:
+            ObjetLog.objects.create(
+                objet=instance,
+                type=instance.type,
+                nom=instance.nom,
+                etat=instance.etat,
+                commentaire=f"Changement d'état: {old_etat} ➜ {instance.etat}",
+                user=self.request.user
+            )
+    
+    def perform_destroy(self, instance):
+        # Créer un log avant de supprimer l'objet
+        ObjetLog.objects.create(
+            objet=None,  # L'objet va être supprimé
+            type=instance.type,
+            nom=instance.nom,
+            etat=instance.etat,
+            commentaire="Suppression",
+            user=self.request.user
+        )
+        instance.delete()
 
 class ObjetLogViewSet(viewsets.ReadOnlyModelViewSet):  # ReadOnly car on ne veut que GET
     queryset = ObjetLog.objects.all()

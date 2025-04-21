@@ -13,6 +13,7 @@ interface SquaresProps {
   borderColor?: CanvasStrokeStyle;
   squareSize?: number;
   hoverFillColor?: CanvasStrokeStyle;
+  opacity?: number;
 }
 
 const Squares: React.FC<SquaresProps> = ({
@@ -21,6 +22,7 @@ const Squares: React.FC<SquaresProps> = ({
   borderColor = "#999",
   squareSize = 40,
   hoverFillColor = "#222",
+  opacity = 0.3,
 }) => {
   const canvasRef = useRef<HTMLCanvasElement>(null);
   const requestRef = useRef<number | null>(null);
@@ -49,6 +51,8 @@ const Squares: React.FC<SquaresProps> = ({
 
       ctx.clearRect(0, 0, canvas.width, canvas.height);
 
+      ctx.globalAlpha = opacity;
+
       const startX = Math.floor(gridOffset.current.x / squareSize) * squareSize;
       const startY = Math.floor(gridOffset.current.y / squareSize) * squareSize;
 
@@ -60,7 +64,7 @@ const Squares: React.FC<SquaresProps> = ({
           if (
             hoveredSquareRef.current &&
             Math.floor((x - startX) / squareSize) ===
-              hoveredSquareRef.current.x &&
+            hoveredSquareRef.current.x &&
             Math.floor((y - startY) / squareSize) === hoveredSquareRef.current.y
           ) {
             ctx.fillStyle = hoverFillColor;
@@ -68,9 +72,12 @@ const Squares: React.FC<SquaresProps> = ({
           }
 
           ctx.strokeStyle = borderColor;
+          ctx.lineWidth = 0.5;
           ctx.strokeRect(squareX, squareY, squareSize, squareSize);
         }
       }
+
+      ctx.globalAlpha = 1;
 
       const gradient = ctx.createRadialGradient(
         canvas.width / 2,
@@ -81,7 +88,7 @@ const Squares: React.FC<SquaresProps> = ({
         Math.sqrt(canvas.width ** 2 + canvas.height ** 2) / 2
       );
       gradient.addColorStop(0, "rgba(0, 0, 0, 0)");
-      gradient.addColorStop(1, "#060606");
+      gradient.addColorStop(1, "rgba(6, 6, 6, 0.7)");
 
       ctx.fillStyle = gradient;
       ctx.fillRect(0, 0, canvas.width, canvas.height);
@@ -158,7 +165,7 @@ const Squares: React.FC<SquaresProps> = ({
       canvas.removeEventListener("mousemove", handleMouseMove);
       canvas.removeEventListener("mouseleave", handleMouseLeave);
     };
-  }, [direction, speed, borderColor, hoverFillColor, squareSize]);
+  }, [direction, speed, borderColor, hoverFillColor, squareSize, opacity]);
 
   return (
     <canvas

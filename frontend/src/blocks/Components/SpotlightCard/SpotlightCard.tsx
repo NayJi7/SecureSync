@@ -1,5 +1,5 @@
 /*
-	Installed from https://reactbits.dev/ts/tailwind/
+  Installed from https://reactbits.dev/ts/tailwind/
 */
 
 import React, { useRef, useState } from "react";
@@ -60,8 +60,17 @@ const SpotlightCard: React.FC<SpotlightCardProps> = ({
       onMouseEnter={handleMouseEnter}
       onMouseLeave={handleMouseLeave}
       onClick={onClick}
-      className={`relative rounded-3xl border border-neutral-800 bg-neutral-900 overflow-hidden p-8 ${className}`}
+      className={`relative rounded-3xl border border-neutral-800 bg-neutral-900/80 backdrop-blur-sm overflow-hidden p-8 shadow-lg hover:shadow-xl hover:shadow-green-900/20 transition-all duration-300 ${className}`}
+      style={{
+        boxShadow: '0 8px 32px -4px rgba(22, 101, 52, 0.15)'
+      }}
     >
+      {/* Card content */}
+      <div className="relative z-10">
+        {children}
+      </div>
+
+      {/* Spotlight effect */}
       <div
         className="pointer-events-none absolute inset-0 opacity-0 transition-opacity duration-500 ease-in-out"
         style={{
@@ -69,7 +78,9 @@ const SpotlightCard: React.FC<SpotlightCardProps> = ({
           background: `radial-gradient(circle at ${position.x}px ${position.y}px, ${spotlightColor}, transparent 80%)`,
         }}
       />
-      {children}
+
+      {/* Subtle gradient overlay */}
+      <div className="absolute inset-0 bg-gradient-to-br from-transparent to-black/30 pointer-events-none" />
     </div>
   );
 };

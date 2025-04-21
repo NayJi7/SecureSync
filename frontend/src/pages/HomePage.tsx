@@ -102,10 +102,10 @@ export default function HomePage({ children }: { children?: React.ReactNode }) {
       </div>
     ),
     settings: (
-      <div>
-        Ceci est <span className="font-medium text-gray-800 dark:text-white">le contenu associé à l'onglet Paramètres</span>.
-        Cliquer sur un autre onglet basculera la visibilité de celui-ci pour le suivant. Le JavaScript de l'onglet
-        échange les classes pour contrôler la visibilité et le style du contenu.
+      <div className="relative h-full">
+        <div className="my-8">
+          <ObjectLogs />
+        </div>
       </div>
     ),
     contacts: (

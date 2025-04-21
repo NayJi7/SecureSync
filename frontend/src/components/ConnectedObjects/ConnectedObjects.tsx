@@ -9,6 +9,45 @@ import ObjectsChart, { AddObjectCallback } from './ObjectsChart';
 import { LayoutGrid, Activity, RefreshCw, X, PlusCircle, AlertCircle, MapPin, ToggleLeft } from 'lucide-react';
 import axios from 'axios';
 
+// Function to test backend connectivity
+const testBackendConnection = async () => {
+    try {
+        console.log('Testing backend connectivity...');
+        // Try to access the Django API root endpoint
+        const response = await axios.get('http://localhost:8000/api/', {
+            timeout: 5000, // 5 second timeout
+            // Don't throw on non-2xx status codes
+            validateStatus: function (status) {
+                return status >= 200 && status < 500; // Accept any status less than 500 as "connected"
+            }
+        });
+
+        console.log('Backend connectivity test result:', response.status, response.statusText);
+
+        // If we get any response, even a 401 Unauthorized, the server is up
+        return true;
+    } catch (error) {
+        console.error('Backend connectivity test failed:', error);
+
+        // Check specifically for network errors
+        if (axios.isAxiosError(error)) {
+            if (error.code === 'ECONNREFUSED' || error.code === 'ECONNABORTED' || error.code === 'ETIMEDOUT') {
+                console.error('Connection refused or timed out. Backend server may be down.');
+                return false;
+            }
+
+            // If we got an error response, the server is actually up
+            if (error.response) {
+                console.log(`Backend responded with status ${error.response.status}`);
+                return true;
+            }
+        }
+
+        // No response at all - server might be down
+        return false;
+    }
+};
+
 const ConnectedObjects: React.FC = () => {
     const [objects, setObjects] = useState<ObjectType[]>([]);
     const [loading, setLoading] = useState(true);
@@ -21,12 +60,26 @@ const ConnectedObjects: React.FC = () => {
     const [newObjectState, setNewObjectState] = useState<'on' | 'off'>('off');
     const [isSaving, setIsSaving] = useState(false);
     const [error, setError] = useState<string | null>(null);
+    const [backendConnected, setBackendConnected] = useState<boolean | null>(null);
+    const [selectedType, setSelectedType] = useState<string>('');
 
     const fetchObjects = async () => {
         try {
             setRefreshing(true);
             setError(null);
-            // Use the service function instead of direct API call
+
+            // First check if backend is connected
+            const isConnected = await testBackendConnection();
+            setBackendConnected(isConnected);
+
+            if (!isConnected) {
+                setError('Impossible de se connecter au serveur backend. Vérifiez que le serveur est démarré.');
+                setLoading(false);
+                setRefreshing(false);
+                return;
+            }
+
+            // Use the service function to get objects
             const response = await getObjects();
             setObjects(response.data);
             setLoading(false);
@@ -45,12 +98,34 @@ const ConnectedObjects: React.FC = () => {
                 return;
             }
 
-            setError('Erreur lors du chargement des objets: ' +
-                (error.friendlyMessage || error.response?.data?.detail || 'Problème de connexion au serveur'));
+            // Check for network errors
+            if (!error.response && error.message && (
+                error.message.includes('Network Error') ||
+                error.code === 'ECONNREFUSED' ||
+                error.code === 'ECONNABORTED' ||
+                error.code === 'ETIMEDOUT'
+            )) {
+                setBackendConnected(false);
+                setError('Problème de connexion au serveur. Vérifiez que le serveur backend est démarré.');
+            } else {
+                setError('Erreur lors du chargement des objets: ' +
+                    (error.friendlyMessage || error.response?.data?.detail || 'Problème de connexion au serveur'));
+            }
+
             setLoading(false);
             setRefreshing(false);
         }
     };
+
+    // Test backend connectivity when component mounts
+    useEffect(() => {
+        const checkBackendConnection = async () => {
+            const isConnected = await testBackendConnection();
+            setBackendConnected(isConnected);
+        };
+
+        checkBackendConnection();
+    }, []);
 
     // Fetch objects when component mounts
     useEffect(() => {
@@ -87,52 +162,76 @@ const ConnectedObjects: React.FC = () => {
         setIsSaving(true);
         setError(null);
 
-        // Debug logging
-        console.log(`Creating ${addingObjectType} with state: ${newObjectState}`);
-        console.log(`State label: ${newObjectState === 'on' ? (addingObjectType === 'porte' ? 'Fermée' : 'Activé') : (addingObjectType === 'porte' ? 'Ouverte' : 'Désactivé')}`);
-
         try {
-            // Use the service function instead of direct API call
-            await createObject({
-                nom: newObjectName,
+            // Basic validation
+            if (newObjectName.trim().length < 2) {
+                setError('Le nom de l\'objet doit contenir au moins 2 caractères.');
+                setIsSaving(false);
+                return;
+            }
+
+            // Create object data
+            const objectData = {
+                nom: newObjectName.trim(),
                 type: addingObjectType,
                 etat: newObjectState,
-                coord_x: newObjectX,
-                coord_y: newObjectY
-            });
+                coord_x: Math.max(0, Math.round(Number(newObjectX))),
+                coord_y: Math.max(0, Math.round(Number(newObjectY))),
+                // Champs obligatoires qui manquaient
+                consomation: 0,
+                connection: 'wifi',
+                valeur_actuelle: '',
+                valeur_cible: ''
+            };
 
-            // Refresh the objects list
+            // Send the request
+            await createObject(objectData);
+
+            // Refresh objects
             await fetchObjects();
 
-            // Close the modal
+            // Close modal
             handleCloseModal();
 
         } catch (error: any) {
             console.error('Error creating object:', error);
 
-            // Handle 401 Unauthorized errors (invalid token)
+            // Handle authentication errors
             if (error.response?.status === 401) {
                 setError('Session expirée. Veuillez vous reconnecter.');
-                // Clear any stale tokens
                 localStorage.removeItem('authToken');
                 localStorage.removeItem('sessionToken');
-                // Optional: Redirect to login
-                // window.location.href = '/login';
-                return;
-            }
-
-            if (axios.isAxiosError(error) && error.response) {
-                if (error.response.status === 400) {
-                    setError('Données invalides. Vérifiez le nom de l\'objet.');
-                } else {
-                    setError(`Erreur lors de la création: ${error.response.data.detail || error.response.statusText}`);
-                }
             } else {
-                setError('Erreur de connexion au serveur: ' + (error.friendlyMessage || error.message));
+                // Display general error
+                setError('Erreur lors de la création de l\'objet: ' +
+                    (error.friendlyMessage || error.response?.data?.detail || 'Problème de connexion au serveur'));
             }
         } finally {
             setIsSaving(false);
         }
+    };
+
+    // Helper function to extract error messages from Django validation errors
+    const extractErrorMessage = (errorData: any): string => {
+        if (!errorData) return 'Erreur inconnue';
+
+        // Handle string errors
+        if (typeof errorData === 'string') return errorData;
+
+        // Handle array errors
+        if (Array.isArray(errorData)) return errorData.join(', ');
+
+        // Handle object errors with field names
+        if (typeof errorData === 'object') {
+            const messages = [];
+            for (const [field, value] of Object.entries(errorData)) {
+                const fieldValue = Array.isArray(value) ? value.join(', ') : value;
+                messages.push(`${field}: ${fieldValue}`);
+            }
+            return messages.join('; ');
+        }
+
+        return 'Format d\'erreur inconnu';
     };
 
     // Handle object state change
@@ -172,21 +271,37 @@ const ConnectedObjects: React.FC = () => {
         }
     };
 
-    // Render appropriate component based on object type
-    const renderObject = (type: 'porte' | 'lumiere' | 'camera' | 'chauffage', objects: ObjectType[]) => {
-        const addHandler = () => handleAddObject(type);
-        // The filtered objects are already passed in - no need to filter again
-        // Ensure the objects are the correct type to fix the linter errors
+    // Function to render the appropriate object type component
+    const renderObject = (objectType: string) => {
+        const filteredObjects = objects.filter((object) => object.type === objectType);
 
-        switch (type) {
+        switch (objectType) {
             case 'porte':
-                return <Door objects={objects as DoorObject[]} onAddObject={addHandler} onStatusChange={fetchObjects} />;
+                return <Door
+                    objects={filteredObjects}
+                    onAddObject={() => handleAddObject('porte')}
+                    onStatusChange={handleObjectStatusChange}
+                />;
             case 'lumiere':
-                return <Light objects={objects as LightObject[]} onAddObject={addHandler} onStatusChange={fetchObjects} />;
+                return <Light
+                    objects={filteredObjects}
+                    onAddObject={() => handleAddObject('lumiere')}
+                    onStatusChange={handleObjectStatusChange}
+                />;
             case 'camera':
-                return <Camera objects={objects as CameraObject[]} onAddObject={addHandler} onStatusChange={fetchObjects} />;
+                return <Camera
+                    objects={filteredObjects}
+                    onAddObject={() => handleAddObject('camera')}
+                    onStatusChange={handleObjectStatusChange}
+                />;
             case 'chauffage':
-                return <Heater objects={objects as HeaterObject[]} onAddObject={addHandler} onStatusChange={fetchObjects} />;
+                return <Heater
+                    objects={filteredObjects}
+                    onAddObject={() => handleAddObject('chauffage')}
+                    onStatusChange={handleObjectStatusChange}
+                />;
+            default:
+                return null;
         }
     };
 
@@ -195,16 +310,16 @@ const ConnectedObjects: React.FC = () => {
         return (
             <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                 {/* Render objects that exist */}
-                {grouped.porte.length > 0 && renderObject('porte', grouped.porte)}
-                {grouped.lumiere.length > 0 && renderObject('lumiere', grouped.lumiere)}
-                {grouped.camera.length > 0 && renderObject('camera', grouped.camera)}
-                {grouped.chauffage.length > 0 && renderObject('chauffage', grouped.chauffage)}
+                {grouped.porte.length > 0 && renderObject('porte')}
+                {grouped.lumiere.length > 0 && renderObject('lumiere')}
+                {grouped.camera.length > 0 && renderObject('camera')}
+                {grouped.chauffage.length > 0 && renderObject('chauffage')}
 
                 {/* Add empty components with add button if no objects exist */}
-                {grouped.porte.length === 0 && renderObject('porte', [])}
-                {grouped.lumiere.length === 0 && renderObject('lumiere', [])}
-                {grouped.camera.length === 0 && renderObject('camera', [])}
-                {grouped.chauffage.length === 0 && renderObject('chauffage', [])}
+                {grouped.porte.length === 0 && renderObject('porte')}
+                {grouped.lumiere.length === 0 && renderObject('lumiere')}
+                {grouped.camera.length === 0 && renderObject('camera')}
+                {grouped.chauffage.length === 0 && renderObject('chauffage')}
             </div>
         );
     };
@@ -266,6 +381,11 @@ const ConnectedObjects: React.FC = () => {
         );
     };
 
+    // Function to handle object status changes
+    const handleObjectStatusChange = () => {
+        fetchObjects();
+    };
+
     return (
         <div className="w-full bg-white dark:bg-gray-800 rounded-lg shadow-lg border border-gray-100 dark:border-gray-700 p-6 mb-8">
             <div className="flex justify-between items-center mb-6">
@@ -287,6 +407,44 @@ const ConnectedObjects: React.FC = () => {
                     </button>
                 </div>
             </div>
+
+            {/* Backend Connection Status */}
+            {backendConnected === false && (
+                <div className="mb-4 p-3 bg-red-100 border border-red-200 text-red-700 dark:bg-red-900/30 dark:border-red-800 dark:text-red-300 rounded-md flex items-start">
+                    <AlertCircle className="h-5 w-5 mr-2 flex-shrink-0 mt-0.5" />
+                    <div className="w-full">
+                        <p className="font-medium">Erreur de connexion à l'API</p>
+                        <p className="text-sm mb-2">Impossible de se connecter au serveur backend. Vérifiez que le serveur est démarré et accessible sur http://localhost:8000/api/</p>
+                        <div className="flex justify-between items-center">
+                            <button
+                                onClick={async () => {
+                                    const isConnected = await testBackendConnection();
+                                    setBackendConnected(isConnected);
+                                    if (isConnected) {
+                                        // If we can connect, try to refresh the objects
+                                        fetchObjects();
+                                    }
+                                }}
+                                className="text-xs px-2 py-1 bg-red-200 hover:bg-red-300 dark:bg-red-800 dark:hover:bg-red-700 rounded transition-colors"
+                            >
+                                Tester à nouveau la connexion
+                            </button>
+                            <button
+                                onClick={() => {
+                                    // Open debug modal or console with connection details
+                                    console.log('Debug info:');
+                                    console.log('- API Base URL:', 'http://localhost:8000/api');
+                                    console.log('- Auth Token:', localStorage.getItem('sessionToken') ? 'Present' : 'Missing');
+                                    alert('Informations de débogage affichées dans la console (F12)');
+                                }}
+                                className="text-xs px-2 py-1 bg-gray-200 hover:bg-gray-300 dark:bg-gray-700 dark:hover:bg-gray-600 rounded transition-colors"
+                            >
+                                Informations de débogage
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            )}
 
             {loading ? (
                 <div className="w-full h-64 flex items-center justify-center">
@@ -322,7 +480,36 @@ const ConnectedObjects: React.FC = () => {
                         {error && (
                             <div className="mb-4 p-3 bg-red-100 border border-red-200 text-red-700 dark:bg-red-900/30 dark:border-red-800 dark:text-red-300 rounded-md flex items-start">
                                 <AlertCircle className="h-5 w-5 mr-2 flex-shrink-0 mt-0.5" />
-                                <p>{error}</p>
+                                <div className="w-full">
+                                    <p className="font-semibold mb-1">{error.includes('400') ? 'Erreur de validation' : 'Erreur'}</p>
+                                    <p>{error}</p>
+
+                                    {error.includes('400') && (
+                                        <div className="mt-2 text-sm">
+                                            <p className="font-medium">Suggestions :</p>
+                                            <ul className="list-disc list-inside ml-2 mt-1">
+                                                <li>Vérifiez que le nom ne contient pas de caractères spéciaux</li>
+                                                <li>Assurez-vous que les coordonnées sont des nombres valides</li>
+                                                <li>Le serveur est bien démarré sur http://localhost:8000</li>
+                                                <li>Vous êtes connecté avec un compte valide</li>
+                                            </ul>
+
+                                            <button
+                                                onClick={async () => {
+                                                    const isConnected = await testBackendConnection();
+                                                    if (isConnected) {
+                                                        setError('Connexion au serveur établie, mais la validation des données a échoué. Vérifiez les données saisies.');
+                                                    } else {
+                                                        setError('Impossible de se connecter au serveur. Vérifiez que le serveur est démarré.');
+                                                    }
+                                                }}
+                                                className="mt-2 text-xs px-2 py-1 bg-red-200 hover:bg-red-300 dark:bg-red-800 dark:hover:bg-red-700 rounded transition-colors"
+                                            >
+                                                Tester la connexion au serveur
+                                            </button>
+                                        </div>
+                                    )}
+                                </div>
                             </div>
                         )}
 
@@ -331,15 +518,46 @@ const ConnectedObjects: React.FC = () => {
                                 <label htmlFor="objectName" className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
                                     Nom
                                 </label>
-                                <input
-                                    type="text"
-                                    id="objectName"
-                                    className="w-full px-4 py-2 border border-gray-300 dark:border-gray-600 rounded-md bg-white dark:bg-gray-700 text-gray-900 dark:text-white focus:ring-2 focus:ring-indigo-500 dark:focus:ring-indigo-600 focus:border-transparent"
-                                    placeholder={`Entrez le nom du ${addingObjectType && getObjectTypeLabel(addingObjectType).toLowerCase()}`}
-                                    value={newObjectName}
-                                    onChange={(e) => setNewObjectName(e.target.value)}
-                                    autoFocus
-                                />
+                                <div className="flex space-x-2">
+                                    <input
+                                        type="text"
+                                        id="objectName"
+                                        className="w-full px-4 py-2 border border-gray-300 dark:border-gray-600 rounded-md bg-white dark:bg-gray-700 text-gray-900 dark:text-white focus:ring-2 focus:ring-indigo-500 dark:focus:ring-indigo-600 focus:border-transparent"
+                                        placeholder={`Entrez le nom du ${addingObjectType && getObjectTypeLabel(addingObjectType).toLowerCase()}`}
+                                        value={newObjectName}
+                                        onChange={(e) => {
+                                            // Only allow alphanumeric, spaces and basic punctuation
+                                            const validName = e.target.value.replace(/[^a-zA-Z0-9\s\-_.()]/g, '');
+                                            setNewObjectName(validName);
+                                        }}
+                                        maxLength={50} // Add reasonable max length
+                                        autoFocus
+                                    />
+                                    <button
+                                        type="button"
+                                        className="px-3 py-2 bg-gray-200 hover:bg-gray-300 dark:bg-gray-700 dark:hover:bg-gray-600 text-gray-700 dark:text-gray-300 rounded-md transition-colors text-sm"
+                                        onClick={() => {
+                                            // Check if the name exists in current objects
+                                            if (!newObjectName.trim()) {
+                                                setError('Veuillez d\'abord saisir un nom');
+                                                return;
+                                            }
+
+                                            const nameExists = objects.some(obj =>
+                                                obj.nom.toLowerCase() === newObjectName.trim().toLowerCase()
+                                            );
+
+                                            if (nameExists) {
+                                                setError('Un objet avec ce nom existe déjà. Veuillez utiliser un nom différent.');
+                                            } else {
+                                                setError(null);
+                                                alert('Nom disponible ✓');
+                                            }
+                                        }}
+                                    >
+                                        Vérifier
+                                    </button>
+                                </div>
                             </div>
 
                             <div className="grid grid-cols-2 gap-4">
@@ -352,7 +570,10 @@ const ConnectedObjects: React.FC = () => {
                                         id="objectX"
                                         className="w-full px-4 py-2 border border-gray-300 dark:border-gray-600 rounded-md bg-white dark:bg-gray-700 text-gray-900 dark:text-white focus:ring-2 focus:ring-indigo-500 dark:focus:ring-indigo-600 focus:border-transparent"
                                         value={newObjectX}
-                                        onChange={(e) => setNewObjectX(Number(e.target.value))}
+                                        onChange={(e) => {
+                                            const value = parseInt(e.target.value, 10);
+                                            setNewObjectX(isNaN(value) ? 0 : value);
+                                        }}
                                     />
                                 </div>
                                 <div>
@@ -364,7 +585,10 @@ const ConnectedObjects: React.FC = () => {
                                         id="objectY"
                                         className="w-full px-4 py-2 border border-gray-300 dark:border-gray-600 rounded-md bg-white dark:bg-gray-700 text-gray-900 dark:text-white focus:ring-2 focus:ring-indigo-500 dark:focus:ring-indigo-600 focus:border-transparent"
                                         value={newObjectY}
-                                        onChange={(e) => setNewObjectY(Number(e.target.value))}
+                                        onChange={(e) => {
+                                            const value = parseInt(e.target.value, 10);
+                                            setNewObjectY(isNaN(value) ? 0 : value);
+                                        }}
                                     />
                                 </div>
                             </div>

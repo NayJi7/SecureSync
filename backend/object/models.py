@@ -101,9 +101,11 @@ class ObjetLog(models.Model):
     etat = models.CharField(max_length=50, choices=ETAT_CHOICES, verbose_name="État")
     date = models.DateTimeField(auto_now_add=True)  # Date du log
     commentaire = models.TextField(blank=True, null=True)
+    user = models.ForeignKey('accounts.CustomUser', on_delete=models.SET_NULL, null=True, blank=True, related_name='object_logs')
     
     def __str__(self):
-        return f"{self.nom} ({self.type}) - {self.date.strftime('%d/%m/%Y %H:%M')}"
+        user_info = f" par {self.user.get_full_name() if self.user else 'Système'}"
+        return f"{self.nom} ({self.type}) - {self.date.strftime('%d/%m/%Y %H:%M')}{user_info}"
     
     class Meta:
         verbose_name = "Log d'objet"
@@ -113,35 +115,23 @@ class ObjetLog(models.Model):
 
 @receiver(post_save, sender=Object)
 def create_objet_log(sender, instance, created, **kwargs):
-    if created:  # Uniquement lors de la création
-        ObjetLog.objects.create(
-            objet=instance,
-            type=instance.type,
-            nom=instance.nom,
-            etat=instance.etat,
-            commentaire="Création"  # Commentaire automatique pour la création
-        )
+    # Nous utilisons maintenant les méthodes perform_* des viewsets pour créer les logs
+    # avec les informations de l'utilisateur qui réalise l'action
+    pass
 
 import random
 
 @receiver(pre_save, sender=Object)
 def log_object_state_change(sender, instance, **kwargs):
-    
+    # Nous utilisons maintenant perform_update du viewset pour gérer cela
+    # avec les informations de l'utilisateur
     if not instance.pk:
         return  # Ce n'est pas une mise à jour
 
     try:
         old_instance = Object.objects.get(pk=instance.pk)
+        # On garde uniquement la logique de mise à jour de la durabilité
         if old_instance.etat != instance.etat:
-            # Log du changement
-            ObjetLog.objects.create(
-                objet=instance,
-                type=instance.type,
-                nom=instance.nom,
-                etat=instance.etat,
-                commentaire=f"Changement d'état: {old_instance.etat} ➜ {instance.etat}"
-            )
-
             # 💡 Si on passe de off ➜ on, on diminue la durabilité
             if old_instance.etat == "off" and instance.etat == "on":
                 perte = random.randint(1, 10)
@@ -154,20 +144,15 @@ def log_object_state_change(sender, instance, **kwargs):
     except Object.DoesNotExist:
         pass  # l'objet n'existait pas encore
 
- 
-
 @receiver(pre_delete, sender=Object)
 def log_object_deletion(sender, instance, **kwargs):
-    ObjetLog.objects.create(
-        objet=instance,
-        type=instance.type,
-        nom=instance.nom,
-        etat=instance.etat,
-        commentaire="Suppression"
-    )
+    # Nous utilisons maintenant perform_destroy du viewset pour gérer cela
+    # avec les informations de l'utilisateur
+    pass
 
 @receiver(pre_save, sender=Object)
 def log_object_repair(sender, instance, **kwargs):
+    # Cette fonction reste pour gérer la réparation automatique
     if not instance.pk:
         return  # Ce n'est pas une mise à jour
     
@@ -177,12 +162,14 @@ def log_object_repair(sender, instance, **kwargs):
         # Si on passe de "en panne" à "fonctionnel" ou si la durabilité passe de <= 0 à 100
         if (old_instance.maintenance == 'en panne' and instance.maintenance == 'fonctionnel') or \
            (old_instance.durabilité <= 0 and instance.durabilité == 100):
+            # Note: Nous ne pouvons pas accéder à l'utilisateur ici, donc ce sera null
             ObjetLog.objects.create(
                 objet=instance,
                 type=instance.type,
                 nom=instance.nom,
                 etat=instance.etat,
-                commentaire="Réparation de l'objet"
+                commentaire="Réparation de l'objet",
+                user=None  # Pas d'info utilisateur disponible dans le signal
             )
     except Object.DoesNotExist:
         pass  # l'objet n'existait pas encore
