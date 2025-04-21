@@ -506,7 +506,7 @@ const StaffModal: React.FC<StaffModalProps> = ({ isOpen, onClose }) => {
           
           {/* Affichage du bouton de tri des membres sur desktop */}
           {!isMobile && (
-            <div className={`justify-end w-150 flex items-center`}>
+            <div className={`justify-end w-140 flex items-center`}>
             {!showAddMemberForm && (
               <div className="flex items-center">
                 <span className="mr-2 text-sm font-medium text-gray-700">Trier par :</span>

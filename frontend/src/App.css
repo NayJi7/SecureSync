@@ -40,6 +40,16 @@
   color: #888;
 }
 
+/* Masquer les barres de défilement pour tous les éléments */
+html, body {
+  scrollbar-width: none; /* Pour Firefox */
+  -ms-overflow-style: none; /* Pour Internet Explorer et Edge */
+}
 
+/* Pour Chrome, Safari et Opera */
+html::-webkit-scrollbar, 
+body::-webkit-scrollbar {
+  display: none;
+}
 
 

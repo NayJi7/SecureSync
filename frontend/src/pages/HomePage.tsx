@@ -60,6 +60,7 @@ export default function HomePage({ children }: { children?: React.ReactNode }) {
   const [staffModalOpen, setStaffModalOpen] = useState(false);
   const [staff, setStaff] = useState<StaffMember[]>([]);
   const isSmallScreen = isMobile || isTablet;
+  const isAdmin = localStorage.getItem('userRole') === 'admin';
 
   // État pour stocker les données du profil utilisateur
   const [profile, setProfile] = useState<UserProfile | null>(null);
@@ -89,14 +90,6 @@ export default function HomePage({ children }: { children?: React.ReactNode }) {
     fetchProfile();
   }, []);
 
-  // Configuration du dock
-  const dockItems = [
-    { icon: <VscHome size={20} />, label: 'Home', onClick: () => navigate(`/${currentPrison}/home`) },
-    { icon: <VscArchive size={20} />, label: 'Archive', onClick: () => navigate(`/${currentPrison}/object`) },
-    { icon: <VscAccount size={20} />, label: 'Profile', onClick: () => navigate(`/${currentPrison}/profile`) },
-    { icon: <VscSettingsGear size={20} />, label: 'Settings', onClick: () => navigate(`/${currentPrison}/staff`) },
-  ];
-
   // Contenu des tabs/menu
   const tabContents = {
     dashboard: (
@@ -105,16 +98,6 @@ export default function HomePage({ children }: { children?: React.ReactNode }) {
         {/* ConnectedObjects always visible */}
         <div className="my-8">
           <ConnectedObjects />
-        </div>
-        <div className="fixed bottom-4 left-1/2 transform -translate-x-1/2 z-30">
-          <Dock
-            className="text-white bg-sidebar"
-            color="#000"
-            items={dockItems}
-            panelHeight={isSmallScreen ? 60 : 70}
-            baseItemSize={isSmallScreen ? 40 : 50}
-            magnification={isSmallScreen ? 60 : 70}
-          />
         </div>
       </div>
     ),
@@ -164,6 +147,10 @@ export default function HomePage({ children }: { children?: React.ReactNode }) {
     navigate('/login');
   };
 
+  const handleChangePrison = () => {
+    navigate('/prison-selection');
+  };
+
   return (
     <div className="flex flex-col min-h-screen">
       <Waves
@@ -180,117 +167,123 @@ export default function HomePage({ children }: { children?: React.ReactNode }) {
         yGap={36}
         dot={false}
       />
-      <div className="absolute w-full h-20 bg-sidebar z-10"></div>
       <div className="w-full flex justify-between items-center h-full">
-        <div className="flex-1 p-4 flex gap-4 h-full">
-          <div className={`flex items-center justify-center z-10 h-full ${isSmallScreen ? 'mt-1.5' : '-mt-1.5'}`}>
-            <a href="/landing" className="flex items-center">
-              <img src="/src/assets/logo-band.png" alt="SmartHub Logo" className={`${isSmallScreen ? 'w-32' : 'w-38'}`} />
-            </a>
-          </div>
-          {children}
-
-          {isSmallScreen ? (
-            <div className="w-full mt-1.5">
-              <div className="flex justify-between items-center">
-                <h2 className="text-lg font-medium z-10 ml-2">
-                  {activeTab === "dashboard" ? "Dashboard" :
-                    activeTab === "settings" ? "Paramètres" :
-                      activeTab === "contacts" ? "Contacts" : "Désactivé"}
-                </h2>
-
-                <DropdownMenu>
-                  <DropdownMenuTrigger className="inline-flex items-center p-2 text-sm font-medium text-center text-gray-900 bg-white rounded-lg hover:bg-gray-100 focus:ring-4 focus:outline-none dark:text-white focus:ring-gray-50 dark:bg-gray-800 dark:hover:bg-gray-700 dark:focus:ring-gray-600">
-                    <HiDotsVertical className="w-5 h-5 z-10" />
-                  </DropdownMenuTrigger>
-
-                  <DropdownMenuContent align="end">
-                    <DropdownMenuItem
-                      className={`flex items-center gap-2 ${activeTab === "dashboard" ? "bg-gray-100 dark:bg-gray-600" : ""}`}
-                      onClick={() => setActiveTab("dashboard")}
-                    >
-                      <MdDashboard className="w-4 h-4" />
-                      Dashboard
-                    </DropdownMenuItem>
-                    <DropdownMenuItem
-                      className={`flex items-center gap-2 ${activeTab === "settings" ? "bg-gray-100 dark:bg-gray-600" : ""}`}
-                      onClick={() => setActiveTab("settings")}
-                    >
-                      <HiAdjustments className="w-4 h-4" />
-                      Paramètres
-                    </DropdownMenuItem>
-                    <DropdownMenuItem
-                      className={`flex items-center gap-2 ${activeTab === "contacts" ? "bg-gray-100 dark:bg-gray-600" : ""}`}
-                      onClick={() => setActiveTab("contacts")}
-                    >
-                      <HiClipboardList className="w-4 h-4" />
-                      Contacts
-                    </DropdownMenuItem>
-                  </DropdownMenuContent>
-                </DropdownMenu>
-              </div>
-
-              {/* Contenu des onglets avec styles améliorés pour assurer la visibilité */}
-              <div className="absolute left-0 pt-6 px-4 w-full min-h-[calc(100vh-120px)] z-5">
-                {activeTab === "dashboard" && tabContents.dashboard}
-                {activeTab === "settings" && tabContents.settings}
-                {activeTab === "contacts" && tabContents.contacts}
-                {activeTab === "disabled" && tabContents.disabled}
-              </div>
+        <div className="flex-1 flex gap-4 h-full">
+          <div className="bg-white p-4 w-full flex-1 flex gap-4 h-20 z-10">
+            <div className={`flex items-center justify-center z-10 h-full ${isSmallScreen ? 'w-1/2' : ''}`}>
+              <a href="/landing" className="flex items-center">
+                <img src="/src/assets/logo-band.png" alt="SmartHub Logo" className={`${isSmallScreen ? 'w-32' : 'w-38'}`} />
+              </a>
             </div>
-          ) : (
-            <Tabs
-              className="w-full [&_button]:cursor-pointer z-10"
-              aria-label="Onglets avec icônes"
-              variant="underline"
-              onActiveTabChange={(tab) => {
-                if (tab === 0) setActiveTab("dashboard");
-                else if (tab === 1) setActiveTab("settings");
-                else if (tab === 2) setActiveTab("contacts");
-                else setActiveTab("disabled");
-              }}
-            >
-              <TabItem title="Dashboard" icon={MdDashboard}>
-                {tabContents.dashboard}
-              </TabItem>
-              <TabItem title="Paramètres" icon={HiAdjustments}>
-                {tabContents.settings}
-              </TabItem>
-              <TabItem title="Contacts" icon={HiClipboardList}>
-                {tabContents.contacts}
-              </TabItem>
-              <TabItem disabled title="Désactivé">
-                {tabContents.disabled}
-              </TabItem>
-            </Tabs>
-          )}
+            {children}
 
-          <DropdownMenu>
-            <DropdownMenuTrigger className="mt-2 rounded-full h-8 z-10">
-              <Avatar className="cursor-pointer">
-                {/* Si chargement ou erreur, afficher une fallback */}
-                {loading || error || !profile ? (
-                  <AvatarFallback className="bg-gray-300">?</AvatarFallback>
-                ) : (
-                  <div className="w-8 h-8 flex-shrink-0">
-                    <div className="w-8 h-8 rounded-full bg-blue-100 flex items-center justify-center text-blue-600 font-bold text-sm border-2 border-gray-200">
-                      {(profile.first_name || profile.last_name) ?
-                        `${profile.first_name?.charAt(0).toUpperCase() || ''}${profile.last_name?.charAt(0).toUpperCase() || ''}` :
-                        profile.username?.charAt(0).toUpperCase() || '?'}
+            {isSmallScreen ? (
+              <div className="w-full mt-1.5">
+                <div className="flex justify-between items-center">
+                  <h2 className="text-lg font-medium z-10 ml-2">
+                    {activeTab === "dashboard" ? "Dashboard" :
+                      activeTab === "settings" ? "Paramètres" :
+                        activeTab === "contacts" ? "Contacts" : "Désactivé"}
+                  </h2>
+
+                  <DropdownMenu>
+                    <DropdownMenuTrigger className="inline-flex items-center p-2 text-sm font-medium text-center text-gray-900 bg-white rounded-lg hover:bg-gray-100 focus:ring-4 focus:outline-none dark:text-white focus:ring-gray-50 dark:bg-gray-800 dark:hover:bg-gray-700 dark:focus:ring-gray-600">
+                      <HiDotsVertical className="w-5 h-5 z-10" />
+                    </DropdownMenuTrigger>
+
+                    <DropdownMenuContent align="end">
+                      <DropdownMenuItem
+                        className={`flex items-center gap-2 ${activeTab === "dashboard" ? "bg-gray-100 dark:bg-gray-600" : ""}`}
+                        onClick={() => setActiveTab("dashboard")}
+                      >
+                        <MdDashboard className="w-4 h-4" />
+                        Dashboard
+                      </DropdownMenuItem>
+                      <DropdownMenuItem
+                        className={`flex items-center gap-2 ${activeTab === "settings" ? "bg-gray-100 dark:bg-gray-600" : ""}`}
+                        onClick={() => setActiveTab("settings")}
+                      >
+                        <HiAdjustments className="w-4 h-4" />
+                        Paramètres
+                      </DropdownMenuItem>
+                      <DropdownMenuItem
+                        className={`flex items-center gap-2 ${activeTab === "contacts" ? "bg-gray-100 dark:bg-gray-600" : ""}`}
+                        onClick={() => setActiveTab("contacts")}
+                      >
+                        <HiClipboardList className="w-4 h-4" />
+                        Contacts
+                      </DropdownMenuItem>
+                    </DropdownMenuContent>
+                  </DropdownMenu>
+                </div>
+
+                {/* Contenu des onglets avec styles améliorés pour assurer la visibilité */}
+                <div className="absolute left-0 pt-6 px-4 w-full min-h-[calc(100vh-120px)] z-5">
+                  {activeTab === "dashboard" && tabContents.dashboard}
+                  {activeTab === "settings" && tabContents.settings}
+                  {activeTab === "contacts" && tabContents.contacts}
+                  {activeTab === "disabled" && tabContents.disabled}
+                </div>
+              </div>
+            ) : (
+              <Tabs
+                className="w-full [&_button]:cursor-pointer z-10"
+                aria-label="Onglets avec icônes"
+                variant="underline"
+                onActiveTabChange={(tab) => {
+                  if (tab === 0) setActiveTab("dashboard");
+                  else if (tab === 1) setActiveTab("settings");
+                  else if (tab === 2) setActiveTab("contacts");
+                  else setActiveTab("disabled");
+                }}
+              >
+                <TabItem title="Dashboard" icon={MdDashboard}>
+                  {tabContents.dashboard}
+                </TabItem>
+                <TabItem title="Paramètres" icon={HiAdjustments}>
+                  {tabContents.settings}
+                </TabItem>
+                <TabItem title="Contacts" icon={HiClipboardList}>
+                  {tabContents.contacts}
+                </TabItem>
+                <TabItem disabled title="Désactivé">
+                  {tabContents.disabled}
+                </TabItem>
+              </Tabs>
+            )}
+
+            <DropdownMenu>
+              <DropdownMenuTrigger className="mt-2 rounded-full h-8 z-10">
+                <Avatar className="cursor-pointer">
+                  {/* Si chargement ou erreur, afficher une fallback */}
+                  {loading || error || !profile ? (
+                    <AvatarFallback className="bg-gray-300">?</AvatarFallback>
+                  ) : (
+                    <div className="w-8 h-8 flex-shrink-0">
+                      <div className="w-8 h-8 rounded-full bg-blue-100 flex items-center justify-center text-blue-600 font-bold text-sm border-2 border-gray-200">
+                        {(profile.first_name || profile.last_name) ?
+                          `${profile.first_name?.charAt(0).toUpperCase() || ''}${profile.last_name?.charAt(0).toUpperCase() || ''}` :
+                          profile.username?.charAt(0).toUpperCase() || '?'}
+                      </div>
                     </div>
-                  </div>
+                  )}
+                </Avatar>
+              </DropdownMenuTrigger>
+              <DropdownMenuContent>
+                <DropdownMenuLabel>Mon Compte</DropdownMenuLabel>
+                <DropdownMenuSeparator />
+                <DropdownMenuItem className="cursor-pointer" onClick={() => setProfileModalOpen(true)}>Profil</DropdownMenuItem>
+                <DropdownMenuItem className="cursor-pointer" onClick={() => setStaffModalOpen(true)}>Équipe</DropdownMenuItem>
+                {isAdmin && (
+                  <DropdownMenuItem className="cursor-pointer" onClick={handleChangePrison}>
+                    Changer de prison
+                  </DropdownMenuItem>
                 )}
-              </Avatar>
-            </DropdownMenuTrigger>
-            <DropdownMenuContent>
-              <DropdownMenuLabel>Mon Compte</DropdownMenuLabel>
-              <DropdownMenuSeparator />
-              <DropdownMenuItem className="cursor-pointer" onClick={() => setProfileModalOpen(true)}>Profil</DropdownMenuItem>
-              <DropdownMenuItem className="cursor-pointer" onClick={() => setStaffModalOpen(true)}>Équipe</DropdownMenuItem>
-              <DropdownMenuSeparator />
-              <DropdownMenuItem variant="danger" className="cursor-pointer transition-colors duration-200" onClick={handleLogout}>Déconnexion</DropdownMenuItem>
-            </DropdownMenuContent>
-          </DropdownMenu>
+                <DropdownMenuSeparator />
+                <DropdownMenuItem variant="danger" className="cursor-pointer transition-colors duration-200" onClick={handleLogout}>Déconnexion</DropdownMenuItem>
+              </DropdownMenuContent>
+            </DropdownMenu>
+          </div>
         </div>
       </div>
 

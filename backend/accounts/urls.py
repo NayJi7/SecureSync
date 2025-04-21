@@ -24,6 +24,7 @@ urlpatterns = [
     path('api/staff/', StaffView.as_view(), name='staff-list'),  
     path('api/account/delete/<str:username>/', views.delete_account, name='delete-account'),
     path('api/user/add_point/', views.add_point),
+    path('api/update-user-prison/', views.update_user_prison, name='update-user-prison'),
 ]
 
 

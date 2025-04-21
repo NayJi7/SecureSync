@@ -1,4 +1,5 @@
 import { useState, useEffect } from "react";
+import { useParams } from "react-router-dom";
 
 type ObjectType = "porte" | "lumiere" | "camera" | "chauffage" | "climatisation" | "panneau d'affichage";
 type ObjectState = "on" | "off";
@@ -18,6 +19,7 @@ interface SmartObject {
   valeur_cible: string | null;
   durabilité: number;
   maintenance: MaintenanceState;
+  Prison_id?: string;
 }
 
 interface UserPoints {
@@ -33,11 +35,37 @@ export default function ObjectDashboard() {
   const [showPointsMessage, setShowPointsMessage] = useState(false);
   const [pointsMessage, setPointsMessage] = useState("");
 
+  // Récupérer l'ID de prison depuis les paramètres d'URL
+  const { prisonId } = useParams();
+  const [selectedPrison, setSelectedPrison] = useState<string | null>(null);
+  
+  // Initialiser la prison sélectionnée lors du chargement
+  useEffect(() => {
+    // Si prisonId est défini dans l'URL, l'utiliser
+    if (prisonId) {
+      setSelectedPrison(prisonId);
+      // Sauvegarder dans le localStorage pour les navigations futures
+      localStorage.setItem('selectedPrison', prisonId);
+    } else {
+      // Sinon, utiliser la prison stockée dans le localStorage (si disponible)
+      const storedPrison = localStorage.getItem('selectedPrison');
+      if (storedPrison) {
+        setSelectedPrison(storedPrison);
+      }
+    }
+  }, [prisonId]);
+
   useEffect(() => {
     const fetchObjects = async () => {
       try {
         setLoading(true);
-        const response = await fetch("http://localhost:8000/api/objects/");
+        
+        // Construire l'URL de l'API en incluant l'identifiant de prison si disponible
+        const apiUrl = selectedPrison 
+          ? `http://localhost:8000/api/objects/?prison_id=${selectedPrison}`
+          : "http://localhost:8000/api/objects/";
+        
+        const response = await fetch(apiUrl);
         const rawText = await response.text();
 
         if (!response.ok) throw new Error(`Erreur HTTP: ${response.status}`);
@@ -58,7 +86,7 @@ export default function ObjectDashboard() {
     };
 
     fetchObjects();
-  }, []);
+  }, [selectedPrison]); // Recharger les objets lorsque la prison change
 
   const addPoints = async (points: number) => {
     try {
@@ -206,7 +234,10 @@ export default function ObjectDashboard() {
 
   return (
     <div className="container mx-auto p-4">
-      <h1 className="text-2xl font-bold mb-6">Tableau de bord des objets connectés</h1>
+      <h1 className="text-2xl font-bold mb-6">
+        Tableau de bord des objets connectés
+        {selectedPrison && <span className="text-lg font-normal ml-2 text-gray-500">(Prison ID: {selectedPrison})</span>}
+      </h1>
 
       {showPointsMessage && (
         <div className="fixed top-4 right-4 bg-green-500 text-white px-4 py-2 rounded-lg shadow-lg transition-opacity">
@@ -215,7 +246,7 @@ export default function ObjectDashboard() {
       )}
 
       {objects.length === 0 ? (
-        <p>Aucun objet trouvé</p>
+        <p>Aucun objet trouvé pour cette prison</p>
       ) : (
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
           {objects.map(obj => (
@@ -265,13 +296,9 @@ export default function ObjectDashboard() {
                     </button>
                   )}
 
-                  {obj.durabilité <= 0 && (
-                    <span className="text-xs text-red-500">Durabilité à 0%</span>
-                  )}
-
                   <button
                     onClick={() => deleteObject(obj.id)}
-                    className="px-3 py-1 rounded text-white bg-gray-600 hover:bg-gray-700 text-sm mt-1"
+                    className="px-3 py-1 mt-1 rounded text-white bg-gray-500 hover:bg-gray-600 text-sm"
                   >
                     Supprimer
                   </button>

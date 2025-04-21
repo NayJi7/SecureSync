@@ -26,6 +26,7 @@ from .serializers import (
     UserLoginSerializer, 
     OTPVerificationSerializer, 
     ResendOTPSerializer,
+    UpdateUserPrisonSerializer,
     StaffSerializer
 )
 from .models import OTPCode
@@ -139,13 +140,21 @@ class VerifyOTPView(APIView):
 
         refresh = RefreshToken.for_user(request.user)
 
+        # Déterminer la prison de l'utilisateur
+        prison_id = request.user.prison
+
+        # Stocker le rôle de l'utilisateur
+        user_role = 'admin' if request.user.is_superuser or request.user.role == 'admin' else 'user'
+        
         return Response({
             'detail': 'OTP vérifié avec succès.',
             'sessionToken': str(refresh.access_token),
             'user': {
                 'id': request.user.id,
                 'username': request.user.username,
-                'email': request.user.email
+                'email': request.user.email,
+                'prison_id': prison_id,
+                'role': user_role
             }
         })
 
@@ -394,3 +403,42 @@ def add_point(request):
             {'status': 'error', 'message': str(e)}, 
             status=status.HTTP_500_INTERNAL_SERVER_ERROR
         )
+
+
+@api_view(['POST'])
+@permission_classes([IsAuthenticated])
+def update_user_prison(request):
+    """
+    Endpoint pour permettre à un administrateur de changer sa prison assignée.
+    L'utilisateur doit être authentifié et avoir le rôle 'admin'.
+    """
+    # Vérifier que l'utilisateur est un administrateur
+    if request.user.role != 'admin':
+        return Response(
+            {'detail': 'Seuls les administrateurs peuvent changer leur prison assignée'},
+            status=status.HTTP_403_FORBIDDEN
+        )
+    
+    # Valider les données de la requête
+    serializer = UpdateUserPrisonSerializer(data=request.data)
+    if not serializer.is_valid():
+        return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+    
+    # Récupérer l'ID de la prison depuis les données validées
+    prison_id = serializer.validated_data['prison_id']
+    
+    # Mettre à jour le champ prison de l'utilisateur
+    request.user.prison = prison_id
+    request.user.save()
+    
+    # Retourner une réponse de succès avec les détails mis à jour
+    return Response({
+        'detail': f'Prison mise à jour avec succès vers {prison_id}',
+        'user': {
+            'id': request.user.id,
+            'username': request.user.username,
+            'email': request.user.email,
+            'prison': request.user.prison,
+            'role': request.user.role
+        }
+    }, status=status.HTTP_200_OK)

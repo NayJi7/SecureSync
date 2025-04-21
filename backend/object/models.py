@@ -49,6 +49,19 @@ class Object(models.Model):
         null=True,
         verbose_name="Connection"
     )
+    PRISON_CHOICES = [
+        ('paris', 'Paris'),
+        ('lyon', 'Lyon'),
+        ('marseille', 'Marseille'),
+        ('cergy', 'Cergy')
+    ]
+    Prison_id = models.CharField(
+        max_length=10,
+        choices=PRISON_CHOICES,
+        blank=True,
+        null=True,
+        verbose_name="Prison ID"
+    )
     consomation = models.IntegerField()
     valeur_actuelle = models.CharField(blank=True)
     valeur_cible = models.CharField(blank=True)

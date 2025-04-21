@@ -1,6 +1,6 @@
 // React et hooks
 import { useState, useRef, useEffect } from 'react';
-import { useNavigate, useLocation } from 'react-router-dom';
+import { useNavigate } from 'react-router-dom';
 import { useDevice } from "@/hooks/use-device";
 
 // Librairies externes
@@ -30,7 +30,11 @@ import { FiRepeat } from "react-icons/fi";
 import { MdOutlineLogin } from "react-icons/md";
 import { LuEyeClosed, LuEye } from "react-icons/lu";
 
-const AnimatedDiv = animated.div;
+// Définir le type AnimatedDiv pour résoudre le problème des enfants (children)
+const AnimatedDiv = animated.div as React.FC<{
+  children?: React.ReactNode;
+  style: any;
+}>;
 
 const formVariants = {
   hidden: { opacity: 0, y: 20 },
@@ -42,7 +46,6 @@ const API_BASE_URL = 'http://localhost:8000/api';
 
 export default function LoginPage() {
   const navigate = useNavigate();
-  const location = useLocation(); // Récupère l'emplacement actuel
   const [authStep, setAuthStep] = useState('login');
   const [email, setEmail] = useState('');
   const [username, setUsername] = useState('');
@@ -67,8 +70,8 @@ export default function LoginPage() {
   const [authToken, setAuthToken] = useState('');
   const [otpCode, setOtpCode] = useState('');
   
-  // Timer pour le countdown
-  const timerRef = useRef(null);
+  // Timer pour le countdown avec le bon type
+  const timerRef = useRef<NodeJS.Timeout | null>(null);
   
   // Nettoyer le timer lors du démontage du composant
   useEffect(() => {
@@ -213,8 +216,7 @@ export default function LoginPage() {
   };
 
   // Soumission du formulaire d'authentification
-  // Soumission du formulaire d'authentification
-const handleSubmit = async (e) => {
+const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
   e.preventDefault();
   setApiError('');
   
@@ -428,34 +430,23 @@ const handleSubmit = async (e) => {
       // Déboguer les informations du profil utilisateur
       console.log('Profil utilisateur reçu:', userProfile);
       console.log('Type de rôle:', typeof userProfile.role, 'Valeur:', userProfile.role);
-      console.log('is_admin:', userProfile.is_admin, 'is_superuser:', userProfile.is_superuser);
       
-      // Vérifier le rôle et la prison associée de l'utilisateur
-      // Vérification améliorée pour détecter correctement les administrateurs
-      const role = userProfile.role?.toLowerCase?.() || '';
-      const isAdmin = role === 'admin' || 
-                      userProfile.is_admin === true || 
-                      userProfile.is_superuser === true ||
-                      userProfile.role === 1 ||  // Si le rôle est stocké comme un nombre
-                      userProfile.admin === true;
+      // Récupérer le rôle et la prison de l'utilisateur
+      const role = userProfile.role || '';
+      // Suppression de isAdmin car non utilisé
+      const prisonId = userProfile.prison_id || '';
       
-      const prisonId = userProfile.prison?.id || userProfile.prison || '';
-      
-      console.log('isAdmin détecté:', isAdmin, 'prisonId:', prisonId);
+      console.log('Rôle détecté:', role, 'Prison ID:', prisonId);
 
-      // Stocker temporairement les informations importantes
-      if (userProfile) {
-        localStorage.setItem('userRole', isAdmin ? 'admin' : 'staff');
-        if (prisonId) {
-          localStorage.setItem('userPrison', String(prisonId));
+      // Stocker les informations importantes dans le localStorage
+      localStorage.setItem('userRole', role);
+      if (prisonId) {
+        localStorage.setItem('userPrison', String(prisonId));
+        // Si c'est la première connexion, on définit aussi la prison sélectionnée
+        if (!localStorage.getItem('selectedPrison')) {
+          localStorage.setItem('selectedPrison', String(prisonId));
         }
-      }
-      
-      // Si c'est un administrateur, toujours rediriger vers la page de sélection de prison
-      if (isAdmin) {
-        console.log('Redirection vers /prison-selection pour admin');
-        navigate('/prison-selection', { replace: true });
-      } else if (prisonId) {
+        
         // Si l'utilisateur appartient à une prison spécifique, le rediriger vers celle-ci
         console.log(`Redirection vers /${prisonId}/home pour utilisateur standard`);
         navigate(`/${prisonId}/home`, { replace: true });
@@ -475,7 +466,7 @@ const handleSubmit = async (e) => {
   };
 
   // Mise à jour du code OTP
-  const handleOTPChange = (value) => {
+  const handleOTPChange = (value: string) => {
     setOtpCode(value);
     setApiError('');
   };

@@ -29,6 +29,15 @@ class OTPVerificationSerializer(serializers.Serializer):
 class ResendOTPSerializer(serializers.Serializer):
     email = serializers.EmailField(required=True)
 
+class UpdateUserPrisonSerializer(serializers.Serializer):
+    prison_id = serializers.CharField(required=True)
+    
+    def validate_prison_id(self, value):
+        prison_ids = [choice[0] for choice in CustomUser.PRISON_CHOICES]
+        if value not in prison_ids:
+            raise serializers.ValidationError("Prison ID invalide.")
+        return value
+
 class RegisterSerializer(serializers.ModelSerializer):
     password1 = serializers.CharField(write_only=True, required=True, validators=[validate_password])
     password2 = serializers.CharField(write_only=True, required=True)

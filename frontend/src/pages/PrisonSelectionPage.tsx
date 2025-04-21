@@ -55,7 +55,6 @@ export default function PrisonSelectionPage() {
           { id: "paris", name: "Centre Pénitentiaire de Paris", location: "Paris", detainees_count: 876, security_level: "Haute" },
           { id: "lyon", name: "Centre Pénitentiaire de Lyon", location: "Lyon", detainees_count: 542, security_level: "Moyenne" },
           { id: "marseille", name: "Centre Pénitentiaire de Marseille", location: "Marseille", detainees_count: 653, security_level: "Haute" },
-          { id: "lille", name: "Centre Pénitentiaire de Lille", location: "Lille", detainees_count: 421, security_level: "Moyenne-Haute" }
         ]);
         setLoading(false);
         
@@ -69,13 +68,38 @@ export default function PrisonSelectionPage() {
     fetchPrisons();
   }, []);
 
-  const handleSelectPrison = (prisonId: string) => {
-    // Stocker l'ID de la prison sélectionnée
-    localStorage.setItem('selectedPrison', prisonId);
-    
-    // Rediriger vers la page d'accueil avec la prison sélectionnée
-    navigate(`/${prisonId}/home`);
-  };
+  const handleSelectPrison = async (prisonId: string) => {
+    try {
+        // Stocker l'ID de la prison sélectionnée localement
+        localStorage.setItem('selectedPrison', prisonId);
+        
+        // Mettre à jour le Prison_id dans la base de données
+        const token = localStorage.getItem('sessionToken');
+        
+        // Utiliser POST au lieu de PUT
+        await axios.post('http://localhost:8000/api/update-user-prison/', 
+        {
+            prison_id: prisonId,
+        },
+        {
+            headers: { 'Authorization': `Bearer ${token}` }
+        }
+        );
+        
+        // Rediriger vers la page d'accueil avec la prison sélectionnée
+        navigate(`/${prisonId}/home`);
+    } catch (error) {
+        console.error("Erreur lors de la mise à jour du Prison_id:", error);
+        // Vous pourriez ajouter ici un log plus détaillé des données de l'erreur
+        if (axios.isAxiosError(error) && error.response) {
+        console.error("Détails de la réponse d'erreur:", error.response);
+        }
+        
+        // Puisqu'il s'agit d'un admin, vous pourriez quand même rediriger
+        // même si la mise à jour a échoué, et mettre à jour la base plus tard
+        navigate(`/${prisonId}/home`);
+    }
+};
 
   // Fonction pour se déconnecter
   const handleLogout = () => {
