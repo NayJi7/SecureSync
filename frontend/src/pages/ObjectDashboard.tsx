@@ -416,15 +416,5 @@ export default function ObjectDashboard() {
           </div>
         )}
       </div>
-
-      {/* Style tag for custom effects */}
-      <style>
-        {`
-          .drop-shadow-glow {
-            filter: drop-shadow(0 0 8px rgba(34, 197, 94, 0.2));
-          }
-        `}
-      </style>
-    </div>
   );
 }

@@ -1,5 +1,5 @@
 import { useEffect, useState } from 'react';
-import { Link } from 'react-router-dom';
+import { Link, useNavigate } from 'react-router-dom';
 import { useDevice } from '@/hooks/use-device.ts';
 import SpotlightCard from '@/blocks/Components/SpotlightCard/SpotlightCard.tsx';
 import { Button } from '@/components/ui/button';
@@ -12,6 +12,7 @@ export default function LandingPage() {
   const { isMobile } = useDevice();
   const [isScrolled, setIsScrolled] = useState(false);
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
+  const navigate = useNavigate();
 
   useEffect(() => {
     // Set direct styles instead of just adding a class
@@ -70,11 +71,27 @@ export default function LandingPage() {
                 Contrôle complet et surveillance des établissements pénitentiaires avec protocoles de sécurité renforcés
               </p>
               <div className="flex flex-col sm:flex-row gap-4 justify-center mb-16">
-                <Link to="/login">
-                  <Button size="lg" className="bg-green-600 hover:bg-green-700 text-black font-semibold px-6 py-3">
-                    Accéder au Tableau de Bord
-                  </Button>
-                </Link>
+                <Button 
+                  size="lg" 
+                  className="bg-green-600 hover:bg-green-700 text-black font-semibold px-6 py-3"
+                  onClick={() => {
+                    // Vérifier si l'utilisateur est déjà connecté avec toutes les possibilités de tokens
+                    const isAuthenticated = 
+                      localStorage.getItem('sessionToken') !== null || 
+                      localStorage.getItem('access_token') !== null || 
+                      localStorage.getItem('token') !== null ||
+                      localStorage.getItem('authToken') !== null;
+                    
+                    // Rediriger vers la page appropriée en utilisant navigate
+                    if (isAuthenticated) {
+                      navigate('/home');
+                    } else {
+                      navigate('/login');
+                    }
+                  }}
+                >
+                  Accéder au Tableau de Bord
+                </Button>
                 <Button variant="outline" size="lg" className={`text-black-300 border-green-500 hover:bg-green-900/30 hover:text-white px-6 py-3 ${isMobile ? 'm-auto w-[50%]' : ''}`}>
                   Obtenir une Démo
                 </Button>

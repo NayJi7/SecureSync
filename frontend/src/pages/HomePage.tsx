@@ -21,6 +21,7 @@ import Dock from '../blocks/Components/Dock/Dock'
 import TeamModal from '../components/HomeComponents/TeamModal'
 import ProfileModal from '../components/HomeComponents/ProfileModal'
 import ConnectedObjects from '../components/HomeComponents/ConnectedObjects';
+import ObjectLogs from '../components/HomeComponents/ObjectLogs'
 
 // Icônes
 import { HiAdjustments, HiClipboardList, HiDotsVertical, HiTrash } from "react-icons/hi"
@@ -61,6 +62,7 @@ export default function HomePage({ children }: { children?: React.ReactNode }) {
   const [staff, setStaff] = useState<StaffMember[]>([]);
   const isSmallScreen = isMobile || isTablet;
   const isAdmin = localStorage.getItem('userRole') === 'admin';
+  const hasLogsRights = localStorage.getItem('userRole') === 'gerant' || localStorage.getItem('userRole') === 'admin' || localStorage.getItem('gestionnaire') === 'gestionnaire';
 
   // État pour stocker les données du profil utilisateur
   const [profile, setProfile] = useState<UserProfile | null>(null);
@@ -102,22 +104,19 @@ export default function HomePage({ children }: { children?: React.ReactNode }) {
       </div>
     ),
     settings: (
+      <div>
+        Ceci est <span className="font-medium text-gray-800 dark:text-white">le contenu associé à l'onglet Paramètres</span>.
+        Cliquer sur un autre onglet basculera la visibilité de celui-ci pour le suivant. Le JavaScript de l'onglet
+        échange les classes pour contrôler la visibilité et le style du contenu.
+      </div>
+    ),
+    logs: (
       <div className="relative h-full">
         <div className="my-8">
           <ObjectLogs />
         </div>
       </div>
     ),
-    contacts: (
-      <div>
-        Ceci est <span className="font-medium text-gray-800 dark:text-white">le contenu associé à l'onglet Contacts</span>.
-        Cliquer sur un autre onglet basculera la visibilité de celui-ci pour le suivant. Le JavaScript de l'onglet
-        échange les classes pour contrôler la visibilité et le style du contenu.
-      </div>
-    ),
-    disabled: (
-      <div>Contenu désactivé</div>
-    )
   };
 
   useEffect(() => {
@@ -183,7 +182,7 @@ export default function HomePage({ children }: { children?: React.ReactNode }) {
                   <h2 className="text-lg font-medium z-10 ml-2">
                     {activeTab === "dashboard" ? "Tableau de Bord" :
                       activeTab === "settings" ? "Paramètres" :
-                        activeTab === "contacts" ? "Contacts" : "Désactivé"}
+                        activeTab === "logs" ? "Historique" : ""}
                   </h2>
 
                   <DropdownMenu>
@@ -200,18 +199,18 @@ export default function HomePage({ children }: { children?: React.ReactNode }) {
                         Tableau de Bord
                       </DropdownMenuItem>
                       <DropdownMenuItem
+                        className={`flex items-center gap-2 ${activeTab === "logs" ? "bg-gray-100 dark:bg-gray-600" : ""}`}
+                        onClick={() => setActiveTab("logs")}
+                      >
+                        <HiClipboardList className="w-4 h-4" />
+                        Historique
+                      </DropdownMenuItem>
+                      <DropdownMenuItem
                         className={`flex items-center gap-2 ${activeTab === "settings" ? "bg-gray-100 dark:bg-gray-600" : ""}`}
                         onClick={() => setActiveTab("settings")}
                       >
                         <HiAdjustments className="w-4 h-4" />
                         Paramètres
-                      </DropdownMenuItem>
-                      <DropdownMenuItem
-                        className={`flex items-center gap-2 ${activeTab === "contacts" ? "bg-gray-100 dark:bg-gray-600" : ""}`}
-                        onClick={() => setActiveTab("contacts")}
-                      >
-                        <HiClipboardList className="w-4 h-4" />
-                        Contacts
                       </DropdownMenuItem>
                     </DropdownMenuContent>
                   </DropdownMenu>
@@ -221,8 +220,7 @@ export default function HomePage({ children }: { children?: React.ReactNode }) {
                 <div className="absolute left-0 pt-6 px-4 w-full min-h-[calc(100vh-120px)] z-5">
                   {activeTab === "dashboard" && tabContents.dashboard}
                   {activeTab === "settings" && tabContents.settings}
-                  {activeTab === "contacts" && tabContents.contacts}
-                  {activeTab === "disabled" && tabContents.disabled}
+                  {activeTab === "logs" && tabContents.logs}
                 </div>
               </div>
             ) : (
@@ -233,21 +231,17 @@ export default function HomePage({ children }: { children?: React.ReactNode }) {
                 onActiveTabChange={(tab) => {
                   if (tab === 0) setActiveTab("dashboard");
                   else if (tab === 1) setActiveTab("settings");
-                  else if (tab === 2) setActiveTab("contacts");
-                  else setActiveTab("disabled");
+                  else if (tab === 2) setActiveTab("logs");
                 }}
               >
                 <TabItem title="Tableau de Bord" icon={MdDashboard}>
                   {tabContents.dashboard}
                 </TabItem>
+                <TabItem disabled={!hasLogsRights} title="Historique" icon={HiClipboardList}>
+                  {tabContents.logs}
+                </TabItem>
                 <TabItem title="Paramètres" icon={HiAdjustments}>
                   {tabContents.settings}
-                </TabItem>
-                <TabItem title="Contacts" icon={HiClipboardList}>
-                  {tabContents.contacts}
-                </TabItem>
-                <TabItem disabled title="Désactivé">
-                  {tabContents.disabled}
                 </TabItem>
               </Tabs>
             )}
