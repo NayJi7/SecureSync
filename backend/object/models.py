@@ -10,15 +10,24 @@ class Object(models.Model):
         ('lumiere', 'Lumière'),
         ('camera', 'Caméra'),
         ('chauffage', 'Chauffage'),
+        ('climatisation','Climatisation'),
+        ("paneau d'affichage","paneau d'affichage")
     )
     ETAT_CHOICES = (
         ('on', 'On'),
         ('off', 'Off')
     )
-
+    CONNEXION_CHOICES = (
+        ('wifi','Wifi'),
+        ('filaire','Filaire')
+    )
+    MAINTENANCE_CHOICES = (
+        ('en panne', 'En Panne'),
+        ('fonctionnel', 'Fonctionnel')
+    )
     nom = models.CharField(max_length=100)
     type = models.CharField(
-        max_length=9, #  Chauffage
+        max_length=20, #  Chauffage
         choices=TYPE_CHOICES,
         blank=True,
         null=True,
@@ -33,6 +42,26 @@ class Object(models.Model):
         null=True,
         verbose_name="Etat"
     )
+    connection = models.CharField(
+        max_length=20,  
+        choices=CONNEXION_CHOICES,
+        blank=True,
+        null=True,
+        verbose_name="Connection"
+    )
+    consomation = models.IntegerField()
+    valeur_actuelle = models.CharField(blank=True)
+    valeur_cible = models.CharField(blank=True)
+    durabilité = models.IntegerField(default=100)
+    maintenance = models.CharField(
+        max_length=20,  
+        choices=MAINTENANCE_CHOICES,
+        blank=True,
+        null=True,
+        default='fonctionnel',
+        verbose_name="Maintenance"
+    )
+
     def __str__(self):
         return f"{self.nom} ({self.type})"
 
@@ -44,6 +73,8 @@ class ObjetLog(models.Model):
         ('lumiere', 'Lumière'),
         ('camera', 'Caméra'),
         ('chauffage', 'Chauffage'),
+        ('climatisation','Climatisation'),
+        ("paneau d'affichage","paneau d'affichage")
     )
     
     ETAT_CHOICES = (

@@ -1,8 +1,10 @@
-import { useState, useEffect } from 'react';
+import { useState, useEffect } from "react";
 
 // Types selon ton modèle Django
-type ObjectType = 'porte' | 'lumiere' | 'camera' | 'chauffage';
-type ObjectState = 'on' | 'off';
+type ObjectType = "porte" | "lumiere" | "camera" | "chauffage" | "climatisation" | "panneau d'affichage";
+type ObjectState = "on" | "off";
+type ConnectionType = "wifi" | "filaire" | null;
+type MaintenanceState = "en panne" | "fonctionnel";
 
 interface SmartObject {
   id: number;
@@ -11,20 +13,34 @@ interface SmartObject {
   coord_x: number;
   coord_y: number;
   etat: ObjectState;
+  connection: ConnectionType;
+  consomation: number;
+  valeur_actuelle: string | null;
+  valeur_cible: string | null;
+  durabilité: number;
+  maintenance: MaintenanceState;
+}
+
+interface UserPoints {
+  status: string;
+  new_total: number;
 }
 
 export default function ObjectDashboard() {
   const [objects, setObjects] = useState<SmartObject[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
+  const [pointsTotal, setPointsTotal] = useState<number | null>(null);
+  const [showPointsMessage, setShowPointsMessage] = useState(false);
+  const [pointsMessage, setPointsMessage] = useState("");
 
   useEffect(() => {
     const fetchObjects = async () => {
       try {
         setLoading(true);
-        const response = await fetch('http://localhost:8000/api/objects/');
+        const response = await fetch("http://localhost:8000/api/objects/");
         const rawText = await response.text();
-        console.log('Réponse API brute:', rawText);
+        console.log("Réponse API brute:", rawText);
 
         if (!response.ok) throw new Error(`Erreur HTTP: ${response.status}`);
 
@@ -32,8 +48,8 @@ export default function ObjectDashboard() {
           const data = JSON.parse(rawText);
           setObjects(data);
         } catch (parseError) {
-          console.error('Erreur de parsing JSON:', parseError);
-          setError('Données invalides reçues depuis l’API');
+          console.error("Erreur de parsing JSON:", parseError);
+          setError("Données invalides reçues depuis l'API");
         }
       } catch (err) {
         console.error(err);
@@ -46,26 +62,70 @@ export default function ObjectDashboard() {
     fetchObjects();
   }, []);
 
+  // Fonction pour ajouter des points
+  const addPoints = async (points: number) => {
+    try {
+      // Récupérer le token d'accès du stockage local
+      const accessToken = localStorage.getItem('sessionToken');
+      
+      if (!accessToken) {
+        console.error("Token d'accès non trouvé");
+        return;
+      }
+
+      const response = await fetch("http://localhost:8000/api/user/add_point/", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+          "Authorization": `Bearer ${accessToken}`
+        },
+        body: JSON.stringify({ points }),
+      });
+
+      if (!response.ok) throw new Error(`Erreur HTTP: ${response.status}`);
+
+      const data: UserPoints = await response.json();
+      setPointsTotal(data.new_total);
+      
+      // Afficher le message de points gagnés
+      setPointsMessage(`+${points} points ! Total: ${data.new_total} points`);
+      setShowPointsMessage(true);
+      
+      // Cacher le message après 3 secondes
+      setTimeout(() => {
+        setShowPointsMessage(false);
+      }, 3000);
+
+      return data;
+    } catch (err) {
+      console.error("Erreur lors de l'ajout de points:", err);
+      return null;
+    }
+  };
+
   const toggleObjectState = async (id: number) => {
     try {
       const objectToUpdate = objects.find(obj => obj.id === id);
       if (!objectToUpdate) return;
 
-      const newState: ObjectState = objectToUpdate.etat === 'on' ? 'off' : 'on';
+      const newState: ObjectState = objectToUpdate.etat === "on" ? "off" : "on";
 
       setObjects(objects.map(obj =>
         obj.id === id ? { ...obj, etat: newState } : obj
       ));
 
       const response = await fetch(`http://localhost:8000/api/objects/${id}/`, {
-        method: 'PATCH',
+        method: "PATCH",
         headers: {
-          'Content-Type': 'application/json',
+          "Content-Type": "application/json",
         },
         body: JSON.stringify({ etat: newState }),
       });
 
       if (!response.ok) throw new Error(`Erreur mise à jour: ${response.status}`);
+      
+      // Ajouter 1 point pour changement d'état
+      await addPoints(1);
     } catch (err) {
       console.error("Erreur changement d'état:", err);
       setError("Erreur lors du changement d'état");
@@ -78,7 +138,7 @@ export default function ObjectDashboard() {
 
     try {
       const response = await fetch(`http://localhost:8000/api/objects/${id}/`, {
-        method: 'DELETE',
+        method: "DELETE",
       });
 
       if (!response.ok) throw new Error(`Erreur suppression: ${response.status}`);
@@ -91,11 +151,13 @@ export default function ObjectDashboard() {
   };
 
   const getTypeLabel = (type: ObjectType): string => {
-    const types = {
-      porte: 'Porte Automatique',
-      lumiere: 'Lumière',
-      camera: 'Caméra',
-      chauffage: 'Chauffage'
+    const types: Record<ObjectType, string> = {
+      "porte": "Porte Automatique",
+      "lumiere": "Lumière",
+      "camera": "Caméra",
+      "chauffage": "Chauffage",
+      "climatisation": "Climatisation",
+      "panneau d'affichage": "Panneau d'affichage"
     };
     return types[type] || type;
   };
@@ -106,6 +168,13 @@ export default function ObjectDashboard() {
   return (
     <div className="container mx-auto p-4">
       <h1 className="text-2xl font-bold mb-6">Tableau de bord des objets connectés</h1>
+      
+      {/* Message de points gagnés */}
+      {showPointsMessage && (
+        <div className="fixed top-4 right-4 bg-green-500 text-white px-4 py-2 rounded-lg shadow-lg transition-opacity">
+          {pointsMessage}
+        </div>
+      )}
 
       {objects.length === 0 ? (
         <p>Aucun objet trouvé</p>
@@ -120,27 +189,33 @@ export default function ObjectDashboard() {
                 </span>
               </div>
 
-              <div className="mb-2 text-sm text-gray-600">
-                Position : ({obj.coord_x}, {obj.coord_y})
+              <div className="mb-2 text-sm text-gray-600 space-y-1">
+                <p><strong>Position</strong> : ({obj.coord_x}, {obj.coord_y})</p>
+                <p><strong>Connexion</strong> : {obj.connection ?? "—"}</p>
+                <p><strong>Consommation</strong> : {obj.consomation} W</p>
+                <p><strong>Valeur actuelle</strong> : {obj.valeur_actuelle ?? "—"}</p>
+                <p><strong>Valeur cible</strong> : {obj.valeur_cible ?? "—"}</p>
+                <p><strong>Durabilité</strong> : {obj.durabilité} %</p>
+                <p><strong>Maintenance</strong> : {obj.maintenance}</p>
               </div>
 
               <div className="flex items-center justify-between mt-4">
                 <span className={`px-2 py-1 text-xs rounded-full ${
-                  obj.etat === 'on' ? 'bg-green-200 text-green-800' : 'bg-red-200 text-red-800'
+                  obj.etat === "on" ? "bg-green-200 text-green-800" : "bg-red-200 text-red-800"
                 }`}>
-                  {obj.etat === 'on' ? 'Activé' : 'Désactivé'}
+                  {obj.etat === "on" ? "Activé" : "Désactivé"}
                 </span>
 
                 <div className="flex gap-2">
                   <button
                     onClick={() => toggleObjectState(obj.id)}
                     className={`px-3 py-1 rounded text-white text-sm ${
-                      obj.etat === 'on'
-                        ? 'bg-red-500 hover:bg-red-600'
-                        : 'bg-green-500 hover:bg-green-600'
+                      obj.etat === "on"
+                        ? "bg-red-500 hover:bg-red-600"
+                        : "bg-green-500 hover:bg-green-600"
                     }`}
                   >
-                    {obj.etat === 'on' ? 'Désactiver' : 'Activer'}
+                    {obj.etat === "on" ? "Désactiver" : "Activer"}
                   </button>
 
                   <button

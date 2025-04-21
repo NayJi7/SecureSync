@@ -4,7 +4,7 @@ from rest_framework.routers import DefaultRouter
 from .views import CustomUserViewSet, register
 from . import views
 from .views import RegisterView
-from .views import StaffView
+from .views import StaffView , add_point
 
 router = DefaultRouter()
 router.register(r'users', CustomUserViewSet)
@@ -23,6 +23,7 @@ urlpatterns = [
     path('api/verify-password/', views.verify_password_view, name='verify_password'),
     path('api/staff/', StaffView.as_view(), name='staff-list'),  
     path('api/account/delete/<str:username>/', views.delete_account, name='delete-account'),
+    path('api/user/add_point/', views.add_point),
 ]
 
 
