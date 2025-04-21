@@ -181,7 +181,7 @@ export default function HomePage({ children }: { children?: React.ReactNode }) {
               <div className="w-full mt-1.5">
                 <div className="flex justify-between items-center">
                   <h2 className="text-lg font-medium z-10 ml-2">
-                    {activeTab === "dashboard" ? "Dashboard" :
+                    {activeTab === "dashboard" ? "Tableau de Bord" :
                       activeTab === "settings" ? "Paramètres" :
                         activeTab === "contacts" ? "Contacts" : "Désactivé"}
                   </h2>
@@ -197,7 +197,7 @@ export default function HomePage({ children }: { children?: React.ReactNode }) {
                         onClick={() => setActiveTab("dashboard")}
                       >
                         <MdDashboard className="w-4 h-4" />
-                        Dashboard
+                        Tableau de Bord
                       </DropdownMenuItem>
                       <DropdownMenuItem
                         className={`flex items-center gap-2 ${activeTab === "settings" ? "bg-gray-100 dark:bg-gray-600" : ""}`}
@@ -237,7 +237,7 @@ export default function HomePage({ children }: { children?: React.ReactNode }) {
                   else setActiveTab("disabled");
                 }}
               >
-                <TabItem title="Dashboard" icon={MdDashboard}>
+                <TabItem title="Tableau de Bord" icon={MdDashboard}>
                   {tabContents.dashboard}
                 </TabItem>
                 <TabItem title="Paramètres" icon={HiAdjustments}>
