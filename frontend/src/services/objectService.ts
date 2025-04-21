@@ -4,11 +4,13 @@ import { ObjectType } from '../components/ConnectedObjects/types';
 // Object API endpoints
 const OBJECTS_ENDPOINT = 'objects/';
 
-// Get all objects
-export const getObjects = () => {
-  console.debug('Fetching all objects');
+// Get all objects, optionally filtered by prison ID
+export const getObjects = (prison_id?: string) => {
+  console.debug('Fetching objects' + (prison_id ? ` for prison: ${prison_id}` : ''));
   // Allow this request without authentication since it's a read-only operation
-  return API.get<ObjectType[]>(OBJECTS_ENDPOINT);
+  return API.get<ObjectType[]>(OBJECTS_ENDPOINT, { 
+    params: prison_id ? { prison_id } : undefined 
+  });
 };
 
 // Get single object by ID
@@ -20,7 +22,17 @@ export const getObjectById = (id: number) => {
 // Create a new object
 export const createObject = (object: Omit<ObjectType, 'id'>) => {
   console.debug('Creating new object:', object.type);
-  return API.post<ObjectType>(OBJECTS_ENDPOINT, object);
+  
+  // Ajouter automatiquement le Prison_id actuel à l'objet
+  const currentPrisonId = localStorage.getItem('userPrison') || localStorage.getItem('selectedPrison');
+  
+  const objectWithPrison = {
+    ...object,
+    Prison_id: currentPrisonId // Associer l'objet à la prison actuelle
+  };
+  
+  console.debug('Creating object with prison ID:', currentPrisonId);
+  return API.post<ObjectType>(OBJECTS_ENDPOINT, objectWithPrison);
 };
 
 // Update an object

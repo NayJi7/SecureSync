@@ -21,6 +21,23 @@ export default function PrisonSelectionPage() {
   const [prisons, setPrisons] = useState<Prison[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState('');
+
+  // Vérification du rôle administrateur
+  useEffect(() => {
+    const userRole = localStorage.getItem('userRole');
+    // Si l'utilisateur n'est pas un administrateur, rediriger vers sa page d'accueil
+    if (userRole !== 'admin') {
+      // Récupérer l'ID de la prison de l'utilisateur
+      const prisonId = localStorage.getItem('userPrison');
+      if (prisonId) {
+        // Rediriger vers la page d'accueil de la prison de l'utilisateur
+        navigate(`/${prisonId}/home`, { replace: true });
+      } else {
+        // En cas de problème, rediriger vers la page de connexion
+        navigate('/login', { replace: true });
+      }
+    }
+  }, [navigate]);
   
   useEffect(() => {
     document.body.classList.add('prison-selection-page');
@@ -55,6 +72,7 @@ export default function PrisonSelectionPage() {
           { id: "paris", name: "Centre Pénitentiaire de Paris", location: "Paris", detainees_count: 876, security_level: "Haute" },
           { id: "lyon", name: "Centre Pénitentiaire de Lyon", location: "Lyon", detainees_count: 542, security_level: "Moyenne" },
           { id: "marseille", name: "Centre Pénitentiaire de Marseille", location: "Marseille", detainees_count: 653, security_level: "Haute" },
+          { id: "cergy", name: "Centre Pénitentiaire de Cergy", location: "Cergy", detainees_count: 421, security_level: "Moyenne" },
         ]);
         setLoading(false);
         

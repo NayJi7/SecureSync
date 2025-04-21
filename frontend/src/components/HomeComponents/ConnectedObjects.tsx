@@ -1,15 +1,19 @@
 import React, { useEffect, useState } from 'react';
-import { ObjectType, DoorObject, LightObject, CameraObject, HeaterObject } from './types';
+import { ObjectType, DoorObject, LightObject, CameraObject, HeaterObject } from '../ConnectedObjects/types';
 import { getObjects, createObject, toggleObjectState } from '../../services/objectService';
-import Door from './Door';
-import Light from './Light';
-import Camera from './Camera';
-import Heater from './Heater';
-import ObjectsChart, { AddObjectCallback } from './ObjectsChart';
+import Door from '../ConnectedObjects/Door';
+import Light from '../ConnectedObjects/Light';
+import Camera from '../ConnectedObjects/Camera';
+import Heater from '../ConnectedObjects/Heater';
+import ObjectsChart, { AddObjectCallback } from '../ConnectedObjects/ObjectsChart';
 import { LayoutGrid, Activity, RefreshCw, X, PlusCircle, AlertCircle, MapPin, ToggleLeft } from 'lucide-react';
 import axios from 'axios';
 
-const ConnectedObjects: React.FC = () => {
+interface ConnectedObjectsProps {
+    prisonId?: string;
+}
+
+const ConnectedObjects: React.FC<ConnectedObjectsProps> = ({ prisonId }) => {
     const [objects, setObjects] = useState<ObjectType[]>([]);
     const [loading, setLoading] = useState(true);
     const [refreshing, setRefreshing] = useState(false);
@@ -21,14 +25,26 @@ const ConnectedObjects: React.FC = () => {
     const [newObjectState, setNewObjectState] = useState<'on' | 'off'>('off');
     const [isSaving, setIsSaving] = useState(false);
     const [error, setError] = useState<string | null>(null);
+    
+    // Get the prison ID from props or from localStorage if not provided
+    const currentPrisonId = prisonId || localStorage.getItem('userPrison') || localStorage.getItem('selectedPrison');
 
     const fetchObjects = async () => {
         try {
             setRefreshing(true);
             setError(null);
-            // Use the service function instead of direct API call
-            const response = await getObjects();
-            setObjects(response.data);
+            // Use the service function with prison ID parameter
+            const response = await getObjects(currentPrisonId || undefined);
+            
+            // Filtrage supplémentaire côté client pour assurer que seuls les objets 
+            // de la prison actuelle sont affichés
+            const filteredObjects = currentPrisonId 
+                ? response.data.filter(obj => obj.Prison_id === currentPrisonId)
+                : response.data;
+                
+            console.log(`Filtered objects for prison ${currentPrisonId}: ${filteredObjects.length} of ${response.data.length}`);
+            
+            setObjects(filteredObjects);
             setLoading(false);
             setTimeout(() => setRefreshing(false), 500); // Visual feedback
         } catch (error: any) {
@@ -52,10 +68,10 @@ const ConnectedObjects: React.FC = () => {
         }
     };
 
-    // Fetch objects when component mounts
+    // Fetch objects when component mounts or when currentPrisonId changes
     useEffect(() => {
         fetchObjects();
-    }, []);
+    }, [currentPrisonId]);
 
     // Group objects by type using type assertions for type safety
     const grouped = {
@@ -98,7 +114,8 @@ const ConnectedObjects: React.FC = () => {
                 type: addingObjectType,
                 etat: newObjectState,
                 coord_x: newObjectX,
-                coord_y: newObjectY
+                coord_y: newObjectY,
+                Prison_id: currentPrisonId || '' // Ajouter explicitement l'ID de la prison actuelle
             });
 
             // Refresh the objects list

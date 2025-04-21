@@ -1,7 +1,7 @@
 // src/components/UserDetail.tsx
 import React, { useState, useEffect } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
-import { getUser, deleteUser, User } from '../services/userService';
+import { getUser, deleteUser, User } from '../../services/userService';
 
 const UserDetail: React.FC = () => {
   const { id } = useParams<{ id: string }>();

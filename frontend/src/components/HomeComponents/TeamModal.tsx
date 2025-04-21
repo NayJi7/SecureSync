@@ -25,6 +25,7 @@ interface CurrentUser {
 interface StaffModalProps {
   isOpen: boolean;
   onClose: () => void;
+  prisonId?: string; // ID de la prison pour filtrer les employés
 }
 
 // Interface pour le formulaire d'ajout de membre
@@ -38,15 +39,17 @@ interface NewMemberFormData {
   sexe: string;
   date_naissance: string;
   section: string;
-  prison: string;
+  prison: string; // On conserve la propriété dans l'interface mais on l'assignera automatiquement
   role: string;
 }
 
-const StaffModal: React.FC<StaffModalProps> = ({ isOpen, onClose }) => {
+const StaffModal: React.FC<StaffModalProps> = ({ isOpen, onClose, prisonId }) => {
   const [staff, setStaff] = useState<StaffMember[]>([]);
+  const [filteredStaff, setFilteredStaff] = useState<StaffMember[]>([]);
   const [loading, setLoading] = useState<boolean>(true);
   const [error, setError] = useState<string | null>(null);
   const [currentUser, setCurrentUser] = useState<CurrentUser | null>(null);
+  const currentPrisonId = prisonId || localStorage.getItem('userPrison') || localStorage.getItem('selectedPrison');
   const [deleteModal, setDeleteModal] = useState<{isOpen: boolean, username: string, userId: string}>({
     isOpen: false,
     username: '',
@@ -66,7 +69,7 @@ const StaffModal: React.FC<StaffModalProps> = ({ isOpen, onClose }) => {
     sexe: 'M',
     date_naissance: '',
     section: 'a',
-    prison: 'paris',
+    prison: currentPrisonId || 'paris', // On utilise la prison actuelle ou 'paris' par défaut
     role: 'employe' // Rôle par défaut le plus bas
   });
   const [formError, setFormError] = useState<string | null>(null);
@@ -249,7 +252,7 @@ const StaffModal: React.FC<StaffModalProps> = ({ isOpen, onClose }) => {
       sexe: 'M',
       date_naissance: '',
       section: 'a',
-      prison: 'paris',
+      prison: currentPrisonId || 'paris', // Utiliser la prison actuelle
       role: 'employe'
     });
   };
@@ -309,8 +312,33 @@ const StaffModal: React.FC<StaffModalProps> = ({ isOpen, onClose }) => {
     const allStaffList = Array.isArray(staff) ? staff : [];
     const isAdmin = currentUser?.role === 'admin';
     
-    // Filtrer les employés dont le rôle n'est pas spécifié
-    const filteredStaffList = allStaffList.filter(member => member.role && member.role !== 'Non spécifié');
+    // Obtenir l'ID de la prison actuelle (prop ou localStorage)
+    const currentPrisonId = prisonId || localStorage.getItem('userPrison') || '';
+    
+    // Filtrer les employés par rôle et par prison si un ID de prison est défini
+    const filteredStaffList = allStaffList.filter(member => {
+      // Toujours vérifier que le rôle est défini
+      const hasRole = member.role && member.role !== 'Non spécifié';
+      
+      // Si le membre est admin, seuls les autres admins peuvent le voir
+      if (member.role === 'admin' && currentUser?.role !== 'admin') {
+        return false;
+      }
+      
+      // Si l'utilisateur est admin et qu'aucun filtre de prison n'est appliqué
+      // alors montrer tous les employés
+      if (isAdmin && !currentPrisonId) {
+        return hasRole;
+      }
+      
+      // Dans tous les autres cas (admin avec prison sélectionnée ou utilisateur normal)
+      // filtrer par prison
+      if (currentPrisonId) {
+        return hasRole && member.prison === currentPrisonId;
+      }
+      
+      return hasRole;
+    });
     
     // Trier les employés selon le critère choisi
     let staffList = [...filteredStaffList];
@@ -750,23 +778,7 @@ const StaffModal: React.FC<StaffModalProps> = ({ isOpen, onClose }) => {
                   </select>
                 </div>
                 
-                <div>
-                  <label htmlFor="prison" className="block text-sm font-medium text-gray-700 mb-1">
-                    Prison
-                  </label>
-                  <select
-                    id="prison"
-                    name="prison"
-                    value={formData.prison}
-                    onChange={handleInputChange}
-                    className="w-full p-2.5 text-sm text-gray-900 bg-gray-50 rounded-lg border border-gray-300 focus:ring-blue-500 focus:border-blue-500"
-                  >
-                    <option value="paris">Paris</option>
-                    <option value="lyon">Lyon</option>
-                    <option value="marseille">Marseille</option>
-                    <option value="cergy">Cergy</option>
-                  </select>
-                </div>
+                {/* Le champ Prison a été retiré, la prison actuelle sera automatiquement assignée */}
               </div>
               
               <div className="flex justify-end space-x-2 pt-4">

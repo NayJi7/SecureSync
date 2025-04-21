@@ -29,6 +29,7 @@ import { TbLockPassword } from "react-icons/tb";
 import { FiRepeat } from "react-icons/fi";
 import { MdOutlineLogin } from "react-icons/md";
 import { LuEyeClosed, LuEye } from "react-icons/lu";
+import { CgProfile } from "react-icons/cg";
 
 // Définir le type AnimatedDiv pour résoudre le problème des enfants (children)
 const AnimatedDiv = animated.div as React.FC<{
@@ -565,6 +566,7 @@ const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
                         className={`pointer-events-auto text-lg ${usernameError ? 'border-red-500' : ''}`}
                         id="username" 
                         type="text" 
+                        icon={CgProfile} 
                         required 
                         shadow
                         value={username}

@@ -1,5 +1,6 @@
 import React, { useEffect, useState } from 'react';
-import { getObjects, ObjectType } from '../../services/objectService';
+import { getObjects } from '../../services/objectService';
+import { ObjectType } from './types';
 import Door from './Door';
 import Light from './Light';
 import Camera from './Camera';

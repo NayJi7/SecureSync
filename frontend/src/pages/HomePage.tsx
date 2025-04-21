@@ -18,9 +18,9 @@ import {
 import { TabItem, Tabs } from "flowbite-react"
 import Waves from '../blocks/Backgrounds/Waves/Waves'
 import Dock from '../blocks/Components/Dock/Dock'
-import TeamModal from '../components/TeamModal'
-import ProfileModal from '../components/ProfileModal'
-import ConnectedObjects from '../components/ConnectedObjects/ConnectedObjects';
+import TeamModal from '../components/HomeComponents/TeamModal'
+import ProfileModal from '../components/HomeComponents/ProfileModal'
+import ConnectedObjects from '../components/HomeComponents/ConnectedObjects';
 
 // Icônes
 import { HiAdjustments, HiClipboardList, HiDotsVertical, HiTrash } from "react-icons/hi"
@@ -95,9 +95,9 @@ export default function HomePage({ children }: { children?: React.ReactNode }) {
     dashboard: (
       <div className="relative h-full">
 
-        {/* ConnectedObjects always visible */}
+        {/* ConnectedObjects always visible - passing prison ID */}
         <div className="my-8">
-          <ConnectedObjects />
+          <ConnectedObjects prisonId={currentPrison} />
         </div>
       </div>
     ),
@@ -291,6 +291,7 @@ export default function HomePage({ children }: { children?: React.ReactNode }) {
       <TeamModal
         isOpen={staffModalOpen}
         onClose={() => setStaffModalOpen(false)}
+        prisonId={currentPrison}
       />
 
       {/* "Profil" section in user parameters */}
