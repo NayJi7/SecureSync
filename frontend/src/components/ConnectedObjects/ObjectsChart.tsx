@@ -24,8 +24,18 @@ const ObjectsChart: React.FC<{ onAddObject?: AddObjectCallback }> = ({ onAddObje
     useEffect(() => {
         const fetchObjects = async () => {
             try {
+                // Récupérer tous les objets sans filtrage
                 const response = await getObjects();
-                setObjects(response.data);
+                
+                // Récupérer l'identifiant de prison de l'utilisateur depuis le localStorage
+                const userPrisonId = localStorage.getItem('userPrison') || localStorage.getItem('selectedPrison');
+                
+                // Filtrer les objets côté client par l'identifiant de prison
+                const filteredObjects = userPrisonId 
+                    ? response.data.filter(obj => obj.Prison_id === userPrisonId)
+                    : [];
+                
+                setObjects(filteredObjects);
                 setLoading(false);
             } catch (error) {
                 console.error('Error fetching objects:', error);
@@ -78,7 +88,7 @@ const ObjectsChart: React.FC<{ onAddObject?: AddObjectCallback }> = ({ onAddObje
                 </div>
                 <div>
                     <span className="text-xs text-gray-500 dark:text-gray-400">
-                        Mise à jour: {new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}
+                        Dernère mise à jour: {new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}
                     </span>
                 </div>
             </div>
@@ -87,13 +97,6 @@ const ObjectsChart: React.FC<{ onAddObject?: AddObjectCallback }> = ({ onAddObje
                 {/* Summary boxes */}
                 <div className="md:col-span-3 grid grid-cols-2 sm:grid-cols-4 gap-3">
                     <div className="bg-blue-50 dark:bg-blue-900/20 p-3 rounded-lg border border-blue-100 dark:border-blue-900/30 flex flex-col items-center justify-center shadow-sm h-full relative group">
-                        <button
-                            onClick={() => handleAddObject('porte')}
-                            className="absolute top-2 right-2 p-1 bg-blue-100 rounded-full opacity-0 group-hover:opacity-100 hover:bg-blue-200 transition-opacity"
-                            title="Ajouter une porte"
-                        >
-                            <Plus className="h-3 w-3 text-blue-600" />
-                        </button>
                         <Activity className="h-5 w-5 text-blue-600 dark:text-blue-400 mb-1" />
                         <p className="text-xs text-blue-600 dark:text-blue-400 uppercase font-medium text-center">Total</p>
                         <p className="text-lg font-bold text-blue-700 dark:text-blue-300">{stats.total}</p>

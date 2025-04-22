@@ -75,19 +75,7 @@ export default function LandingPage() {
                   size="lg" 
                   className="bg-green-600 hover:bg-green-700 text-black font-semibold px-6 py-3"
                   onClick={() => {
-                    // Vérifier si l'utilisateur est déjà connecté avec toutes les possibilités de tokens
-                    const isAuthenticated = 
-                      localStorage.getItem('sessionToken') !== null || 
-                      localStorage.getItem('access_token') !== null || 
-                      localStorage.getItem('token') !== null ||
-                      localStorage.getItem('authToken') !== null;
-                    
-                    // Rediriger vers la page appropriée en utilisant navigate
-                    if (isAuthenticated) {
-                      navigate('/home');
-                    } else {
                       navigate('/login');
-                    }
                   }}
                 >
                   Accéder au Tableau de Bord

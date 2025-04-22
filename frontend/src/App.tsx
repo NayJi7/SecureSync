@@ -27,13 +27,6 @@ export default function App() {
         <Route path="/contact" element={<ContactPage />} />
         <Route path="/features" element={<FeaturesPage />} />
         
-        {/* Routes protégées */}
-        <Route path="/home" element={
-          <ProtectedRoute>
-            <HomePage />
-          </ProtectedRoute>
-        } />
-        
         <Route path="/prison-selection" element={
           <ProtectedRoute>
             <PrisonSelectionPage />

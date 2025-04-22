@@ -23,16 +23,21 @@ export const getObjectById = (id: number) => {
 export const createObject = (object: Omit<ObjectType, 'id'>) => {
   console.debug('Creating new object:', object.type);
   
-  // Ajouter automatiquement le Prison_id actuel à l'objet
-  const currentPrisonId = localStorage.getItem('userPrison') || localStorage.getItem('selectedPrison');
+  // N'ajouter l'ID de prison que si aucun n'a été fourni
+  let objectToCreate = object;
   
-  const objectWithPrison = {
-    ...object,
-    Prison_id: currentPrisonId // Associer l'objet à la prison actuelle
-  };
+  // Si aucun Prison_id n'est fourni ou s'il est vide, utiliser celui du localStorage
+  if (!object.Prison_id || object.Prison_id === '') {
+    const currentPrisonId = localStorage.getItem('userPrison') || localStorage.getItem('selectedPrison') || undefined;
+    objectToCreate = {
+      ...object,
+      Prison_id: currentPrisonId
+    };
+    console.debug('Prison_id non fourni, utilisation de la valeur par défaut:', currentPrisonId);
+  }
   
-  console.debug('Creating object with prison ID:', currentPrisonId);
-  return API.post<ObjectType>(OBJECTS_ENDPOINT, objectWithPrison);
+  console.debug('Creating object with prison ID:', objectToCreate.Prison_id);
+  return API.post<ObjectType>(OBJECTS_ENDPOINT, objectToCreate);
 };
 
 // Update an object

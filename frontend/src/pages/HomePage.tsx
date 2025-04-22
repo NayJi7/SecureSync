@@ -61,8 +61,10 @@ export default function HomePage({ children }: { children?: React.ReactNode }) {
   const [staffModalOpen, setStaffModalOpen] = useState(false);
   const [staff, setStaff] = useState<StaffMember[]>([]);
   const isSmallScreen = isMobile || isTablet;
-  const isAdmin = localStorage.getItem('userRole') === 'admin';
-  const hasLogsRights = localStorage.getItem('userRole') === 'gerant' || localStorage.getItem('userRole') === 'admin' || localStorage.getItem('gestionnaire') === 'gestionnaire';
+  const isAdmin = localStorage.getItem('role') === 'admin';
+  // Vérification des droits d'accès en récupérant le rôle utilisateur
+  const role = localStorage.getItem('role');  
+  const hasLogsRights = role === 'gerant' || role === 'admin' || role === 'gestionnaire';
 
   // État pour stocker les données du profil utilisateur
   const [profile, setProfile] = useState<UserProfile | null>(null);
@@ -80,6 +82,13 @@ export default function HomePage({ children }: { children?: React.ReactNode }) {
           }
         });
         console.log("API response data:", response.data);
+        
+        // Sauvegarder le rôle dans localStorage si présent dans la réponse API
+        if (response.data.role) {
+          localStorage.setItem('role', response.data.role);
+          console.log('Rôle sauvegardé dans localStorage:', response.data.role);
+        }
+        
         setProfile(response.data);
         setLoading(false);
       } catch (err) {
@@ -113,7 +122,7 @@ export default function HomePage({ children }: { children?: React.ReactNode }) {
     logs: (
       <div className="relative h-full">
         <div className="my-8">
-          <ObjectLogs />
+          <ObjectLogs prisonId={currentPrison} />
         </div>
       </div>
     ),

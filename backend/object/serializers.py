@@ -12,7 +12,7 @@ class UserBasicSerializer(serializers.ModelSerializer):
     
     class Meta:
         model = CustomUser
-        fields = ['id', 'username', 'full_name', 'role']
+        fields = ['id', 'username', 'full_name', 'role', 'prison']
     
     def get_full_name(self, obj):
         return obj.get_full_name() or obj.username

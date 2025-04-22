@@ -16,13 +16,14 @@ interface ObjetLog {
         username: string;
         full_name: string;
         role: string;
+        prison?: string;
     };
 }
 
 type SortColumn = 'date' | 'nom' | 'type' | 'etat' | 'commentaire' | 'user';
 type SortDirection = 'asc' | 'desc';
 
-const ObjectLogs: React.FC = () => {
+const ObjectLogs: React.FC<{ prisonId: string }> = ({ prisonId }) => {
     const [logs, setLogs] = useState<ObjetLog[]>([]);
     const [filteredLogs, setFilteredLogs] = useState<ObjetLog[]>([]);
     const [loading, setLoading] = useState(true);
@@ -42,7 +43,7 @@ const ObjectLogs: React.FC = () => {
     const [filterObject, setFilterObject] = useState<string>('');
     const [filterAction, setFilterAction] = useState<string>('');
     const [filterUser, setFilterUser] = useState<string>('');
-
+    
     const fetchLogs = async () => {
         try {
             setRefreshing(true);
@@ -76,6 +77,25 @@ const ObjectLogs: React.FC = () => {
     // Apply sorting and filtering to logs
     useEffect(() => {
         let result = [...logs];
+        
+        // Filtrer pour exclure les logs des utilisateurs admin
+        result = result.filter(log => 
+            // Garder les logs du système (sans user) ou ceux d'utilisateurs non-admin
+            !log.user_info || log.user_info.role !== 'admin'
+        );
+        
+        // Filtrer pour ne montrer que les logs des utilisateurs de la prison actuelle
+        if (prisonId) {
+            result = result.filter(log => {
+                // Si le log n'a pas d'infos utilisateur, on ne le garde pas (retire les logs système)
+                if (!log.user_info) return false;
+                
+                // Vérifier si l'utilisateur a un champ prison (attention à la casse)
+                const userPrison = log.user_info.prison;
+
+                return userPrison === prisonId;
+            });
+        }
 
         // Apply filters if any
         if (filterType) {

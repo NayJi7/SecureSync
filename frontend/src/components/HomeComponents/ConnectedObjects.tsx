@@ -108,6 +108,24 @@ const ConnectedObjects: React.FC<ConnectedObjectsProps> = ({ prisonId }) => {
         console.log(`State label: ${newObjectState === 'on' ? (addingObjectType === 'porte' ? 'Fermée' : 'Activé') : (addingObjectType === 'porte' ? 'Ouverte' : 'Désactivé')}`);
 
         try {
+            // Assurons-nous que l'ID de la prison actuelle est utilisé et non écrasé
+            const prisonId = currentPrisonId || '';
+            console.log('Création d\'un objet pour la prison:', prisonId);
+            
+            // Pour être sûr de débugger le problème
+            if (localStorage.getItem('userPrison') !== prisonId || localStorage.getItem('selectedPrison') !== prisonId) {
+                console.warn('Attention: l\'ID de prison actuel ne correspond pas au localStorage:', {
+                    'currentPrisonId': prisonId,
+                    'localStorage.userPrison': localStorage.getItem('userPrison'),
+                    'localStorage.selectedPrison': localStorage.getItem('selectedPrison')
+                });
+                
+                // Forcer la mise à jour du localStorage pour éviter des conflits futurs
+                if (prisonId) {
+                    localStorage.setItem('selectedPrison', prisonId);
+                }
+            }
+            
             // Use the service function instead of direct API call
             await createObject({
                 nom: newObjectName,
@@ -115,7 +133,14 @@ const ConnectedObjects: React.FC<ConnectedObjectsProps> = ({ prisonId }) => {
                 etat: newObjectState,
                 coord_x: newObjectX,
                 coord_y: newObjectY,
-                Prison_id: currentPrisonId || '' // Ajouter explicitement l'ID de la prison actuelle
+                Prison_id: prisonId, // Utiliser une variable explicite
+                // Champs requis par le modèle backend
+                consomation: 0, // Valeur par défaut (0 watts)
+                valeur_actuelle: addingObjectType === 'chauffage' ? 20 : 0,
+                valeur_cible: addingObjectType === 'chauffage' ? 22 : 0,
+                durabilité: 100, // 100% par défaut
+                connection: 'wifi', // Connexion par défaut
+                maintenance: 'fonctionnel' // État de maintenance par défaut
             });
 
             // Refresh the objects list
