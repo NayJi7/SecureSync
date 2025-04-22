@@ -358,7 +358,22 @@ const ConnectedObjects: React.FC<ConnectedObjectsProps> = ({ prisonId }) => {
                         </button>
 
                         <h3 className="text-xl font-semibold text-gray-900 dark:text-white mb-4">
-                            Ajouter un{['a', 'e', 'i', 'o', 'u', 'y', 'é'].includes(getObjectTypeLabel(addingObjectType || '').toLowerCase()[0]) ? ' nouvel' : ' nouveau'} {addingObjectType && getObjectTypeLabel(addingObjectType).toLowerCase()}
+                            {(() => {
+                                if (!addingObjectType) return 'Ajouter un objet';
+                                const objectLabel = getObjectTypeLabel(addingObjectType).toLowerCase();
+                                // Gérer les mots féminins (porte, caméra)
+                                if (addingObjectType === 'porte' || addingObjectType === 'camera') {
+                                    return `Ajouter une nouvelle ${objectLabel}`;
+                                }
+                                // Gérer les mots masculins commençant par une voyelle
+                                else if (['a', 'e', 'i', 'o', 'u', 'y', 'é'].includes(objectLabel[0])) {
+                                    return `Ajouter un nouvel ${objectLabel}`;
+                                }
+                                // Mots masculins commençant par une consonne
+                                else {
+                                    return `Ajouter un nouveau ${objectLabel}`;
+                                }
+                            })()}
                         </h3>
 
                         {error && (
@@ -377,7 +392,13 @@ const ConnectedObjects: React.FC<ConnectedObjectsProps> = ({ prisonId }) => {
                                     type="text"
                                     id="objectName"
                                     className="w-full px-4 py-2 border border-gray-300 dark:border-gray-600 rounded-md bg-white dark:bg-gray-700 text-gray-900 dark:text-white focus:ring-2 focus:ring-indigo-500 dark:focus:ring-indigo-600 focus:border-transparent"
-                                    placeholder={`Entrez le nom du ${addingObjectType && getObjectTypeLabel(addingObjectType).toLowerCase()}`}
+                                    placeholder={`Entrez le nom ${
+                                        addingObjectType === 'porte' || addingObjectType === 'camera' ? 
+                                        'de la ' : 
+                                        ['a', 'e', 'i', 'o', 'u', 'y', 'é'].includes((addingObjectType && getObjectTypeLabel(addingObjectType).toLowerCase()[0]) || '') ? 
+                                        "de l'" : 
+                                        'du '
+                                    }${addingObjectType && getObjectTypeLabel(addingObjectType).toLowerCase()}`}
                                     value={newObjectName}
                                     onChange={(e) => setNewObjectName(e.target.value)}
                                     autoFocus
