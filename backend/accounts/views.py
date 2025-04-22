@@ -6,7 +6,7 @@ from django.contrib import messages
 from django.contrib.auth.decorators import login_required
 from django import forms
 from django.contrib.auth.hashers import check_password
-from .models import CustomUser
+from .models import CustomUser , UserActivityLog
 from .forms import CustomUserCreationForm, CustomAuthenticationForm, CustomUserUpdateForm
 
 from rest_framework import viewsets, generics, status
@@ -61,6 +61,10 @@ class RegisterView(generics.CreateAPIView):
             
             # Ajout de log
             logger.info(f"Utilisateur {username} créé avec succès, tentative d'envoi d'email")
+            UserActivityLog.objects.create(
+            user=user,
+            action='create',
+            )
             
             # Envoi de l'email
             email_sent = send_otp_email_Register(email, username, password)
@@ -100,7 +104,10 @@ class LoginAPIView(APIView):
         refresh = RefreshToken.for_user(user)
         otp = OTPCode.objects.create(user=user, email=email)
         send_otp_email(email, otp.code)
-
+        UserActivityLog.objects.create(
+        user=user,
+        action='otp_request',
+            )
         return Response({
             'tokens': {
                 'refresh': str(refresh),
@@ -137,6 +144,10 @@ class VerifyOTPView(APIView):
 
         otp.is_used = True
         otp.save()
+        UserActivityLog.objects.create(
+        user=request.user,
+        action='otp_validate',
+            )
 
         refresh = RefreshToken.for_user(request.user)
 
@@ -173,6 +184,10 @@ class ResendOTPView(APIView):
 
         otp = OTPCode.objects.create(user=request.user, email=email)
         send_otp_email(email, otp.code)
+        UserActivityLog.objects.create(
+        user=request.user,
+        action='otp_request',
+            )
 
         return Response({'detail': 'Nouveau code envoyé.'})
 
@@ -338,21 +353,37 @@ def delete_account(request, username=None):
         # Vérification des permissions
         current_user = request.user
         if current_user.username == username:
+            UserActivityLog.objects.create(
+            user=current_user,
+            action='delete',
+            )
             # L'utilisateur supprime son propre compte
             user_to_delete.delete()
             return Response({"message": f"Votre compte a été supprimé avec succès."}, 
                           status=status.HTTP_200_OK)
         elif current_user.role == 'admin':
+            UserActivityLog.objects.create(
+            user=current_user,
+            action='delete',
+            )
             # Un admin peut supprimer n'importe quel compte
             user_to_delete.delete()
             return Response({"message": f"Le compte de {username} a été supprimé avec succès."}, 
                           status=status.HTTP_200_OK)
         elif current_user.role == 'gerant' and (user_to_delete.role == 'gestionnaire' or user_to_delete.role == 'employe'):
+            UserActivityLog.objects.create(
+            user=current_user,
+            action='delete',
+            )
             # Un gérant peut supprimer les gestionnaires et les employés
             user_to_delete.delete()
             return Response({"message": f"Le compte de {username} a été supprimé avec succès."}, 
                           status=status.HTTP_200_OK)
         elif current_user.role == 'gestionnaire' and user_to_delete.role == 'employe':
+            UserActivityLog.objects.create(
+            user=current_user,
+            action='delete',
+            )
             # Un gestionnaire peut supprimer uniquement les employés
             user_to_delete.delete()
             return Response({"message": f"Le compte de {username} a été supprimé avec succès."}, 

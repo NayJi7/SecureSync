@@ -104,3 +104,20 @@ class OTPCode(models.Model):
     def is_valid(self):
         now = timezone.now()
         return not self.is_used and now <= self.expires_at
+
+class UserActivityLog(models.Model):
+    ACTION_TYPES = [
+        ('login', 'Connexion'),
+        ('logout', 'Déconnexion'),
+        ('update_profile', 'Modification du profil'),
+        ('password_change', 'Changement de mot de passe'),
+        ('create', 'Création de compte'),
+        ('delete', 'Suppression de compte'),
+        ('otp_request', 'Demande de code OTP'),
+        ('otp_validate', 'Validation OTP'),
+        # Ajoute d'autres actions ici selon tes besoins
+    ]
+
+    user = models.ForeignKey(settings.AUTH_USER_MODEL, on_delete=models.CASCADE)
+    action = models.CharField(max_length=50, choices=ACTION_TYPES)
+    timestamp = models.DateTimeField(default=timezone.now)
