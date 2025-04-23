@@ -12,13 +12,96 @@ interface UserProfile {
   date_naissance: string;
   sexe: string;
   photo: string | null;
+  points: number; // Ajout du champ points
 }
+
+// Composant pour la barre de progression du niveau
+interface ProgressBarProps {
+  points: number;
+}
+
+const UserLevelProgressBar: React.FC<ProgressBarProps> = ({ points }) => {
+  // Définition des niveaux avec leurs images
+  const levels = [
+    { 
+      name: "Junior", 
+      minPoints: 0, 
+      maxPoints: 100, 
+      color: "bg-blue-500",
+      badgeImg: "/JUNIOR.png" 
+    },
+    { 
+      name: "Confirmé", 
+      minPoints: 100, 
+      maxPoints: 1000, 
+      color: "bg-green-500",
+      badgeImg: "/CONFIRME.png" 
+    },
+    { 
+      name: "Senior", 
+      minPoints: 1000, 
+      maxPoints: Infinity, 
+      color: "bg-yellow-600",
+      badgeImg: "/SENIOR.png" 
+    }
+  ];
+  
+  // Déterminer le niveau actuel
+  const currentLevel = levels.find(level => 
+    points >= level.minPoints && points < level.maxPoints
+  ) || levels[levels.length - 1];
+  
+  // Calculer le pourcentage de progression dans le niveau actuel
+  let percentage = 0;
+  if (currentLevel.maxPoints !== Infinity) {
+    percentage = ((points - currentLevel.minPoints) / (currentLevel.maxPoints - currentLevel.minPoints)) * 100;
+  } else {
+    // Pour le niveau Senior, on remplit la barre à 100%
+    percentage = 100;
+  }
+  
+  // Points restants pour atteindre le niveau suivant
+  let nextLevelInfo = '';
+  if (currentLevel.maxPoints !== Infinity) {
+    const pointsToNextLevel = currentLevel.maxPoints - points;
+    nextLevelInfo = `${pointsToNextLevel} points pour atteindre ${levels[levels.indexOf(currentLevel) + 1].name}`;
+  } else {
+    nextLevelInfo = `Niveau maximum atteint`;
+  }
+  
+  return (
+    <div className="w-full space-y-4">
+      <div className="flex items-center gap-4">
+        <div className="w-35 h-35">
+          <img 
+            src={currentLevel.badgeImg} 
+            alt={`Badge ${currentLevel.name}`} 
+            className="w-full h-full object-contain"
+          />
+        </div>
+        <div className="flex-grow">
+          <div className="flex justify-between">
+            <span className="font-semibold">{currentLevel.name}</span>
+            <span className="text-sm text-gray-500">{points} points</span>
+          </div>
+          <div className="w-full bg-gray-200 rounded-full h-2.5 dark:bg-gray-700 mt-2">
+            <div
+              className={`h-2.5 rounded-full ${currentLevel.color}`}
+              style={{ width: `${percentage}%` }}
+            ></div>
+          </div>
+          <p className="text-xs text-gray-500 mt-1">{nextLevelInfo}</p>
+        </div>
+      </div>
+    </div>
+  );
+};
 
 interface ProfileModalProps {
     isOpen: boolean;
     onClose: () => void;
-    existingProfile?: UserProfile | null; // Ajoutez cette ligne
-    setProfile?: React.Dispatch<React.SetStateAction<UserProfile | null>>; // Ajoutez cette ligne
+    existingProfile?: UserProfile | null;
+    setProfile?: React.Dispatch<React.SetStateAction<UserProfile | null>>;
 }
 
 const ProfileModal: React.FC<ProfileModalProps> = ({ 
@@ -344,6 +427,11 @@ const ProfileModal: React.FC<ProfileModalProps> = ({
                       }</p>
                     </div>
                   </div>
+                </div>
+                
+                {/* Ajout de la barre de progression du niveau */}
+                <div className="mt-4 border-t border-gray-200 pt-4">
+                  <UserLevelProgressBar points={profile.points || 0} />
                 </div>
                 
                 <div className="mt-6 flex justify-center">  

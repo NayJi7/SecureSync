@@ -11,9 +11,10 @@ import axios from 'axios';
 
 interface ConnectedObjectsProps {
     prisonId?: string;
+    addPoints?: (points: number) => Promise<void>;
 }
 
-const ConnectedObjects: React.FC<ConnectedObjectsProps> = ({ prisonId }) => {
+const ConnectedObjects: React.FC<ConnectedObjectsProps> = ({ prisonId, addPoints }) => {
     const [objects, setObjects] = useState<ObjectType[]>([]);
     const [loading, setLoading] = useState(true);
     const [refreshing, setRefreshing] = useState(false);
@@ -222,13 +223,13 @@ const ConnectedObjects: React.FC<ConnectedObjectsProps> = ({ prisonId }) => {
 
         switch (type) {
             case 'porte':
-                return <Door objects={objects as DoorObject[]} onAddObject={addHandler} onStatusChange={fetchObjects} />;
+                return <Door objects={objects as DoorObject[]} onAddObject={addHandler} onStatusChange={fetchObjects} addPoints={addPoints} />;
             case 'lumiere':
-                return <Light objects={objects as LightObject[]} onAddObject={addHandler} onStatusChange={fetchObjects} />;
+                return <Light objects={objects as LightObject[]} onAddObject={addHandler} onStatusChange={fetchObjects} addPoints={addPoints} />;
             case 'camera':
-                return <Camera objects={objects as CameraObject[]} onAddObject={addHandler} onStatusChange={fetchObjects} />;
+                return <Camera objects={objects as CameraObject[]} onAddObject={addHandler} onStatusChange={fetchObjects} addPoints={addPoints} />;
             case 'chauffage':
-                return <Heater objects={objects as HeaterObject[]} onAddObject={addHandler} onStatusChange={fetchObjects} />;
+                return <Heater objects={objects as HeaterObject[]} onAddObject={addHandler} onStatusChange={fetchObjects} addPoints={addPoints} />;
         }
     };
 

@@ -6,12 +6,18 @@ import Light from './Light';
 import Camera from './Camera';
 import Heater from './Heater';
 
-const ConnectedObjectsGroup: React.FC = () => {
+interface ConnectedObjectsGroupProps {
+  prisonId?: string;
+  addPoints?: (points: number) => Promise<void>;
+}
+
+const ConnectedObjectsGroup: React.FC<ConnectedObjectsGroupProps> = ({ prisonId, addPoints }) => {
   const [objects, setObjects] = useState<ObjectType[]>([]);
 
   useEffect(() => {
-    getObjects().then(res => setObjects(res.data));
-  }, []);
+    // Utiliser prisonId si disponible
+    getObjects(prisonId).then(res => setObjects(res.data));
+  }, [prisonId]);
 
   const grouped = {
     porte: objects.filter(obj => obj.type === 'porte'),
@@ -22,10 +28,10 @@ const ConnectedObjectsGroup: React.FC = () => {
 
   return (
     <div className="w-full max-w-4xl mx-auto p-4 grid grid-cols-1 md:grid-cols-2 gap-6">
-      <Door objects={grouped.porte} />
-      <Light objects={grouped.lumiere} />
-      <Camera objects={grouped.camera} />
-      <Heater objects={grouped.chauffage} />
+      <Door objects={grouped.porte} addPoints={addPoints} />
+      <Light objects={grouped.lumiere} addPoints={addPoints} />
+      <Camera objects={grouped.camera} addPoints={addPoints} />
+      <Heater objects={grouped.chauffage} addPoints={addPoints} />
     </div>
   );
 };

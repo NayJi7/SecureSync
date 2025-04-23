@@ -84,7 +84,7 @@ class ProfileSerializer(serializers.ModelSerializer):
     class Meta:
         model = CustomUser
         fields = ['username', 'email', 'first_name', 'last_name', 
-                  'date_naissance', 'sexe', 'photo','role']
+                  'date_naissance', 'sexe', 'photo', 'role', 'points']
         read_only_fields = ['username']  # Nom d'utilisateur ne peut pas être modifié
 
 

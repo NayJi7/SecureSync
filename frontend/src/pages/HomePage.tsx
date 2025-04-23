@@ -38,6 +38,13 @@ interface UserProfile {
   date_naissance: string;
   sexe: string;
   photo: string | null;
+  points: number; // Ajout du champ points pour gérer les niveaux
+}
+
+// Interface pour les points utilisateur
+interface UserPoints {
+  status: string;
+  new_total: number;
 }
 
 // Types pour les données du personnel
@@ -64,12 +71,72 @@ export default function HomePage({ children }: { children?: React.ReactNode }) {
   const isAdmin = localStorage.getItem('role') === 'admin';
   // Vérification des droits d'accès en récupérant le rôle utilisateur
   const role = localStorage.getItem('role');  
-  const hasLogsRights = role === 'gerant' || role === 'admin' || role === 'gestionnaire';
 
   // État pour stocker les données du profil utilisateur
   const [profile, setProfile] = useState<UserProfile | null>(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState('');
+  // État pour les droits d'accès aux logs
+  const [hasLogsRights, setHasLogsRights] = useState(false);
+  // États pour le système de gain de points
+  const [pointsTotal, setPointsTotal] = useState<number | null>(null);
+  const [showPointsMessage, setShowPointsMessage] = useState(false);
+  const [pointsMessage, setPointsMessage] = useState("");
+
+  // Mise à jour des droits d'accès quand le profil est chargé
+  useEffect(() => {
+    // Accès par défaut pour les rôles administratifs
+    const isPrivilegedRole = role === 'gerant' || role === 'admin' || role === 'gestionnaire';
+    
+    // Accès pour les employés de niveau Senior (1000+ points)
+    const isEmployeeSenior = role === 'employe' && profile?.points && profile.points >= 1000;
+    
+    // Mise à jour des droits d'accès
+    setHasLogsRights(isPrivilegedRole || (isEmployeeSenior === true));
+    
+    // Si l'employé a accès aux logs grâce à son niveau Senior, on affiche un message dans la console
+    if (isEmployeeSenior) {
+      console.log("Employé de niveau Senior: accès aux logs accordé");
+    }
+  }, [profile, role]);
+
+  // Fonction pour ajouter des points à l'utilisateur
+  const addPoints = async (points: number) => {
+    try {
+      const accessToken = localStorage.getItem('sessionToken');
+      if (!accessToken) return;
+
+      const response = await fetch("http://localhost:8000/api/user/add_point/", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+          "Authorization": `Bearer ${accessToken}`
+        },
+        body: JSON.stringify({ points }),
+      });
+
+      if (!response.ok) throw new Error(`Erreur HTTP: ${response.status}`);
+
+      const data: UserPoints = await response.json();
+      setPointsTotal(data.new_total);
+      setPointsMessage(`+${points} points ! Total: ${data.new_total} points`);
+      setShowPointsMessage(true);
+
+      // Met à jour le profil avec les nouveaux points
+      if (profile) {
+        setProfile({
+          ...profile,
+          points: data.new_total
+        });
+      }
+
+      setTimeout(() => {
+        setShowPointsMessage(false);
+      }, 3000);
+    } catch (err) {
+      console.error("Erreur lors de l'ajout de points:", err);
+    }
+  };
 
   // Récupération des données du profil au chargement du composant
   useEffect(() => {
@@ -106,9 +173,9 @@ export default function HomePage({ children }: { children?: React.ReactNode }) {
     dashboard: (
       <div className="relative h-full">
 
-        {/* ConnectedObjects always visible - passing prison ID */}
+        {/* ConnectedObjects always visible - passing prison ID and addPoints function */}
         <div className="my-8">
-          <ConnectedObjects prisonId={currentPrison} />
+          <ConnectedObjects prisonId={currentPrison} addPoints={addPoints} />
         </div>
       </div>
     ),
@@ -161,6 +228,18 @@ export default function HomePage({ children }: { children?: React.ReactNode }) {
 
   return (
     <div className="flex flex-col min-h-screen">
+      {/* Notification des points gagnés - affichée en bas à droite */}
+      {showPointsMessage && (
+        <div className="fixed bottom-4 right-4 bg-green-600/90 backdrop-blur-sm text-white px-6 py-3 rounded-lg shadow-xl transition-opacity z-50 border border-green-500/50">
+          <div className="flex items-center">
+            <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5 mr-2" viewBox="0 0 20 20" fill="currentColor">
+              <path fillRule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clipRule="evenodd" />
+            </svg>
+            {pointsMessage}
+          </div>
+        </div>
+      )}
+      
       <Waves
         lineColor="#000"
         backgroundColor="rgba(255, 255, 255, 0.2)"
@@ -256,7 +335,7 @@ export default function HomePage({ children }: { children?: React.ReactNode }) {
             )}
 
             <DropdownMenu>
-              <DropdownMenuTrigger className="mt-2 rounded-full h-8 z-10">
+              <DropdownMenuTrigger className="mt-2 rounded-full h-8 z-5">
                 <Avatar className="cursor-pointer">
                   {/* Si chargement ou erreur, afficher une fallback */}
                   {loading || error || !profile ? (

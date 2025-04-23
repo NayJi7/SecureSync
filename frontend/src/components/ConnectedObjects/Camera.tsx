@@ -7,9 +7,10 @@ interface CameraProps {
     objects: ObjectType[];
     onAddObject?: () => void;
     onStatusChange?: () => void; // Callback for when status changes
+    addPoints?: (points: number) => Promise<void>; // Fonction pour ajouter des points à l'utilisateur
 }
 
-const Camera: React.FC<CameraProps> = ({ objects, onAddObject, onStatusChange }) => {
+const Camera: React.FC<CameraProps> = ({ objects, onAddObject, onStatusChange, addPoints }) => {
     const isEmpty = objects.length === 0;
     const [isHovering, setIsHovering] = useState(false);
     const [toggleLoading, setToggleLoading] = useState<number | null>(null);
@@ -19,6 +20,8 @@ const Camera: React.FC<CameraProps> = ({ objects, onAddObject, onStatusChange })
     const [newY, setNewY] = useState<number>(0);
     const [isDeleting, setIsDeleting] = useState<number | null>(null);
     const [isUpdating, setIsUpdating] = useState<number | null>(null);
+    const [showDeleteModal, setShowDeleteModal] = useState(false);
+    const [objectToDelete, setObjectToDelete] = useState<number | null>(null);
 
     const handleAddClick = () => {
         if (onAddObject) {
@@ -33,6 +36,13 @@ const Camera: React.FC<CameraProps> = ({ objects, onAddObject, onStatusChange })
             setToggleLoading(id);
             const response = await toggleObjectState(id, currentState);
             console.log('Toggle successful:', response);
+            
+            // Ajouter des points à l'utilisateur pour chaque interaction
+            if (addPoints) {
+                // Attribution de 7 points pour l'interaction avec une caméra (plus de points car plus critique)
+                await addPoints(7);
+            }
+            
             if (onStatusChange) {
                 onStatusChange();
             }
@@ -117,22 +127,29 @@ const Camera: React.FC<CameraProps> = ({ objects, onAddObject, onStatusChange })
         }
     };
 
-    const handleDeleteClick = async (id: number) => {
-        if (window.confirm('Êtes-vous sûr de vouloir supprimer cet objet ?')) {
-            try {
-                setIsDeleting(id);
-                const response = await deleteObject(id);
-                console.log('Delete successful:', response);
-                if (onStatusChange) {
-                    onStatusChange();
-                }
-            } catch (error: any) {
-                console.error('Error deleting object:', error);
-                alert('Erreur lors de la suppression de l\'objet: ' +
-                    (error.response?.data?.message || 'Problème de connexion au serveur'));
-            } finally {
-                setIsDeleting(null);
+    const handleDeleteClick = (id: number) => {
+        setObjectToDelete(id);
+        setShowDeleteModal(true);
+    };
+    
+    const confirmDelete = async () => {
+        if (objectToDelete === null) return;
+        
+        try {
+            setIsDeleting(objectToDelete);
+            const response = await deleteObject(objectToDelete);
+            console.log('Delete successful:', response);
+            if (onStatusChange) {
+                onStatusChange();
             }
+        } catch (error: any) {
+            console.error('Error deleting object:', error);
+            alert('Erreur lors de la suppression de l\'objet: ' +
+                (error.response?.data?.message || 'Problème de connexion au serveur'));
+        } finally {
+            setIsDeleting(null);
+            setShowDeleteModal(false);
+            setObjectToDelete(null);
         }
     };
 
@@ -296,6 +313,49 @@ const Camera: React.FC<CameraProps> = ({ objects, onAddObject, onStatusChange })
                             )}
                         </div>
                     ))}
+                </div>
+            )}
+            
+            {/* Modal de confirmation de suppression */}
+            {showDeleteModal && (
+                <div className="fixed inset-0 flex items-center justify-center z-50">
+                    <div className="fixed inset-0 bg-black/50" onClick={() => setShowDeleteModal(false)}></div>
+                    <div className="bg-white dark:bg-gray-800 rounded-lg shadow-lg p-6 max-w-md w-full mx-4 relative z-10">
+                        <h3 className="text-xl font-semibold text-gray-900 dark:text-white mb-4">
+                            Confirmer la suppression
+                        </h3>
+                        <p className="text-gray-600 dark:text-gray-300 mb-6">
+                            Êtes-vous sûr de vouloir supprimer cette caméra ? Cette action est irréversible.
+                        </p>
+                        <div className="flex justify-end space-x-3">
+                            <button
+                                onClick={() => setShowDeleteModal(false)}
+                                className="px-4 py-2 bg-gray-100 hover:bg-gray-200 dark:bg-gray-700 dark:hover:bg-gray-600 text-gray-700 dark:text-gray-300 rounded-md transition-colors"
+                            >
+                                Annuler
+                            </button>
+                            <button
+                                onClick={confirmDelete}
+                                disabled={isDeleting !== null}
+                                className="px-4 py-2 bg-red-600 hover:bg-red-700 text-white rounded-md flex items-center transition-colors"
+                            >
+                                {isDeleting !== null ? (
+                                    <>
+                                        <svg className="animate-spin -ml-1 mr-2 h-4 w-4 text-white" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
+                                            <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4"></circle>
+                                            <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
+                                        </svg>
+                                        Suppression...
+                                    </>
+                                ) : (
+                                    <>
+                                        <Trash2 className="h-4 w-4 mr-2" />
+                                        Supprimer
+                                    </>
+                                )}
+                            </button>
+                        </div>
+                    </div>
                 </div>
             )}
         </div>
