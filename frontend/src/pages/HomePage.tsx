@@ -22,11 +22,13 @@ import TeamModal from '../components/HomeComponents/TeamModal'
 import ProfileModal from '../components/HomeComponents/ProfileModal'
 import ConnectedObjects from '../components/HomeComponents/ConnectedObjects';
 import ObjectLogs from '../components/HomeComponents/ObjectLogs'
+import ParametersPage from './ParametersPage'
 
 // Icônes
 import { HiAdjustments, HiClipboardList, HiDotsVertical, HiTrash } from "react-icons/hi"
 import { MdDashboard, MdSecurity, MdOutlinePersonAdd } from "react-icons/md"
 import { VscHome, VscArchive, VscAccount, VscSettingsGear } from "react-icons/vsc"
+import { Settings } from 'lucide-react';
 
 // Interface pour le profil utilisateur
 interface UserProfile {
@@ -180,10 +182,10 @@ export default function HomePage({ children }: { children?: React.ReactNode }) {
       </div>
     ),
     settings: (
-      <div>
-        Ceci est <span className="font-medium text-gray-800 dark:text-white">le contenu associé à l'onglet Paramètres</span>.
-        Cliquer sur un autre onglet basculera la visibilité de celui-ci pour le suivant. Le JavaScript de l'onglet
-        échange les classes pour contrôler la visibilité et le style du contenu.
+      <div className="relative h-full">
+        <div className="my-8">
+          <ParametersPage />
+        </div>
       </div>
     ),
     logs: (
@@ -297,7 +299,7 @@ export default function HomePage({ children }: { children?: React.ReactNode }) {
                         className={`flex items-center gap-2 ${activeTab === "settings" ? "bg-gray-100 dark:bg-gray-600" : ""}`}
                         onClick={() => setActiveTab("settings")}
                       >
-                        <HiAdjustments className="w-4 h-4" />
+                        <Settings className="w-4 h-4" />
                         Paramètres
                       </DropdownMenuItem>
                     </DropdownMenuContent>
@@ -328,7 +330,7 @@ export default function HomePage({ children }: { children?: React.ReactNode }) {
                 <TabItem disabled={!hasLogsRights} title="Historique" icon={HiClipboardList}>
                   {tabContents.logs}
                 </TabItem>
-                <TabItem title="Paramètres" icon={HiAdjustments}>
+                <TabItem title="Paramètres" icon={Settings}>
                   {tabContents.settings}
                 </TabItem>
               </Tabs>

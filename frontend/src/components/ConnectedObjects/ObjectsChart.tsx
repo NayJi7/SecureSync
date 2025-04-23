@@ -88,7 +88,7 @@ const ObjectsChart: React.FC<{ onAddObject?: AddObjectCallback }> = ({ onAddObje
                 </div>
                 <div>
                     <span className="text-xs text-gray-500 dark:text-gray-400">
-                        Dernère mise à jour: {new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}
+                        Mise à jour: {new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}
                     </span>
                 </div>
             </div>
@@ -175,7 +175,7 @@ const ObjectsChart: React.FC<{ onAddObject?: AddObjectCallback }> = ({ onAddObje
             <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                 <div className="space-y-2">
                     <h4 className="text-xs font-medium text-gray-600 dark:text-gray-400 uppercase mb-2">Distribution par type</h4>
-                    <div className="flex justify-between items-center">
+                    <div className="flex justify-between gap-2 items-center">
                         <div className="flex items-center">
                             <DoorClosed className="h-4 w-4 text-blue-600 dark:text-blue-400 mr-2" />
                             <span className="text-sm text-gray-600 dark:text-gray-300">Portes</span>
@@ -188,7 +188,7 @@ const ObjectsChart: React.FC<{ onAddObject?: AddObjectCallback }> = ({ onAddObje
                         </div>
                         <span className="text-sm font-medium text-gray-700 dark:text-gray-200">{stats.byType.porte}</span>
                     </div>
-                    <div className="flex justify-between items-center">
+                    <div className="flex justify-between gap-2 items-center">
                         <div className="flex items-center">
                             <Lightbulb className="h-4 w-4 text-yellow-600 dark:text-yellow-400 mr-2" />
                             <span className="text-sm text-gray-600 dark:text-gray-300">Lumières</span>
@@ -205,7 +205,7 @@ const ObjectsChart: React.FC<{ onAddObject?: AddObjectCallback }> = ({ onAddObje
 
                 <div className="space-y-2">
                     <h4 className="text-xs font-medium text-gray-600 dark:text-gray-400 uppercase mb-2">Suite</h4>
-                    <div className="flex justify-between items-center">
+                    <div className="flex justify-between gap-2 items-center">
                         <div className="flex items-center">
                             <Video className="h-4 w-4 text-purple-600 dark:text-purple-400 mr-2" />
                             <span className="text-sm text-gray-600 dark:text-gray-300">Caméras</span>
@@ -218,7 +218,7 @@ const ObjectsChart: React.FC<{ onAddObject?: AddObjectCallback }> = ({ onAddObje
                         </div>
                         <span className="text-sm font-medium text-gray-700 dark:text-gray-200">{stats.byType.camera}</span>
                     </div>
-                    <div className="flex justify-between items-center">
+                    <div className="flex justify-between gap-2 items-center">
                         <div className="flex items-center">
                             <Thermometer className="h-4 w-4 text-red-600 dark:text-red-400 mr-2" />
                             <span className="text-sm text-gray-600 dark:text-gray-300">Chauffage</span>

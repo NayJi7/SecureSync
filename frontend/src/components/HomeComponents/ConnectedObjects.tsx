@@ -183,6 +183,34 @@ const ConnectedObjects: React.FC<ConnectedObjectsProps> = ({ prisonId, addPoints
         try {
             const response = await toggleObjectState(id, currentState);
             console.log('Toggle successful:', response);
+            
+            // Ajouter des points à l'utilisateur pour chaque interaction
+            if (addPoints) {
+                // Trouver l'objet dans la liste pour déterminer son type
+                const object = objects.find(obj => obj.id === id);
+                if (object) {
+                    // Attribution de points selon le type d'objet
+                    let pointsToAdd = 0;
+                    switch (object.type) {
+                        case 'porte':
+                            pointsToAdd = 5; // Même valeur que dans Door.tsx
+                            break;
+                        case 'lumiere':
+                            pointsToAdd = 3; // Même valeur que dans Light.tsx
+                            break;
+                        case 'camera':
+                            pointsToAdd = 7; // Même valeur que dans Camera.tsx
+                            break;
+                        case 'chauffage':
+                            pointsToAdd = 4; // Même valeur que dans Heater.tsx
+                            break;
+                        default:
+                            pointsToAdd = 2; // Valeur par défaut pour les types non reconnus
+                    }
+                    await addPoints(pointsToAdd);
+                }
+            }
+            
             // Refresh objects to show updated state
             await fetchObjects();
         } catch (error: any) {
