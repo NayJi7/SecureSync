@@ -1,6 +1,5 @@
 from rest_framework import serializers
-from .models import CustomUser
-from .models import CustomUser
+from .models import CustomUser , UserActivityLog
 from django.contrib.auth.password_validation import validate_password
 from django.contrib.auth.hashers import check_password
 from rest_framework.decorators import api_view, permission_classes
@@ -97,4 +96,10 @@ class StaffSerializer(serializers.ModelSerializer):
         model = CustomUser
         fields = ['username', 'first_name', 'last_name', 'sexe', 'date_naissance', 'role', 'section', 'prison']
 
+class UserActivityLogSerializer(serializers.ModelSerializer):
+    user = CustomUserSerializer()
+
+    class Meta:
+        model = UserActivityLog
+        fields = ['id', 'user', 'action', 'timestamp']
 

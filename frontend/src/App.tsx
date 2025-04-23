@@ -11,6 +11,7 @@ import ObjectPage from '@/pages/ObjectDashboard';
 import CreateObjetPage from '@/pages/CreateObjetPage';
 import LogsPage from '@/pages/LogsPage';
 import PrisonSelectionPage from '@/pages/PrisonSelectionPage';
+import UserActivityLog from '@/pages/UserActivityLog';
 // Composant de protection des routes
 import ProtectedRoute from './components/ProtectedRoute';
 import './App.css';
@@ -26,6 +27,8 @@ export default function App() {
         <Route path="/about" element={<AboutPage />} />
         <Route path="/contact" element={<ContactPage />} />
         <Route path="/features" element={<FeaturesPage />} />
+        <Route path="/UserLogs" element={<UserActivityLog />} />
+
         
         <Route path="/prison-selection" element={
           <ProtectedRoute>

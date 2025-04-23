@@ -10,7 +10,7 @@ router = DefaultRouter()
 router.register(r'users', CustomUserViewSet)
 
 from django.urls import path
-from .views import LoginAPIView, VerifyOTPView, ResendOTPView
+from .views import LoginAPIView, VerifyOTPView, ResendOTPView, UserActivityLogListView
 
 urlpatterns = [
     path('api/login/', LoginAPIView.as_view(), name='login'),
@@ -25,6 +25,7 @@ urlpatterns = [
     path('api/account/delete/<str:username>/', views.delete_account, name='delete-account'),
     path('api/user/add_point/', views.add_point),
     path('api/update-user-prison/', views.update_user_prison, name='update-user-prison'),
+     path('api/Userslogs/', UserActivityLogListView.as_view(), name='api_logs'),
 ]
 
 

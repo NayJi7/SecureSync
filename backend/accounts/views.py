@@ -16,6 +16,7 @@ from rest_framework.permissions import AllowAny, IsAuthenticated
 from rest_framework_simplejwt.tokens import RefreshToken
 from rest_framework.decorators import api_view, permission_classes
 from .serializers import ProfileSerializer
+from .serializers import UserActivityLogSerializer
 import logging
 logger = logging.getLogger(__name__)
 
@@ -473,3 +474,7 @@ def update_user_prison(request):
             'role': request.user.role
         }
     }, status=status.HTTP_200_OK)
+
+class UserActivityLogListView(generics.ListAPIView):
+    queryset = UserActivityLog.objects.select_related('user').order_by('-timestamp')[:100]
+    serializer_class = UserActivityLogSerializer
