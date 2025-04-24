@@ -63,8 +63,8 @@ const CreateObjetPage: React.FC = () => {
           <option value="porte">Porte Automatique</option>
           <option value="lumiere">Lumière</option>
           <option value="camera">Caméra</option>
-          <option value="chauffage">Chauffage</option>
-          <option value="climatisation">Climatisation</option>
+          <option value="thermostat">Thermostat</option>
+          <option value="ventilation">Ventilation</option>
           <option value="paneau d'affichage">Panneau d'affichage</option>
         </select>
 

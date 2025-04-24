@@ -1,17 +1,17 @@
 import React, { useEffect, useState } from 'react';
 import { ObjectType } from './types';
 import { getObjects } from '../../services/objectService';
-import { PieChart, DoorClosed, Lightbulb, Video, Thermometer, Activity, BarChart2, Plus } from 'lucide-react';
+import { PieChart, DoorClosed, Lightbulb, Video, Thermometer, Activity, BarChart2, Plus, Wind, MonitorPlay } from 'lucide-react';
 
 // Define a type for the add object callback
-export type AddObjectCallback = (type: 'porte' | 'lumiere' | 'camera' | 'chauffage') => void;
+export type AddObjectCallback = (type: 'porte' | 'lumiere' | 'camera' | 'thermostat' | 'ventilation' | "paneau d'affichage") => void;
 
 const ObjectsChart: React.FC<{ onAddObject?: AddObjectCallback }> = ({ onAddObject }) => {
     const [objects, setObjects] = useState<ObjectType[]>([]);
     const [loading, setLoading] = useState(true);
 
     // Function to handle adding an object by type
-    const handleAddObject = (type: 'porte' | 'lumiere' | 'camera' | 'chauffage') => {
+    const handleAddObject = (type: 'porte' | 'lumiere' | 'camera' | 'thermostat' | 'ventilation' | "paneau d'affichage") => {
         if (onAddObject) {
             onAddObject(type);
         } else {
@@ -21,20 +21,25 @@ const ObjectsChart: React.FC<{ onAddObject?: AddObjectCallback }> = ({ onAddObje
         }
     };
 
+    // This part needs to be updated for each object type
+    const handleIconClick = (type: 'porte' | 'lumiere' | 'camera' | 'thermostat' | 'ventilation' | "paneau d'affichage") => {
+        handleAddObject(type);
+    };
+
     useEffect(() => {
         const fetchObjects = async () => {
             try {
                 // Récupérer tous les objets sans filtrage
                 const response = await getObjects();
-                
+
                 // Récupérer l'identifiant de prison de l'utilisateur depuis le localStorage
                 const userPrisonId = localStorage.getItem('userPrison') || localStorage.getItem('selectedPrison');
-                
+
                 // Filtrer les objets côté client par l'identifiant de prison
-                const filteredObjects = userPrisonId 
+                const filteredObjects = userPrisonId
                     ? response.data.filter(obj => obj.Prison_id === userPrisonId)
                     : [];
-                
+
                 setObjects(filteredObjects);
                 setLoading(false);
             } catch (error) {
@@ -69,7 +74,9 @@ const ObjectsChart: React.FC<{ onAddObject?: AddObjectCallback }> = ({ onAddObje
             porte: objects.filter(obj => obj.type === 'porte').length,
             lumiere: objects.filter(obj => obj.type === 'lumiere').length,
             camera: objects.filter(obj => obj.type === 'camera').length,
-            chauffage: objects.filter(obj => obj.type === 'chauffage').length,
+            thermostat: objects.filter(obj => obj.type === 'thermostat').length,
+            ventilation: objects.filter(obj => obj.type === 'ventilation').length,
+            paneauAffichage: objects.filter(obj => obj.type === "paneau d'affichage").length,
         }
     };
 
@@ -221,17 +228,81 @@ const ObjectsChart: React.FC<{ onAddObject?: AddObjectCallback }> = ({ onAddObje
                     <div className="flex justify-between gap-2 items-center">
                         <div className="flex items-center">
                             <Thermometer className="h-4 w-4 text-red-600 dark:text-red-400 mr-2" />
-                            <span className="text-sm text-gray-600 dark:text-gray-300">Chauffage</span>
+                            <span className="text-sm text-gray-600 dark:text-gray-300">Thermostat</span>
                         </div>
                         <div className="w-2/3 bg-gray-200 dark:bg-gray-700 rounded-full h-2">
                             <div
                                 className="bg-red-600 h-2 rounded-full"
-                                style={{ width: `${stats.total ? (stats.byType.chauffage / stats.total) * 100 : 0}%` }}
+                                style={{ width: `${stats.total ? (stats.byType.thermostat / stats.total) * 100 : 0}%` }}
                             ></div>
                         </div>
-                        <span className="text-sm font-medium text-gray-700 dark:text-gray-200">{stats.byType.chauffage}</span>
+                        <span className="text-sm font-medium text-gray-700 dark:text-gray-200">{stats.byType.thermostat}</span>
+                    </div>
+                    <div className="flex justify-between gap-2 items-center">
+                        <div className="flex items-center">
+                            <MonitorPlay className="h-4 w-4 text-indigo-600 dark:text-indigo-400 mr-2" />
+                            <span className="text-sm text-gray-600 dark:text-gray-300">Panneaux</span>
+                        </div>
+                        <div className="w-2/3 bg-gray-200 dark:bg-gray-700 rounded-full h-2">
+                            <div
+                                className="bg-indigo-600 h-2 rounded-full"
+                                style={{ width: `${stats.total ? (stats.byType.paneauAffichage / stats.total) * 100 : 0}%` }}
+                            ></div>
+                        </div>
+                        <span className="text-sm font-medium text-gray-700 dark:text-gray-200">{stats.byType.paneauAffichage}</span>
                     </div>
                 </div>
+            </div>
+
+            <div className="mt-6 grid grid-cols-5 gap-2 md:grid-cols-6">
+                <button
+                    onClick={() => handleIconClick('porte')}
+                    className="p-2 bg-blue-50 hover:bg-blue-100 dark:bg-blue-900/20 dark:hover:bg-blue-900/40 rounded-lg flex flex-col items-center justify-center transition-colors"
+                    title="Ajouter une porte"
+                >
+                    <DoorClosed className="h-5 w-5 text-blue-600 dark:text-blue-400 mb-1" />
+                    <span className="text-xs text-blue-700 dark:text-blue-300">Porte</span>
+                </button>
+                <button
+                    onClick={() => handleIconClick('lumiere')}
+                    className="p-2 bg-yellow-50 hover:bg-yellow-100 dark:bg-yellow-900/20 dark:hover:bg-yellow-900/40 rounded-lg flex flex-col items-center justify-center transition-colors"
+                    title="Ajouter une lumière"
+                >
+                    <Lightbulb className="h-5 w-5 text-yellow-600 dark:text-yellow-400 mb-1" />
+                    <span className="text-xs text-yellow-700 dark:text-yellow-300">Lumière</span>
+                </button>
+                <button
+                    onClick={() => handleIconClick('camera')}
+                    className="p-2 bg-purple-50 hover:bg-purple-100 dark:bg-purple-900/20 dark:hover:bg-purple-900/40 rounded-lg flex flex-col items-center justify-center transition-colors"
+                    title="Ajouter une caméra"
+                >
+                    <Video className="h-5 w-5 text-purple-600 dark:text-purple-400 mb-1" />
+                    <span className="text-xs text-purple-700 dark:text-purple-300">Caméra</span>
+                </button>
+                <button
+                    onClick={() => handleIconClick('thermostat')}
+                    className="p-2 bg-red-50 hover:bg-red-100 dark:bg-red-900/20 dark:hover:bg-red-900/40 rounded-lg flex flex-col items-center justify-center transition-colors"
+                    title="Ajouter un thermostat"
+                >
+                    <Thermometer className="h-5 w-5 text-red-600 dark:text-red-400 mb-1" />
+                    <span className="text-xs text-red-700 dark:text-red-300">Thermostat</span>
+                </button>
+                <button
+                    onClick={() => handleIconClick('ventilation')}
+                    className="p-2 bg-green-50 hover:bg-green-100 dark:bg-green-900/20 dark:hover:bg-green-900/40 rounded-lg flex flex-col items-center justify-center transition-colors"
+                    title="Ajouter une ventilation"
+                >
+                    <Wind className="h-5 w-5 text-green-600 dark:text-green-400 mb-1" />
+                    <span className="text-xs text-green-700 dark:text-green-300">Ventilation</span>
+                </button>
+                <button
+                    onClick={() => handleIconClick("paneau d'affichage")}
+                    className="p-2 bg-indigo-50 hover:bg-indigo-100 dark:bg-indigo-900/20 dark:hover:bg-indigo-900/40 rounded-lg flex flex-col items-center justify-center transition-colors"
+                    title="Ajouter un panneau d'affichage"
+                >
+                    <MonitorPlay className="h-5 w-5 text-indigo-600 dark:text-indigo-400 mb-1" />
+                    <span className="text-xs text-indigo-700 dark:text-indigo-300">Panneau</span>
+                </button>
             </div>
         </div>
     );

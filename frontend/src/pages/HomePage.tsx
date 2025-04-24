@@ -2,7 +2,6 @@
 import { useEffect, useState } from "react"
 import { useNavigate, useParams } from "react-router-dom"
 import { useDevice } from "@/hooks/use-device"
-import { Button } from '@/components/ui/button';
 import axios from 'axios';
 
 // Composants locaux
@@ -17,7 +16,6 @@ import {
 } from "@/components/ui/dropdown-menu"
 import { TabItem, Tabs } from "flowbite-react"
 import Waves from '../blocks/Backgrounds/Waves/Waves'
-import Dock from '../blocks/Components/Dock/Dock'
 import TeamModal from '../components/HomeComponents/TeamModal'
 import ProfileModal from '../components/HomeComponents/ProfileModal'
 import ConnectedObjects from '../components/HomeComponents/ConnectedObjects';
@@ -27,7 +25,6 @@ import ParametersPage from './ParametersPage'
 // Icônes
 import { HiAdjustments, HiClipboardList, HiDotsVertical, HiTrash } from "react-icons/hi"
 import { MdDashboard, MdSecurity, MdOutlinePersonAdd } from "react-icons/md"
-import { VscHome, VscArchive, VscAccount, VscSettingsGear } from "react-icons/vsc"
 import { Settings } from 'lucide-react';
 
 // Interface pour le profil utilisateur
@@ -72,7 +69,7 @@ export default function HomePage({ children }: { children?: React.ReactNode }) {
   const isSmallScreen = isMobile || isTablet;
   const isAdmin = localStorage.getItem('role') === 'admin';
   // Vérification des droits d'accès en récupérant le rôle utilisateur
-  const role = localStorage.getItem('role');  
+  const role = localStorage.getItem('role');
 
   // État pour stocker les données du profil utilisateur
   const [profile, setProfile] = useState<UserProfile | null>(null);
@@ -89,13 +86,13 @@ export default function HomePage({ children }: { children?: React.ReactNode }) {
   useEffect(() => {
     // Accès par défaut pour les rôles administratifs
     const isPrivilegedRole = role === 'gerant' || role === 'admin' || role === 'gestionnaire';
-    
+
     // Accès pour les employés de niveau Senior (1000+ points)
     const isEmployeeSenior = role === 'employe' && profile?.points && profile.points >= 1000;
-    
+
     // Mise à jour des droits d'accès
     setHasLogsRights(isPrivilegedRole || (isEmployeeSenior === true));
-    
+
     // Si l'employé a accès aux logs grâce à son niveau Senior, on affiche un message dans la console
     if (isEmployeeSenior) {
       console.log("Employé de niveau Senior: accès aux logs accordé");
@@ -151,13 +148,13 @@ export default function HomePage({ children }: { children?: React.ReactNode }) {
           }
         });
         console.log("API response data:", response.data);
-        
+
         // Sauvegarder le rôle dans localStorage si présent dans la réponse API
         if (response.data.role) {
           localStorage.setItem('role', response.data.role);
           console.log('Rôle sauvegardé dans localStorage:', response.data.role);
         }
-        
+
         setProfile(response.data);
         setLoading(false);
       } catch (err) {
@@ -241,7 +238,7 @@ export default function HomePage({ children }: { children?: React.ReactNode }) {
           </div>
         </div>
       )}
-      
+
       <Waves
         lineColor="#000"
         backgroundColor="rgba(255, 255, 255, 0.2)"

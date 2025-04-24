@@ -5,6 +5,7 @@ import Door from './Door';
 import Light from './Light';
 import Camera from './Camera';
 import Heater from './Heater';
+import PanneauAffichage from './PanneauAffichage';
 
 interface ConnectedObjectsGroupProps {
   prisonId?: string;
@@ -23,7 +24,8 @@ const ConnectedObjectsGroup: React.FC<ConnectedObjectsGroupProps> = ({ prisonId,
     porte: objects.filter(obj => obj.type === 'porte'),
     lumiere: objects.filter(obj => obj.type === 'lumiere'),
     camera: objects.filter(obj => obj.type === 'camera'),
-    chauffage: objects.filter(obj => obj.type === 'chauffage'),
+    thermostat: objects.filter(obj => obj.type === 'thermostat'),
+    paneauAffichage: objects.filter(obj => obj.type === "paneau d'affichage"),
   };
 
   return (
@@ -31,7 +33,8 @@ const ConnectedObjectsGroup: React.FC<ConnectedObjectsGroupProps> = ({ prisonId,
       <Door objects={grouped.porte} addPoints={addPoints} />
       <Light objects={grouped.lumiere} addPoints={addPoints} />
       <Camera objects={grouped.camera} addPoints={addPoints} />
-      <Heater objects={grouped.chauffage} addPoints={addPoints} />
+      <Heater objects={grouped.thermostat} addPoints={addPoints} />
+      <PanneauAffichage objects={grouped.paneauAffichage} addPoints={addPoints} />
     </div>
   );
 };

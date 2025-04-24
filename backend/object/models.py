@@ -9,8 +9,8 @@ class Object(models.Model):
         ('porte', 'Porte Automatique'),
         ('lumiere', 'Lumière'),
         ('camera', 'Caméra'),
-        ('chauffage', 'Chauffage'),
-        ('climatisation','Climatisation'),
+        ('thermostat', 'Thermostat'),
+        ('ventilation','Ventilation'),
         ("paneau d'affichage","paneau d'affichage")
     )
     ETAT_CHOICES = (
@@ -85,8 +85,8 @@ class ObjetLog(models.Model):
         ('porte', 'Porte Automatique'),
         ('lumiere', 'Lumière'),
         ('camera', 'Caméra'),
-        ('chauffage', 'Chauffage'),
-        ('climatisation','Climatisation'),
+        ('thermostat', 'Thermostat'),
+        ('ventilation','Ventilation'),
         ("paneau d'affichage","paneau d'affichage")
     )
     

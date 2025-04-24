@@ -1,10 +1,12 @@
 import React, { useEffect, useState } from 'react';
-import { ObjectType, DoorObject, LightObject, CameraObject, HeaterObject } from '../ConnectedObjects/types';
+import { ObjectType, DoorObject, LightObject, CameraObject, ThermostatObject, VentilationObject, PanneauAffichageObject } from '../ConnectedObjects/types';
 import { getObjects, createObject, toggleObjectState } from '../../services/objectService';
 import Door from '../ConnectedObjects/Door';
 import Light from '../ConnectedObjects/Light';
 import Camera from '../ConnectedObjects/Camera';
-import Heater from '../ConnectedObjects/Heater';
+import Thermostat from '../ConnectedObjects/Thermostat';
+import Ventilation from '../ConnectedObjects/Ventilation';
+import PanneauAffichage from '../ConnectedObjects/PanneauAffichage';
 import ObjectsChart, { AddObjectCallback } from '../ConnectedObjects/ObjectsChart';
 import { LayoutGrid, Activity, RefreshCw, X, PlusCircle, AlertCircle, MapPin, ToggleLeft } from 'lucide-react';
 import axios from 'axios';
@@ -19,14 +21,18 @@ const ConnectedObjects: React.FC<ConnectedObjectsProps> = ({ prisonId, addPoints
     const [loading, setLoading] = useState(true);
     const [refreshing, setRefreshing] = useState(false);
     const [showAddModal, setShowAddModal] = useState(false);
-    const [addingObjectType, setAddingObjectType] = useState<'porte' | 'lumiere' | 'camera' | 'chauffage' | null>(null);
+    const [addingObjectType, setAddingObjectType] = useState<'porte' | 'lumiere' | 'camera' | 'thermostat' | 'ventilation' | "paneau d'affichage" | null>(null);
     const [newObjectName, setNewObjectName] = useState('');
     const [newObjectX, setNewObjectX] = useState<number>(0);
     const [newObjectY, setNewObjectY] = useState<number>(0);
     const [newObjectState, setNewObjectState] = useState<'on' | 'off'>('off');
+    const [newConnection, setNewConnection] = useState<'wifi' | 'filaire'>('wifi');
+    const [newConsumption, setNewConsumption] = useState<number>(0);
+    const [newDurability, setNewDurability] = useState<number>(1000);
+    const [newTargetValue, setNewTargetValue] = useState<number>(22);
     const [isSaving, setIsSaving] = useState(false);
     const [error, setError] = useState<string | null>(null);
-    
+
     // Get the prison ID from props or from localStorage if not provided
     const currentPrisonId = prisonId || localStorage.getItem('userPrison') || localStorage.getItem('selectedPrison');
 
@@ -36,15 +42,15 @@ const ConnectedObjects: React.FC<ConnectedObjectsProps> = ({ prisonId, addPoints
             setError(null);
             // Use the service function with prison ID parameter
             const response = await getObjects(currentPrisonId || undefined);
-            
+
             // Filtrage supplémentaire côté client pour assurer que seuls les objets 
             // de la prison actuelle sont affichés
-            const filteredObjects = currentPrisonId 
+            const filteredObjects = currentPrisonId
                 ? response.data.filter(obj => obj.Prison_id === currentPrisonId)
                 : response.data;
-                
+
             console.log(`Filtered objects for prison ${currentPrisonId}: ${filteredObjects.length} of ${response.data.length}`);
-            
+
             setObjects(filteredObjects);
             setLoading(false);
             setTimeout(() => setRefreshing(false), 500); // Visual feedback
@@ -79,15 +85,21 @@ const ConnectedObjects: React.FC<ConnectedObjectsProps> = ({ prisonId, addPoints
         porte: objects.filter(obj => obj.type === 'porte') as DoorObject[],
         lumiere: objects.filter(obj => obj.type === 'lumiere') as LightObject[],
         camera: objects.filter(obj => obj.type === 'camera') as CameraObject[],
-        chauffage: objects.filter(obj => obj.type === 'chauffage') as HeaterObject[],
+        thermostat: objects.filter(obj => obj.type === 'thermostat') as ThermostatObject[],
+        ventilation: objects.filter(obj => obj.type === 'ventilation') as VentilationObject[],
+        paneauAffichage: objects.filter(obj => obj.type === "paneau d'affichage") as PanneauAffichageObject[],
     };
 
     const handleAddObject: AddObjectCallback = (type) => {
-        setAddingObjectType(type);
+        setAddingObjectType(type as 'porte' | 'lumiere' | 'camera' | 'thermostat' | 'ventilation' | "paneau d'affichage" | null);
         setNewObjectName('');
         setNewObjectX(0);
         setNewObjectY(0);
         setNewObjectState('off');
+        setNewConnection('wifi');
+        setNewConsumption(0);
+        setNewDurability(1000);
+        setNewTargetValue(22);
         setError(null);
         setShowAddModal(true);
     };
@@ -96,6 +108,15 @@ const ConnectedObjects: React.FC<ConnectedObjectsProps> = ({ prisonId, addPoints
         setShowAddModal(false);
         setAddingObjectType(null);
         setError(null);
+        // Reset form fields
+        setNewObjectName('');
+        setNewObjectX(0);
+        setNewObjectY(0);
+        setNewObjectState('off');
+        setNewConnection('wifi');
+        setNewConsumption(0);
+        setNewDurability(1000);
+        setNewTargetValue(22);
     };
 
     const handleSaveObject = async () => {
@@ -112,7 +133,7 @@ const ConnectedObjects: React.FC<ConnectedObjectsProps> = ({ prisonId, addPoints
             // Assurons-nous que l'ID de la prison actuelle est utilisé et non écrasé
             const prisonId = currentPrisonId || '';
             console.log('Création d\'un objet pour la prison:', prisonId);
-            
+
             // Pour être sûr de débugger le problème
             if (localStorage.getItem('userPrison') !== prisonId || localStorage.getItem('selectedPrison') !== prisonId) {
                 console.warn('Attention: l\'ID de prison actuel ne correspond pas au localStorage:', {
@@ -120,13 +141,23 @@ const ConnectedObjects: React.FC<ConnectedObjectsProps> = ({ prisonId, addPoints
                     'localStorage.userPrison': localStorage.getItem('userPrison'),
                     'localStorage.selectedPrison': localStorage.getItem('selectedPrison')
                 });
-                
+
                 // Forcer la mise à jour du localStorage pour éviter des conflits futurs
                 if (prisonId) {
                     localStorage.setItem('selectedPrison', prisonId);
                 }
             }
-            
+
+            // Determine initial value based on object type
+            let initialValue: number | string = 0;
+            if (addingObjectType === 'thermostat') {
+                initialValue = 20;
+            } else if (addingObjectType === 'ventilation') {
+                initialValue = 1;
+            } else if (addingObjectType === "paneau d'affichage") {
+                initialValue = "Bienvenue"; // Default message for display panel
+            }
+
             // Use the service function instead of direct API call
             await createObject({
                 nom: newObjectName,
@@ -136,11 +167,11 @@ const ConnectedObjects: React.FC<ConnectedObjectsProps> = ({ prisonId, addPoints
                 coord_y: newObjectY,
                 Prison_id: prisonId, // Utiliser une variable explicite
                 // Champs requis par le modèle backend
-                consomation: 0, // Valeur par défaut (0 watts)
-                valeur_actuelle: addingObjectType === 'chauffage' ? 20 : 0,
-                valeur_cible: addingObjectType === 'chauffage' ? 22 : 0,
-                durabilité: 100, // 100% par défaut
-                connection: 'wifi', // Connexion par défaut
+                consomation: newConsumption, // Use the value from the form
+                valeur_actuelle: initialValue,
+                valeur_cible: addingObjectType === 'thermostat' ? newTargetValue : 0, // Use target value for thermostat
+                durabilité: newDurability, // Use the value from the form
+                connection: newConnection, // Use the connection type from the form
                 maintenance: 'fonctionnel' // État de maintenance par défaut
             });
 
@@ -183,7 +214,7 @@ const ConnectedObjects: React.FC<ConnectedObjectsProps> = ({ prisonId, addPoints
         try {
             const response = await toggleObjectState(id, currentState);
             console.log('Toggle successful:', response);
-            
+
             // Ajouter des points à l'utilisateur pour chaque interaction
             if (addPoints) {
                 // Trouver l'objet dans la liste pour déterminer son type
@@ -201,8 +232,14 @@ const ConnectedObjects: React.FC<ConnectedObjectsProps> = ({ prisonId, addPoints
                         case 'camera':
                             pointsToAdd = 7; // Même valeur que dans Camera.tsx
                             break;
-                        case 'chauffage':
-                            pointsToAdd = 4; // Même valeur que dans Heater.tsx
+                        case 'thermostat':
+                            pointsToAdd = 4; // Même valeur que dans Thermostat.tsx
+                            break;
+                        case 'ventilation':
+                            pointsToAdd = 4; // Même valeur que dans Ventilation.tsx
+                            break;
+                        case "paneau d'affichage":
+                            pointsToAdd = 3; // Points pour panneau d'affichage
                             break;
                         default:
                             pointsToAdd = 2; // Valeur par défaut pour les types non reconnus
@@ -210,7 +247,7 @@ const ConnectedObjects: React.FC<ConnectedObjectsProps> = ({ prisonId, addPoints
                     await addPoints(pointsToAdd);
                 }
             }
-            
+
             // Refresh objects to show updated state
             await fetchObjects();
         } catch (error: any) {
@@ -238,13 +275,15 @@ const ConnectedObjects: React.FC<ConnectedObjectsProps> = ({ prisonId, addPoints
             case 'porte': return 'Porte';
             case 'lumiere': return 'Éclairage';
             case 'camera': return 'Caméra';
-            case 'chauffage': return 'Chauffage';
+            case 'thermostat': return 'Chauffage';
+            case 'ventilation': return 'Ventilation';
+            case "paneau d'affichage": return 'Panneau d\'affichage';
             default: return 'Objet';
         }
     };
 
     // Render appropriate component based on object type
-    const renderObject = (type: 'porte' | 'lumiere' | 'camera' | 'chauffage', objects: ObjectType[]) => {
+    const renderObject = (type: 'porte' | 'lumiere' | 'camera' | 'thermostat' | 'ventilation' | "paneau d'affichage", objects: ObjectType[]) => {
         const addHandler = () => handleAddObject(type);
         // The filtered objects are already passed in - no need to filter again
         // Ensure the objects are the correct type to fix the linter errors
@@ -256,8 +295,12 @@ const ConnectedObjects: React.FC<ConnectedObjectsProps> = ({ prisonId, addPoints
                 return <Light objects={objects as LightObject[]} onAddObject={addHandler} onStatusChange={fetchObjects} addPoints={addPoints} />;
             case 'camera':
                 return <Camera objects={objects as CameraObject[]} onAddObject={addHandler} onStatusChange={fetchObjects} addPoints={addPoints} />;
-            case 'chauffage':
-                return <Heater objects={objects as HeaterObject[]} onAddObject={addHandler} onStatusChange={fetchObjects} addPoints={addPoints} />;
+            case 'thermostat':
+                return <Thermostat objects={objects as ThermostatObject[]} onAddObject={addHandler} onStatusChange={fetchObjects} addPoints={addPoints} />;
+            case 'ventilation':
+                return <Ventilation objects={objects as VentilationObject[]} onAddObject={addHandler} onStatusChange={fetchObjects} addPoints={addPoints} />;
+            case "paneau d'affichage":
+                return <PanneauAffichage objects={objects as PanneauAffichageObject[]} onAddObject={addHandler} onStatusChange={fetchObjects} addPoints={addPoints} />;
         }
     };
 
@@ -269,13 +312,17 @@ const ConnectedObjects: React.FC<ConnectedObjectsProps> = ({ prisonId, addPoints
                 {grouped.porte.length > 0 && renderObject('porte', grouped.porte)}
                 {grouped.lumiere.length > 0 && renderObject('lumiere', grouped.lumiere)}
                 {grouped.camera.length > 0 && renderObject('camera', grouped.camera)}
-                {grouped.chauffage.length > 0 && renderObject('chauffage', grouped.chauffage)}
+                {grouped.thermostat.length > 0 && renderObject('thermostat', grouped.thermostat)}
+                {grouped.ventilation.length > 0 && renderObject('ventilation', grouped.ventilation)}
+                {grouped.paneauAffichage.length > 0 && renderObject("paneau d'affichage", grouped.paneauAffichage)}
 
                 {/* Add empty components with add button if no objects exist */}
                 {grouped.porte.length === 0 && renderObject('porte', [])}
                 {grouped.lumiere.length === 0 && renderObject('lumiere', [])}
                 {grouped.camera.length === 0 && renderObject('camera', [])}
-                {grouped.chauffage.length === 0 && renderObject('chauffage', [])}
+                {grouped.thermostat.length === 0 && renderObject('thermostat', [])}
+                {grouped.ventilation.length === 0 && renderObject('ventilation', [])}
+                {grouped.paneauAffichage.length === 0 && renderObject("paneau d'affichage", [])}
             </div>
         );
     };
@@ -378,7 +425,7 @@ const ConnectedObjects: React.FC<ConnectedObjectsProps> = ({ prisonId, addPoints
             {/* Add Object Modal */}
             {showAddModal && (
                 <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50">
-                    <div className="bg-white dark:bg-gray-800 rounded-lg shadow-lg max-w-md w-full p-6 mx-4 relative">
+                    <div className="bg-white dark:bg-gray-800 rounded-lg shadow-lg max-w-md w-full p-6 mx-4 relative overflow-y-auto max-h-[90vh]">
                         <button
                             onClick={handleCloseModal}
                             className="absolute top-4 right-4 text-gray-500 hover:text-gray-700 dark:text-gray-400 dark:hover:text-gray-300"
@@ -421,13 +468,12 @@ const ConnectedObjects: React.FC<ConnectedObjectsProps> = ({ prisonId, addPoints
                                     type="text"
                                     id="objectName"
                                     className="w-full px-4 py-2 border border-gray-300 dark:border-gray-600 rounded-md bg-white dark:bg-gray-700 text-gray-900 dark:text-white focus:ring-2 focus:ring-indigo-500 dark:focus:ring-indigo-600 focus:border-transparent"
-                                    placeholder={`Entrez le nom ${
-                                        addingObjectType === 'porte' || addingObjectType === 'camera' ? 
-                                        'de la ' : 
-                                        ['a', 'e', 'i', 'o', 'u', 'y', 'é'].includes((addingObjectType && getObjectTypeLabel(addingObjectType).toLowerCase()[0]) || '') ? 
-                                        "de l'" : 
-                                        'du '
-                                    }${addingObjectType && getObjectTypeLabel(addingObjectType).toLowerCase()}`}
+                                    placeholder={`Entrez le nom ${addingObjectType === 'porte' || addingObjectType === 'camera' ?
+                                        'de la ' :
+                                        ['a', 'e', 'i', 'o', 'u', 'y', 'é'].includes((addingObjectType && getObjectTypeLabel(addingObjectType).toLowerCase()[0]) || '') ?
+                                            "de l'" :
+                                            'du '
+                                        }${addingObjectType && getObjectTypeLabel(addingObjectType).toLowerCase()}`}
                                     value={newObjectName}
                                     onChange={(e) => setNewObjectName(e.target.value)}
                                     autoFocus
@@ -460,6 +506,88 @@ const ConnectedObjects: React.FC<ConnectedObjectsProps> = ({ prisonId, addPoints
                                     />
                                 </div>
                             </div>
+
+                            <div>
+                                <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
+                                    Type de connexion
+                                </label>
+                                <div className="flex space-x-4">
+                                    <label className="inline-flex items-center">
+                                        <input
+                                            type="radio"
+                                            className="form-radio h-4 w-4 text-indigo-600 dark:text-indigo-400"
+                                            name="connectionType"
+                                            value="wifi"
+                                            checked={newConnection === 'wifi'}
+                                            onChange={() => setNewConnection('wifi')}
+                                        />
+                                        <span className="ml-2 text-gray-700 dark:text-gray-300">
+                                            Wifi
+                                        </span>
+                                    </label>
+                                    <label className="inline-flex items-center">
+                                        <input
+                                            type="radio"
+                                            className="form-radio h-4 w-4 text-indigo-600 dark:text-indigo-400"
+                                            name="connectionType"
+                                            value="filaire"
+                                            checked={newConnection === 'filaire'}
+                                            onChange={() => setNewConnection('filaire')}
+                                        />
+                                        <span className="ml-2 text-gray-700 dark:text-gray-300">
+                                            Filaire
+                                        </span>
+                                    </label>
+                                </div>
+                            </div>
+
+                            <div className="grid grid-cols-2 gap-4">
+                                <div>
+                                    <label htmlFor="consumption" className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
+                                        Consommation (Watts)
+                                    </label>
+                                    <input
+                                        type="number"
+                                        id="consumption"
+                                        className="w-full px-4 py-2 border border-gray-300 dark:border-gray-600 rounded-md bg-white dark:bg-gray-700 text-gray-900 dark:text-white focus:ring-2 focus:ring-indigo-500 dark:focus:ring-indigo-600 focus:border-transparent"
+                                        value={newConsumption}
+                                        onChange={(e) => setNewConsumption(Number(e.target.value))}
+                                        min="0"
+                                    />
+                                </div>
+                                <div>
+                                    <label htmlFor="durability" className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
+                                        Durabilité
+                                    </label>
+                                    <input
+                                        type="number"
+                                        id="durability"
+                                        className="w-full px-4 py-2 border border-gray-300 dark:border-gray-600 rounded-md bg-white dark:bg-gray-700 text-gray-900 dark:text-white focus:ring-2 focus:ring-indigo-500 dark:focus:ring-indigo-600 focus:border-transparent"
+                                        value={newDurability}
+                                        onChange={(e) => setNewDurability(Number(e.target.value))}
+                                        min="0"
+                                        max="1000"
+                                    />
+                                </div>
+                            </div>
+
+                            {addingObjectType === 'thermostat' && (
+                                <div>
+                                    <label htmlFor="targetValue" className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
+                                        Valeur cible (°C)
+                                    </label>
+                                    <input
+                                        type="number"
+                                        id="targetValue"
+                                        className="w-full px-4 py-2 border border-gray-300 dark:border-gray-600 rounded-md bg-white dark:bg-gray-700 text-gray-900 dark:text-white focus:ring-2 focus:ring-indigo-500 dark:focus:ring-indigo-600 focus:border-transparent"
+                                        value={newTargetValue}
+                                        onChange={(e) => setNewTargetValue(Number(e.target.value))}
+                                        min="15"
+                                        max="30"
+                                        step="0.5"
+                                    />
+                                </div>
+                            )}
 
                             <div>
                                 <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">

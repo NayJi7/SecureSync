@@ -1,7 +1,7 @@
 import { useState, useEffect } from "react";
 import { useParams } from "react-router-dom";
 
-type ObjectType = "porte" | "lumiere" | "camera" | "chauffage" | "climatisation" | "panneau d'affichage";
+type ObjectType = "porte" | "lumiere" | "camera" | "thermostat" | "ventilation" | "panneau d'affichage";
 type ObjectState = "on" | "off";
 type ConnectionType = "wifi" | "filaire" | null;
 type MaintenanceState = "en panne" | "fonctionnel";
@@ -38,7 +38,7 @@ export default function ObjectDashboard() {
   // Récupérer l'ID de prison depuis les paramètres d'URL
   const { prisonId } = useParams();
   const [selectedPrison, setSelectedPrison] = useState<string | null>(null);
-  
+
   // Initialiser la prison sélectionnée lors du chargement
   useEffect(() => {
     // Si prisonId est défini dans l'URL, l'utiliser
@@ -59,12 +59,12 @@ export default function ObjectDashboard() {
     const fetchObjects = async () => {
       try {
         setLoading(true);
-        
+
         // Construire l'URL de l'API en incluant l'identifiant de prison si disponible
-        const apiUrl = selectedPrison 
+        const apiUrl = selectedPrison
           ? `http://localhost:8000/api/objects/?prison_id=${selectedPrison}`
           : "http://localhost:8000/api/objects/";
-        
+
         const response = await fetch(apiUrl);
         const rawText = await response.text();
 
@@ -222,8 +222,8 @@ export default function ObjectDashboard() {
       "porte": "Porte Automatique",
       "lumiere": "Lumière",
       "camera": "Caméra",
-      "chauffage": "Chauffage",
-      "climatisation": "Climatisation",
+      "thermostat": "Thermostat",
+      "ventilation": "Ventilation",
       "panneau d'affichage": "Panneau d'affichage"
     };
     return types[type] || type;
@@ -249,14 +249,14 @@ export default function ObjectDashboard() {
             <path d="M15 10L19.5528 7.72361C19.8343 7.58281 20 7.30529 20 7V17C20 17.3047 19.8343 17.5822 19.5528 17.7236L15 15M5 18H15C15.5523 18 16 17.5523 16 17V7C16 6.44772 15.5523 6 15 6H5C4.44772 6 4 6.44772 4 7V17C4 17.5523 4.44772 18 5 18Z" />
           </svg>
         );
-      case "chauffage":
+      case "thermostat":
         return (
           <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
             <path d="M12 12C13.6569 12 15 10.6569 15 9C15 7.34315 13.6569 6 12 6C10.3431 6 9 7.34315 9 9C9 10.6569 10.3431 12 12 12Z" />
             <path d="M12 2V4M4 12H2M6.34 6.34L4.93 4.93M17.66 6.34L19.07 4.93M22 12H20M12 22V16M6.56 16.67L7.45 15.54M17.44 16.67L16.55 15.54M15 20H9" />
           </svg>
         );
-      case "climatisation":
+      case "ventilation":
         return (
           <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
             <path d="M4 14L4 4M15 14L15 5.5M20 14L20 9M9 14L9 12M4 20L4 18M15 20L15 18M20 20L20 18M9 20L9 18M2 14L22 14" />
@@ -312,16 +312,16 @@ export default function ObjectDashboard() {
         {selectedPrison && <span className="text-lg font-normal ml-2 text-gray-500">(Prison ID: {selectedPrison})</span>}
       </h1>
 
-        {showPointsMessage && (
-          <div className="fixed top-4 right-4 bg-green-600/90 backdrop-blur-sm text-white px-6 py-3 rounded-lg shadow-xl transition-opacity z-50 border border-green-500/50">
-            <div className="flex items-center">
-              <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5 mr-2" viewBox="0 0 20 20" fill="currentColor">
-                <path fillRule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clipRule="evenodd" />
-              </svg>
-              {pointsMessage}
-            </div>
+      {showPointsMessage && (
+        <div className="fixed top-4 right-4 bg-green-600/90 backdrop-blur-sm text-white px-6 py-3 rounded-lg shadow-xl transition-opacity z-50 border border-green-500/50">
+          <div className="flex items-center">
+            <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5 mr-2" viewBox="0 0 20 20" fill="currentColor">
+              <path fillRule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clipRule="evenodd" />
+            </svg>
+            {pointsMessage}
           </div>
-        )}
+        </div>
+      )}
 
       {objects.length === 0 ? (
         <p>Aucun objet trouvé pour cette prison</p>
@@ -346,75 +346,75 @@ export default function ObjectDashboard() {
                 <p><strong>Maintenance</strong> : <span className={obj.maintenance === "en panne" ? "text-red-600 font-semibold" : "text-green-600"}>{obj.maintenance}</span></p>
               </div>
 
-                <div className="mb-4">
-                  <div className="mb-1 flex justify-between">
-                    <span className="text-sm text-gray-300">Durabilité</span>
-                    <span className={`text-sm font-medium ${obj.durabilité > 70 ? "text-green-400" :
-                      obj.durabilité > 30 ? "text-yellow-400" :
-                        "text-red-400"
-                      }`}>{obj.durabilité}%</span>
-                  </div>
-                  <div className="w-full bg-gray-700/50 rounded-full h-2.5">
-                    <div
-                      className={`h-2.5 rounded-full ${obj.durabilité > 70 ? "bg-green-600" :
-                        obj.durabilité > 30 ? "bg-yellow-600" :
-                          "bg-red-600"
-                        }`}
-                      style={{ width: `${obj.durabilité}%` }}
-                    ></div>
-                  </div>
+              <div className="mb-4">
+                <div className="mb-1 flex justify-between">
+                  <span className="text-sm text-gray-300">Durabilité</span>
+                  <span className={`text-sm font-medium ${obj.durabilité > 70 ? "text-green-400" :
+                    obj.durabilité > 30 ? "text-yellow-400" :
+                      "text-red-400"
+                    }`}>{obj.durabilité}%</span>
                 </div>
-
-                <div className="flex flex-wrap gap-2 mt-4">
-                  {obj.durabilité <= 0 || obj.maintenance === "en panne" ? (
-                    <button
-                      onClick={() => repairObject(obj.id)}
-                      className="flex-1 bg-blue-600/70 hover:bg-blue-700 text-white py-2 px-4 rounded-lg shadow-md transition-colors flex items-center justify-center"
-                    >
-                      <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5 mr-1.5" viewBox="0 0 20 20" fill="currentColor">
-                        <path fillRule="evenodd" d="M11.49 3.17c-.38-1.56-2.6-1.56-2.98 0a1.532 1.532 0 01-2.286.948c-1.372-.836-2.942.734-2.106 2.106.54.886.061 2.042-.947 2.287-1.561.379-1.561 2.6 0 2.978a1.532 1.532 0 01.947 2.287c-.836 1.372.734 2.942 2.106 2.106a1.532 1.532 0 012.287.947c.379 1.561 2.6 1.561 2.978 0a1.533 1.533 0 012.287-.947c1.372.836 2.942-.734 2.106-2.106a1.533 1.533 0 01.947-2.287c1.561-.379 1.561-2.6 0-2.978a1.532 1.532 0 01-.947-2.287c.836-1.372-.734-2.942-2.106-2.106a1.532 1.532 0 01-2.287-.947zM10 13a3 3 0 100-6 3 3 0 000 6z" clipRule="evenodd" />
-                      </svg>
-                      Réparer
-                    </button>
-                  ) : (
-                    <button
-                      onClick={() => toggleObjectState(obj.id)}
-                      className={`flex-1 py-2 px-4 rounded-lg shadow-md transition-colors flex items-center justify-center ${obj.etat === "on"
-                        ? "bg-red-600/70 hover:bg-red-700 text-white"
-                        : "bg-green-600/70 hover:bg-green-700 text-white"
-                        }`}
-                    >
-                      {obj.etat === "on" ? (
-                        <>
-                          <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5 mr-1.5" viewBox="0 0 20 20" fill="currentColor">
-                            <path fillRule="evenodd" d="M4.293 4.293a1 1 0 011.414 0L10 8.586l4.293-4.293a1 1 0 111.414 1.414L11.414 10l4.293 4.293a1 1 0 01-1.414 1.414L10 11.414l-4.293 4.293a1 1 0 01-1.414-1.414L8.586 10 4.293 5.707a1 1 0 010-1.414z" clipRule="evenodd" />
-                          </svg>
-                          Désactiver
-                        </>
-                      ) : (
-                        <>
-                          <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5 mr-1.5" viewBox="0 0 20 20" fill="currentColor">
-                            <path fillRule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm1-11a1 1 0 10-2 0v2H7a1 1 0 100 2h2v2a1 1 0 102 0v-2h2a1 1 0 100-2h-2V7z" clipRule="evenodd" />
-                          </svg>
-                          Activer
-                        </>
-                      )}
-                    </button>
-                  )}
-
-                  <button
-                    onClick={() => deleteObject(obj.id)}
-                    className="px-3 py-1 mt-1 rounded text-white bg-gray-500 hover:bg-gray-600 text-sm"
-                  >
-                    <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5" viewBox="0 0 20 20" fill="currentColor">
-                      <path fillRule="evenodd" d="M9 2a1 1 0 00-.894.553L7.382 4H4a1 1 0 000 2v10a2 2 0 002 2h8a2 2 0 002-2V6a1 1 0 100-2h-3.382l-.724-1.447A1 1 0 0011 2H9zM7 8a1 1 0 012 0v6a1 1 0 11-2 0V8zm5-1a1 1 0 00-1 1v6a1 1 0 102 0V8a1 1 0 00-1-1z" clipRule="evenodd" />
-                    </svg>
-                  </button>
+                <div className="w-full bg-gray-700/50 rounded-full h-2.5">
+                  <div
+                    className={`h-2.5 rounded-full ${obj.durabilité > 70 ? "bg-green-600" :
+                      obj.durabilité > 30 ? "bg-yellow-600" :
+                        "bg-red-600"
+                      }`}
+                    style={{ width: `${obj.durabilité}%` }}
+                  ></div>
                 </div>
               </div>
-            ))}
-          </div>
-        )}
-      </div>
+
+              <div className="flex flex-wrap gap-2 mt-4">
+                {obj.durabilité <= 0 || obj.maintenance === "en panne" ? (
+                  <button
+                    onClick={() => repairObject(obj.id)}
+                    className="flex-1 bg-blue-600/70 hover:bg-blue-700 text-white py-2 px-4 rounded-lg shadow-md transition-colors flex items-center justify-center"
+                  >
+                    <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5 mr-1.5" viewBox="0 0 20 20" fill="currentColor">
+                      <path fillRule="evenodd" d="M11.49 3.17c-.38-1.56-2.6-1.56-2.98 0a1.532 1.532 0 01-2.286.948c-1.372-.836-2.942.734-2.106 2.106.54.886.061 2.042-.947 2.287-1.561.379-1.561 2.6 0 2.978a1.532 1.532 0 01.947 2.287c-.836 1.372.734 2.942 2.106 2.106a1.532 1.532 0 012.287.947c.379 1.561 2.6 1.561 2.978 0a1.533 1.533 0 012.287-.947c1.372.836 2.942-.734 2.106-2.106a1.533 1.533 0 01.947-2.287c1.561-.379 1.561-2.6 0-2.978a1.532 1.532 0 01-.947-2.287c.836-1.372-.734-2.942-2.106-2.106a1.532 1.532 0 01-2.287-.947zM10 13a3 3 0 100-6 3 3 0 000 6z" clipRule="evenodd" />
+                    </svg>
+                    Réparer
+                  </button>
+                ) : (
+                  <button
+                    onClick={() => toggleObjectState(obj.id)}
+                    className={`flex-1 py-2 px-4 rounded-lg shadow-md transition-colors flex items-center justify-center ${obj.etat === "on"
+                      ? "bg-red-600/70 hover:bg-red-700 text-white"
+                      : "bg-green-600/70 hover:bg-green-700 text-white"
+                      }`}
+                  >
+                    {obj.etat === "on" ? (
+                      <>
+                        <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5 mr-1.5" viewBox="0 0 20 20" fill="currentColor">
+                          <path fillRule="evenodd" d="M4.293 4.293a1 1 0 011.414 0L10 8.586l4.293-4.293a1 1 0 111.414 1.414L11.414 10l4.293 4.293a1 1 0 01-1.414 1.414L10 11.414l-4.293 4.293a1 1 0 01-1.414-1.414L8.586 10 4.293 5.707a1 1 0 010-1.414z" clipRule="evenodd" />
+                        </svg>
+                        Désactiver
+                      </>
+                    ) : (
+                      <>
+                        <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5 mr-1.5" viewBox="0 0 20 20" fill="currentColor">
+                          <path fillRule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm1-11a1 1 0 10-2 0v2H7a1 1 0 100 2h2v2a1 1 0 102 0v-2h2a1 1 0 100-2h-2V7z" clipRule="evenodd" />
+                        </svg>
+                        Activer
+                      </>
+                    )}
+                  </button>
+                )}
+
+                <button
+                  onClick={() => deleteObject(obj.id)}
+                  className="px-3 py-1 mt-1 rounded text-white bg-gray-500 hover:bg-gray-600 text-sm"
+                >
+                  <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5" viewBox="0 0 20 20" fill="currentColor">
+                    <path fillRule="evenodd" d="M9 2a1 1 0 00-.894.553L7.382 4H4a1 1 0 000 2v10a2 2 0 002 2h8a2 2 0 002-2V6a1 1 0 100-2h-3.382l-.724-1.447A1 1 0 0011 2H9zM7 8a1 1 0 012 0v6a1 1 0 11-2 0V8zm5-1a1 1 0 00-1 1v6a1 1 0 102 0V8a1 1 0 00-1-1z" clipRule="evenodd" />
+                  </svg>
+                </button>
+              </div>
+            </div>
+          ))}
+        </div>
+      )}
+    </div>
   );
 }
