@@ -117,7 +117,7 @@ export default function ObjectDashboard() {
     }
   };
 
-  const toggleObjectState = async (id: number) => {
+  const toggleObjectState = async (id: number, currentState: 'on' | 'off') => {
     try {
       const objectToUpdate = objects.find(obj => obj.id === id);
       if (!objectToUpdate) return;
@@ -127,7 +127,7 @@ export default function ObjectDashboard() {
         return;
       }
 
-      const newState: ObjectState = objectToUpdate.etat === "on" ? "off" : "on";
+      const newState: ObjectState = currentState === "on" ? "off" : "on";
       let newDurability = objectToUpdate.durabilité;
 
       // Si on l'active, on réduit la durabilité de façon aléatoire
@@ -378,7 +378,7 @@ export default function ObjectDashboard() {
                   </button>
                 ) : (
                   <button
-                    onClick={() => toggleObjectState(obj.id)}
+                    onClick={() => toggleObjectState(obj.id, obj.etat)}
                     className={`flex-1 py-2 px-4 rounded-lg shadow-md transition-colors flex items-center justify-center ${obj.etat === "on"
                       ? "bg-red-600/70 hover:bg-red-700 text-white"
                       : "bg-green-600/70 hover:bg-green-700 text-white"

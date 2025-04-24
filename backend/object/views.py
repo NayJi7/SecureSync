@@ -98,17 +98,17 @@ class ObjectViewSet(viewsets.ModelViewSet):
         old_instance = self.get_object()
         old_etat = old_instance.etat
         
-        # Sauvegarder les changements
+        # Save the updated instance
         instance = serializer.save()
         
-        # Détecter si l'état a changé
+        # If the state has changed, create a log
         if old_etat != instance.etat:
             ObjetLog.objects.create(
                 objet=instance,
                 type=instance.type,
                 nom=instance.nom,
                 etat=instance.etat,
-                commentaire=f"Changement d'état: {old_etat} ➜ {instance.etat}",
+                commentaire=f"État changé de {old_etat} à {instance.etat}",
                 user=self.request.user
             )
     

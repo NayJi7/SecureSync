@@ -1,29 +1,33 @@
 import React, { useState } from 'react';
-import { ObjectType, PanneauAffichageObject } from './types';
-import { MonitorPlay, Plus, ToggleLeft, MoreVertical, Pencil, Trash2, X, MessageSquare } from 'lucide-react';
+import { Info, MoreVertical, Pencil, Save, Trash2, ToggleLeft, X, MonitorPlay, Plus, MessageSquare } from 'lucide-react';
+import { ObjectType } from './types';
 import { toggleObjectState, updateObject, deleteObject } from '../../services/objectService';
 
 interface PanneauAffichageProps {
     objects: ObjectType[];
-    onAddObject?: () => void;
     onStatusChange?: () => void;
+    onAddObject?: () => void;
     addPoints?: (points: number) => Promise<void>;
 }
 
-const PanneauAffichage: React.FC<PanneauAffichageProps> = ({ objects, onAddObject, onStatusChange, addPoints }) => {
+const PanneauAffichage: React.FC<PanneauAffichageProps> = ({ objects, onStatusChange, onAddObject, addPoints }) => {
     const isEmpty = objects.length === 0;
-    const [isHovering, setIsHovering] = useState(false);
-    const [toggleLoading, setToggleLoading] = useState<number | null>(null);
     const [activeMenu, setActiveMenu] = useState<number | null>(null);
+    const [isUpdating, setIsUpdating] = useState<number | null>(null);
+    const [toggleLoading, setToggleLoading] = useState<number | null>(null);
+    const [isHovering, setIsHovering] = useState(false);
     const [objectToEdit, setObjectToEdit] = useState<ObjectType | null>(null);
+    const [newName, setNewName] = useState<string>('');
     const [newX, setNewX] = useState<number>(0);
     const [newY, setNewY] = useState<number>(0);
+    const [newConsumption, setNewConsumption] = useState<number>(0);
+    const [newConnection, setNewConnection] = useState<'wifi' | 'filaire'>('wifi');
+    const [showInfoId, setShowInfoId] = useState<number | null>(null);
     const [isDeleting, setIsDeleting] = useState<number | null>(null);
-    const [isUpdating, setIsUpdating] = useState<number | null>(null);
     const [showDeleteModal, setShowDeleteModal] = useState(false);
     const [objectToDelete, setObjectToDelete] = useState<number | null>(null);
     const [showMessageInput, setShowMessageInput] = useState<number | null>(null);
-    const [newMessage, setNewMessage] = useState('');
+    const [newMessage, setNewMessage] = useState<string>('');
 
     const handleAddClick = () => {
         if (onAddObject) {
@@ -33,23 +37,23 @@ const PanneauAffichage: React.FC<PanneauAffichageProps> = ({ objects, onAddObjec
         }
     };
 
-    const handleToggleState = async (id: number, currentState: 'on' | 'off') => {
+    const handleToggleState = async (id: number, currentState: string) => {
         try {
             setToggleLoading(id);
-            const response = await toggleObjectState(id, currentState);
-            console.log('Toggle successful:', response);
+            console.log(`Toggling panel ${id} state from ${currentState} to ${currentState === 'on' ? 'off' : 'on'}`);
 
+            // Important: Dans le service, toggleObjectState inverse déjà l'état, donc nous devons passer l'état ACTUEL
+            await toggleObjectState(id, currentState as 'on' | 'off');
+
+            console.log(`Panel state toggled successfully`);
+            onStatusChange?.();
             if (addPoints) {
-                await addPoints(3);
-            }
-
-            if (onStatusChange) {
-                onStatusChange();
+                await addPoints(10);
             }
         } catch (error: any) {
-            console.error("Error toggling display panel state:", error);
-            alert("Erreur lors du changement d'état du panneau d'affichage: " +
-                (error.response?.data?.message || 'Problème de connexion au serveur'));
+            console.error('Error toggling state:', error);
+            alert('Erreur lors du changement d\'état: ' +
+                (error.friendlyMessage || error.response?.data?.detail || 'Problème de connexion au serveur'));
         } finally {
             setToggleLoading(null);
         }
@@ -60,66 +64,85 @@ const PanneauAffichage: React.FC<PanneauAffichageProps> = ({ objects, onAddObjec
             setActiveMenu(null);
         } else {
             setActiveMenu(id);
-            setObjectToEdit(null);
-            setShowMessageInput(null);
         }
     };
 
     const handleEditClick = (object: ObjectType) => {
         setObjectToEdit(object);
+        setNewName(object.nom);
         setNewX(object.coord_x);
         setNewY(object.coord_y);
+        setNewConsumption(object.consomation || 0);
+        setNewConnection(object.connection as 'wifi' | 'filaire' || 'wifi');
         setActiveMenu(null);
     };
 
     const handleMessageClick = (id: number) => {
+        const object = objects.find(o => o.id === id);
         setShowMessageInput(id);
+        setNewMessage(String(object?.valeur_actuelle || ''));
         setActiveMenu(null);
     };
 
     const handleMessageSave = async (id: number) => {
         try {
-            if (!newMessage.trim()) {
-                alert('Veuillez entrer un message');
-                return;
-            }
-
             setIsUpdating(id);
-            const response = await updateObject(id, { valeur_actuelle: newMessage });
-            console.log('Message update successful:', response);
-            if (onStatusChange) {
-                onStatusChange();
-            }
+            await updateObject(id, {
+                valeur_actuelle: newMessage
+            });
+            onStatusChange?.();
             setShowMessageInput(null);
-            setNewMessage('');
+            if (addPoints) {
+                await addPoints(5);
+            }
         } catch (error: any) {
             console.error('Error updating message:', error);
-            alert("Erreur lors de la mise à jour du message: " +
-                (error.response?.data?.message || 'Problème de connexion au serveur'));
+            alert('Erreur lors de la mise à jour du message: ' +
+                (error.friendlyMessage || error.response?.data?.detail || 'Problème de connexion au serveur'));
         } finally {
             setIsUpdating(null);
         }
     };
 
-    const handleCoordinatesSave = async (id: number) => {
+    const handleInfoToggle = (id: number) => {
+        if (showInfoId === id) {
+            setShowInfoId(null);
+        } else {
+            setShowInfoId(id);
+            setActiveMenu(null);
+        }
+    };
+
+    const handleSaveChanges = async (id: number) => {
         try {
+            if (!newName.trim()) {
+                alert('Le nom est requis');
+                return;
+            }
+
             if (isNaN(newX) || isNaN(newY)) {
                 alert('Les coordonnées doivent être des nombres valides');
                 return;
             }
 
-            setIsUpdating(id);
-            console.log(`Updating display panel ${id} with coords: X=${newX}, Y=${newY}`);
-
-            const response = await updateObject(id, { coord_x: newX, coord_y: newY });
-            console.log('Update successful:', response);
-            if (onStatusChange) {
-                onStatusChange();
+            if (isNaN(newConsumption) || newConsumption < 0) {
+                alert('La consommation doit être un nombre positif');
+                return;
             }
+
+            setIsUpdating(id);
+            await updateObject(id, {
+                nom: newName,
+                coord_x: newX,
+                coord_y: newY,
+                consomation: newConsumption,
+                connection: newConnection
+            });
+
+            onStatusChange?.();
             setObjectToEdit(null);
         } catch (error: any) {
-            console.error('Error updating coordinates:', error);
-
+            console.error('Error updating display panel:', error);
             if (error.response?.status === 401) {
                 alert('Session expirée. Veuillez vous reconnecter.');
                 localStorage.removeItem('authToken');
@@ -128,8 +151,21 @@ const PanneauAffichage: React.FC<PanneauAffichageProps> = ({ objects, onAddObjec
                 return;
             }
 
-            alert('Erreur lors de la mise à jour des coordonnées: ' +
-                (error.friendlyMessage || error.response?.data?.detail || 'Problème de connexion au serveur'));
+            if (error.response?.status === 400) {
+                const errorDetails = error.response.data || {};
+                let errorMessage = 'Erreur de validation:\n';
+                if (typeof errorDetails === 'object') {
+                    Object.entries(errorDetails).forEach(([field, errors]) => {
+                        errorMessage += `- ${field}: ${errors}\n`;
+                    });
+                } else {
+                    errorMessage += errorDetails;
+                }
+                alert(errorMessage);
+            } else {
+                alert('Erreur lors de la mise à jour du panneau d\'affichage: ' +
+                    (error.friendlyMessage || error.response?.data?.detail || 'Problème de connexion au serveur'));
+            }
         } finally {
             setIsUpdating(null);
         }
@@ -138,27 +174,29 @@ const PanneauAffichage: React.FC<PanneauAffichageProps> = ({ objects, onAddObjec
     const handleDeleteClick = (id: number) => {
         setObjectToDelete(id);
         setShowDeleteModal(true);
+        setActiveMenu(null);
     };
 
     const confirmDelete = async () => {
-        if (objectToDelete === null) return;
+        if (!objectToDelete) return;
 
         try {
             setIsDeleting(objectToDelete);
-            const response = await deleteObject(objectToDelete);
-            console.log('Delete successful:', response);
-            if (onStatusChange) {
-                onStatusChange();
-            }
-        } catch (error: any) {
-            console.error('Error deleting object:', error);
-            alert("Erreur lors de la suppression du panneau d'affichage: " +
-                (error.response?.data?.message || 'Problème de connexion au serveur'));
-        } finally {
-            setIsDeleting(null);
+            await deleteObject(objectToDelete);
+            onStatusChange?.();
             setShowDeleteModal(false);
             setObjectToDelete(null);
+        } catch (error: any) {
+            console.error('Error deleting object:', error);
+            alert('Erreur lors de la suppression: ' +
+                (error.friendlyMessage || error.response?.data?.detail || 'Problème de connexion au serveur'));
+        } finally {
+            setIsDeleting(null);
         }
+    };
+
+    const getDisplayPanelIcon = (message: string | number | null | undefined) => {
+        return <MonitorPlay className="h-4 w-4 text-indigo-600 dark:text-indigo-400" />;
     };
 
     return (
@@ -197,58 +235,180 @@ const PanneauAffichage: React.FC<PanneauAffichageProps> = ({ objects, onAddObjec
                         className="mt-2 text-sm font-medium text-indigo-600 dark:text-indigo-400 hover:underline flex items-center"
                         onClick={handleAddClick}
                     >
-                        <Plus className="h-4 w-4 mr-1" /> Ajouter un panneau d'affichage
+                        <Plus className="h-4 w-4 mr-1" />
+                        Ajouter un panneau
                     </button>
                 </div>
             ) : (
-                <div className="space-y-3">
-                    {objects.map(panel => (
-                        <div key={panel.id} className="relative">
-                            {objectToEdit?.id === panel.id ? (
-                                <div className="p-4 bg-gray-50 dark:bg-gray-700 rounded-lg shadow-inner border border-gray-200 dark:border-gray-600">
+                <div className="space-y-4">
+                    {objects.map((panneau) => (
+                        <div
+                            key={panneau.id}
+                            className="flex flex-col bg-white dark:bg-gray-800 border border-gray-100 dark:border-gray-700 rounded-lg p-3 hover:border-indigo-200 dark:hover:border-indigo-700 transition-colors"
+                        >
+                            <div className="flex justify-between items-center">
+                                <div className="flex items-center">
+                                    <div className={`p-1.5 rounded-full mr-2 ${panneau.etat === 'on' ? 'bg-indigo-100 dark:bg-indigo-900/30' : 'bg-gray-200 dark:bg-gray-700'}`}>
+                                        {getDisplayPanelIcon(panneau.valeur_actuelle)}
+                                    </div>
+                                    <div>
+                                        <p className="font-medium text-gray-800 dark:text-white text-sm">{panneau.nom}</p>
+                                        <div className="flex items-center mt-1">
+                                            <span className={`inline-flex items-center px-2 py-0.5 rounded-full text-xs ${panneau.etat === 'on'
+                                                ? 'bg-indigo-100 text-indigo-800 dark:bg-indigo-900/30 dark:text-indigo-400'
+                                                : 'bg-gray-200 text-gray-800 dark:bg-gray-700 dark:text-gray-400'}`}
+                                            >
+                                                {panneau.etat === 'on' ? 'Actif' : 'Inactif'}
+                                            </span>
+                                        </div>
+                                        {panneau.etat === 'on' && (
+                                            <div className="flex space-x-3 mt-1">
+                                                <p className="text-xs text-gray-500 dark:text-gray-400">
+                                                    Message: <span className="font-medium">
+                                                        {panneau.valeur_actuelle || 'Aucun'}
+                                                    </span>
+                                                </p>
+                                            </div>
+                                        )}
+                                    </div>
+                                </div>
+                                <div className="flex items-center space-x-1">
+                                    <button
+                                        onClick={() => handleInfoToggle(panneau.id)}
+                                        className="p-1.5 rounded-full hover:bg-indigo-100 dark:hover:bg-indigo-900/30 transition-colors"
+                                        title="Informations"
+                                    >
+                                        <Info className="h-4 w-4 text-indigo-600 dark:text-indigo-400" />
+                                    </button>
+                                    <button
+                                        onClick={() => handleToggleState(panneau.id, panneau.etat)}
+                                        disabled={toggleLoading === panneau.id}
+                                        className={`p-1.5 rounded-full hover:bg-indigo-100 dark:hover:bg-indigo-900/30 transition-colors ${toggleLoading === panneau.id ? 'opacity-50 cursor-not-allowed' : ''}`}
+                                        title="Changer état"
+                                    >
+                                        <ToggleLeft className="h-4 w-4 text-indigo-600 dark:text-indigo-400" />
+                                    </button>
+                                    <button
+                                        onClick={() => handleMenuToggle(panneau.id)}
+                                        className="p-1.5 rounded-full hover:bg-gray-200 dark:hover:bg-gray-600 transition-colors"
+                                        title="Options"
+                                    >
+                                        <MoreVertical className="h-4 w-4 text-gray-600 dark:text-gray-400" />
+                                    </button>
+                                    {activeMenu === panneau.id && (
+                                        <div className="absolute right-0 top-auto mt-2 w-48 bg-white dark:bg-gray-800 shadow-lg rounded-md border border-gray-200 dark:border-gray-700 z-10">
+                                            <button onClick={() => handleMessageClick(panneau.id)} className="flex items-center w-full px-4 py-2 text-sm text-left text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-700">
+                                                <MessageSquare className="h-4 w-4 mr-2 text-gray-500 dark:text-gray-400" />
+                                                Modifier message
+                                            </button>
+                                            <button onClick={() => handleEditClick(panneau)} className="flex items-center w-full px-4 py-2 text-sm text-left text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-700">
+                                                <Pencil className="h-4 w-4 mr-2 text-gray-500 dark:text-gray-400" />
+                                                Modifier
+                                            </button>
+                                            <button onClick={() => handleDeleteClick(panneau.id)} className="flex items-center w-full px-4 py-2 text-sm text-left text-red-600 dark:text-red-400 hover:bg-red-50 dark:hover:bg-red-900/20">
+                                                <Trash2 className="h-4 w-4 mr-2" />
+                                                Supprimer
+                                            </button>
+                                        </div>
+                                    )}
+                                </div>
+                            </div>
+
+                            {objectToEdit?.id === panneau.id && (
+                                <div className="p-4 bg-indigo-50 dark:bg-indigo-900/20 rounded-lg border border-indigo-200 dark:border-indigo-700 mt-3">
                                     <div className="flex justify-between items-center mb-3">
-                                        <h4 className="font-medium text-gray-800 dark:text-gray-200">Modifier la position</h4>
-                                        <button
-                                            onClick={() => setObjectToEdit(null)}
-                                            className="text-gray-500 hover:text-gray-700 dark:text-gray-400 dark:hover:text-gray-300"
-                                        >
+                                        <h4 className="font-medium text-indigo-800 dark:text-indigo-300">Modifier le panneau d'affichage</h4>
+                                        <button onClick={() => setObjectToEdit(null)} className="text-gray-500 hover:text-gray-700 dark:text-gray-400 dark:hover:text-gray-300">
                                             <X className="h-4 w-4" />
                                         </button>
                                     </div>
 
-                                    <div className="grid grid-cols-2 gap-3 mb-3">
+                                    <div className="space-y-3">
                                         <div>
-                                            <label className="block text-xs font-medium text-gray-600 dark:text-gray-400 mb-1">Coordonnée X</label>
+                                            <label className="block text-xs font-medium text-gray-600 dark:text-gray-400 mb-1">Nom</label>
                                             <input
-                                                type="number"
-                                                value={newX}
-                                                onChange={(e) => setNewX(Number(e.target.value))}
+                                                type="text"
+                                                value={newName}
+                                                onChange={(e) => setNewName(e.target.value)}
                                                 className="w-full px-3 py-1.5 text-sm border border-gray-300 dark:border-gray-600 rounded bg-white dark:bg-gray-700 text-gray-900 dark:text-white"
                                             />
                                         </div>
+
+                                        <div className="grid grid-cols-2 gap-3">
+                                            <div>
+                                                <label className="block text-xs font-medium text-gray-600 dark:text-gray-400 mb-1">Coordonnée X</label>
+                                                <input
+                                                    type="number"
+                                                    value={newX}
+                                                    onChange={(e) => setNewX(Number(e.target.value))}
+                                                    className="w-full px-3 py-1.5 text-sm border border-gray-300 dark:border-gray-600 rounded bg-white dark:bg-gray-700 text-gray-900 dark:text-white"
+                                                />
+                                            </div>
+                                            <div>
+                                                <label className="block text-xs font-medium text-gray-600 dark:text-gray-400 mb-1">Coordonnée Y</label>
+                                                <input
+                                                    type="number"
+                                                    value={newY}
+                                                    onChange={(e) => setNewY(Number(e.target.value))}
+                                                    className="w-full px-3 py-1.5 text-sm border border-gray-300 dark:border-gray-600 rounded bg-white dark:bg-gray-700 text-gray-900 dark:text-white"
+                                                />
+                                            </div>
+                                        </div>
+
                                         <div>
-                                            <label className="block text-xs font-medium text-gray-600 dark:text-gray-400 mb-1">Coordonnée Y</label>
+                                            <label className="block text-xs font-medium text-gray-600 dark:text-gray-400 mb-1">Consommation (Watts)</label>
                                             <input
                                                 type="number"
-                                                value={newY}
-                                                onChange={(e) => setNewY(Number(e.target.value))}
+                                                value={newConsumption}
+                                                onChange={(e) => setNewConsumption(Number(e.target.value))}
+                                                min="0"
                                                 className="w-full px-3 py-1.5 text-sm border border-gray-300 dark:border-gray-600 rounded bg-white dark:bg-gray-700 text-gray-900 dark:text-white"
                                             />
+                                        </div>
+
+                                        <div>
+                                            <label className="block text-xs font-medium text-gray-600 dark:text-gray-400 mb-1">Type de connexion</label>
+                                            <div className="flex space-x-4">
+                                                <label className="inline-flex items-center">
+                                                    <input
+                                                        type="radio"
+                                                        className="form-radio h-4 w-4 text-indigo-600"
+                                                        name="connectionType"
+                                                        value="wifi"
+                                                        checked={newConnection === 'wifi'}
+                                                        onChange={() => setNewConnection('wifi')}
+                                                    />
+                                                    <span className="ml-2 text-sm text-gray-700 dark:text-gray-300">Wifi</span>
+                                                </label>
+                                                <label className="inline-flex items-center">
+                                                    <input
+                                                        type="radio"
+                                                        className="form-radio h-4 w-4 text-indigo-600"
+                                                        name="connectionType"
+                                                        value="filaire"
+                                                        checked={newConnection === 'filaire'}
+                                                        onChange={() => setNewConnection('filaire')}
+                                                    />
+                                                    <span className="ml-2 text-sm text-gray-700 dark:text-gray-300">Filaire</span>
+                                                </label>
+                                            </div>
                                         </div>
                                     </div>
 
-                                    <div className="flex justify-end">
+                                    <div className="flex justify-end mt-4">
                                         <button
-                                            onClick={() => handleCoordinatesSave(panel.id)}
-                                            disabled={isUpdating === panel.id}
-                                            className={`px-3 py-1.5 text-xs bg-indigo-600 text-white rounded hover:bg-indigo-700 transition-colors ${isUpdating === panel.id ? 'opacity-50 cursor-not-allowed' : ''}`}
+                                            onClick={() => handleSaveChanges(panneau.id)}
+                                            disabled={isUpdating === panneau.id}
+                                            className={`px-3 py-1.5 text-xs bg-indigo-600 text-white rounded hover:bg-indigo-700 transition-colors flex items-center ${isUpdating === panneau.id ? 'opacity-50 cursor-not-allowed' : ''}`}
                                         >
-                                            {isUpdating === panel.id ? 'Enregistrement...' : 'Enregistrer'}
+                                            {isUpdating === panneau.id ? 'Enregistrement...' : <><Save className="h-3.5 w-3.5 mr-1" /> Enregistrer</>}
                                         </button>
                                     </div>
                                 </div>
-                            ) : showMessageInput === panel.id ? (
-                                <div className="p-4 bg-gray-50 dark:bg-gray-700 rounded-lg shadow-inner border border-gray-200 dark:border-gray-600">
+                            )}
+
+                            {showMessageInput === panneau.id && (
+                                <div className="p-4 bg-gray-50 dark:bg-gray-700 rounded-lg shadow-inner border border-gray-200 dark:border-gray-600 mt-3">
                                     <div className="flex justify-between items-center mb-3">
                                         <h4 className="font-medium text-gray-800 dark:text-gray-200">Modifier le message</h4>
                                         <button
@@ -271,89 +431,62 @@ const PanneauAffichage: React.FC<PanneauAffichageProps> = ({ objects, onAddObjec
 
                                     <div className="flex justify-end">
                                         <button
-                                            onClick={() => handleMessageSave(panel.id)}
-                                            disabled={isUpdating === panel.id}
-                                            className={`px-3 py-1.5 text-xs bg-indigo-600 text-white rounded hover:bg-indigo-700 transition-colors ${isUpdating === panel.id ? 'opacity-50 cursor-not-allowed' : ''}`}
+                                            onClick={() => handleMessageSave(panneau.id)}
+                                            disabled={isUpdating === panneau.id}
+                                            className={`px-3 py-1.5 text-xs bg-indigo-600 text-white rounded hover:bg-indigo-700 transition-colors flex items-center ${isUpdating === panneau.id ? 'opacity-50 cursor-not-allowed' : ''}`}
                                         >
-                                            {isUpdating === panel.id ? 'Enregistrement...' : 'Enregistrer'}
+                                            {isUpdating === panneau.id ? 'Enregistrement...' : <><Save className="h-3.5 w-3.5 mr-1" /> Enregistrer</>}
                                         </button>
                                     </div>
                                 </div>
-                            ) : (
-                                <div className="flex items-center justify-between p-3 bg-gray-50 dark:bg-gray-700/50 rounded-lg hover:bg-gray-100 dark:hover:bg-gray-700 transition-colors">
-                                    <div className="flex items-center">
-                                        <div className={`p-2 rounded-full mr-3 ${panel.etat === 'on' ? 'bg-indigo-100 dark:bg-indigo-900/30' : 'bg-gray-100 dark:bg-gray-800/60'}`}>
-                                            <MonitorPlay className={`h-4 w-4 ${panel.etat === 'on' ? 'text-indigo-600 dark:text-indigo-400' : 'text-gray-600 dark:text-gray-400'}`} />
+                            )}
+
+                            {showInfoId === panneau.id && (
+                                <div className="p-3 bg-gray-50 dark:bg-gray-700/50 border-t border-gray-200 dark:border-gray-700 mt-3 rounded-b-lg">
+                                    <div className="grid grid-cols-2 gap-3 text-sm">
+                                        <div className="space-y-1">
+                                            <p className="text-xs text-gray-500 dark:text-gray-400">État</p>
+                                            <p className="font-medium">
+                                                <span className={`inline-flex items-center px-2 py-0.5 rounded-full text-xs ${panneau.etat === 'on' ? 'bg-indigo-100 text-indigo-800 dark:bg-indigo-900/30 dark:text-indigo-400' : 'bg-gray-200 text-gray-800 dark:bg-gray-700 dark:text-gray-400'}`}>
+                                                    {panneau.etat === 'on' ? 'Actif' : 'Inactif'}
+                                                </span>
+                                            </p>
                                         </div>
-                                        <div>
-                                            <p className="font-medium text-gray-800 dark:text-gray-200">{panel.nom}</p>
-                                            <div className="flex space-x-3 mt-1">
-                                                <p className="text-xs text-gray-500 dark:text-gray-400">
-                                                    Position: {panel.coord_x}, {panel.coord_y}
-                                                </p>
-                                            </div>
-                                            {panel.etat === 'on' && panel.valeur_actuelle && (
-                                                <div className="mt-2 p-2 bg-indigo-50 dark:bg-indigo-950/30 rounded-md">
-                                                    <p className="text-sm text-indigo-800 dark:text-indigo-200 font-medium">
-                                                        {panel.valeur_actuelle.toString()}
-                                                    </p>
-                                                </div>
-                                            )}
+                                        <div className="space-y-1">
+                                            <p className="text-xs text-gray-500 dark:text-gray-400">Connexion</p>
+                                            <p className="font-medium text-gray-700 dark:text-gray-300">{panneau.connection || 'N/A'}</p>
+                                        </div>
+                                        <div className="space-y-1">
+                                            <p className="text-xs text-gray-500 dark:text-gray-400">Position</p>
+                                            <p className="font-medium text-gray-700 dark:text-gray-300">X: {panneau.coord_x}, Y: {panneau.coord_y}</p>
+                                        </div>
+                                        <div className="space-y-1">
+                                            <p className="text-xs text-gray-500 dark:text-gray-400">Consommation</p>
+                                            <p className="font-medium text-gray-700 dark:text-gray-300">{panneau.consomation || 0} W</p>
+                                        </div>
+                                        <div className="space-y-1">
+                                            <p className="text-xs text-gray-500 dark:text-gray-400">Maintenance</p>
+                                            <p className={`text-xs font-medium ${panneau.maintenance === 'fonctionnel'
+                                                ? 'text-green-600 dark:text-green-400'
+                                                : 'text-red-600 dark:text-red-400'
+                                                }`}>
+                                                {panneau.maintenance === 'fonctionnel' ? 'Opérationnel' : 'En panne'}
+                                            </p>
                                         </div>
                                     </div>
 
-                                    <div className="flex items-center space-x-2">
-                                        {panel.etat === 'on' && (
-                                            <button
-                                                onClick={() => handleMessageClick(panel.id)}
-                                                className="p-1.5 bg-indigo-100 rounded-full hover:bg-indigo-200 dark:bg-indigo-900/30 dark:hover:bg-indigo-800/50 transition-colors"
-                                                title="Modifier le message"
-                                            >
-                                                <MessageSquare className="h-4 w-4 text-indigo-600 dark:text-indigo-400" />
-                                            </button>
-                                        )}
-                                        <span className={`px-2.5 py-1 text-xs font-medium rounded-full ${panel.etat === 'on'
-                                            ? 'bg-indigo-100 text-indigo-800 dark:bg-indigo-900/30 dark:text-indigo-300'
-                                            : 'bg-gray-100 text-gray-800 dark:bg-gray-700 dark:text-gray-300'
-                                            }`}>
-                                            {panel.etat === 'on' ? 'Actif' : 'Inactif'}
-                                        </span>
-                                        <button
-                                            onClick={() => handleToggleState(panel.id, panel.etat)}
-                                            disabled={toggleLoading === panel.id}
-                                            className={`p-1.5 bg-indigo-100 rounded-full hover:bg-indigo-200 dark:bg-indigo-900/30 dark:hover:bg-indigo-800/50 transition-colors ${toggleLoading === panel.id ? 'opacity-50' : ''}`}
-                                            title={panel.etat === 'on' ? 'Désactiver' : 'Activer'}
-                                        >
-                                            <ToggleLeft className="h-4 w-4 text-indigo-600 dark:text-indigo-400" />
-                                        </button>
-
-                                        <div className="relative">
-                                            <button
-                                                onClick={() => handleMenuToggle(panel.id)}
-                                                className="p-1.5 bg-gray-100 hover:bg-gray-200 dark:bg-gray-800 dark:hover:bg-gray-700 rounded-full transition-colors"
-                                                title="Options"
-                                            >
-                                                <MoreVertical className="h-4 w-4 text-gray-600 dark:text-gray-400" />
-                                            </button>
-                                            {activeMenu === panel.id && (
-                                                <div className="absolute right-0 top-full mt-1 w-48 bg-white dark:bg-gray-800 shadow-lg rounded-md border border-gray-200 dark:border-gray-700 z-10">
-                                                    <button
-                                                        onClick={() => handleEditClick(panel)}
-                                                        className="flex items-center w-full px-4 py-2 text-sm text-left text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-700"
-                                                    >
-                                                        <Pencil className="h-4 w-4 mr-2 text-gray-500 dark:text-gray-400" />
-                                                        Modifier la position
-                                                    </button>
-
-                                                    <button
-                                                        onClick={() => handleDeleteClick(panel.id)}
-                                                        className="flex items-center w-full px-4 py-2 text-sm text-left text-red-600 dark:text-red-400 hover:bg-red-50 dark:hover:bg-red-900/20"
-                                                    >
-                                                        <Trash2 className="h-4 w-4 mr-2" />
-                                                        Supprimer
-                                                    </button>
-                                                </div>
-                                            )}
+                                    <div className="mt-3">
+                                        <div className="flex justify-between items-center mb-1">
+                                            <p className="text-xs text-gray-500 dark:text-gray-400">Durabilité</p>
+                                            <p className="text-xs font-medium text-gray-700 dark:text-gray-300">{panneau.durabilité || 0}%</p>
+                                        </div>
+                                        <div className="w-full bg-gray-200 dark:bg-gray-700 rounded-full h-1.5">
+                                            <div
+                                                className={`h-1.5 rounded-full ${(panneau.durabilité || 0) > 70 ? 'bg-green-500' :
+                                                    (panneau.durabilité || 0) > 30 ? 'bg-yellow-500' : 'bg-red-500'
+                                                    }`}
+                                                style={{ width: `${panneau.durabilité || 0}%` }}
+                                            ></div>
                                         </div>
                                     </div>
                                 </div>
@@ -363,7 +496,6 @@ const PanneauAffichage: React.FC<PanneauAffichageProps> = ({ objects, onAddObjec
                 </div>
             )}
 
-            {/* Modal de confirmation de suppression */}
             {showDeleteModal && (
                 <div className="fixed inset-0 flex items-center justify-center z-50">
                     <div className="fixed inset-0 bg-black/50" onClick={() => setShowDeleteModal(false)}></div>

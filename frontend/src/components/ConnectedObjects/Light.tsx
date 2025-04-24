@@ -1,7 +1,7 @@
 import React, { useState } from 'react';
 import { ObjectType } from './types';
 import { LightbulbIcon, Plus, ToggleLeft, MoreVertical, Pencil, Trash2, X, Info, Save } from 'lucide-react';
-import { toggleObjectState, updateObject, deleteObject } from '../../services/objectService';
+import { toggleObjectState as toggleObjectStateService, updateObject, deleteObject } from '../../services/objectService';
 
 // Extended interface for Light objects with brightness property
 interface LightObjectExtended extends ObjectType {
@@ -13,9 +13,10 @@ interface LightProps {
     onAddObject?: () => void;
     onStatusChange?: () => void;
     addPoints?: (points: number) => Promise<void>;
+    toggleObjectState?: (id: number, currentState: 'on' | 'off') => Promise<void>;
 }
 
-const Light: React.FC<LightProps> = ({ objects, onAddObject, onStatusChange, addPoints }) => {
+const Light: React.FC<LightProps> = ({ objects, onAddObject, onStatusChange, addPoints, toggleObjectState }) => {
     const isEmpty = objects.length === 0;
     const [isHovering, setIsHovering] = useState(false);
     const [toggleLoading, setToggleLoading] = useState<number | null>(null);
@@ -47,17 +48,21 @@ const Light: React.FC<LightProps> = ({ objects, onAddObject, onStatusChange, add
     const handleToggleState = async (id: number, currentState: 'on' | 'off') => {
         try {
             setToggleLoading(id);
-            const response = await toggleObjectState(id, currentState);
-            console.log('Toggle successful:', response);
+            let response;
+            if (toggleObjectState) {
+                await toggleObjectState(id, currentState);
+            } else {
+                response = await toggleObjectStateService(id, currentState);
+                console.log('Toggle successful:', response);
+            }
 
             if (addPoints) {
                 // Attribution de 1 point pour l'interaction avec une lumière
                 await addPoints(1);
             }
 
-            if (onStatusChange) {
-                onStatusChange();
-            }
+            // Always call onStatusChange to refresh the state
+            onStatusChange?.();
         } catch (error: any) {
             console.error('Error toggling light state:', error);
 
@@ -149,9 +154,7 @@ const Light: React.FC<LightProps> = ({ objects, onAddObject, onStatusChange, add
             });
 
             console.log('Update successful:', response);
-            if (onStatusChange) {
-                onStatusChange();
-            }
+            onStatusChange?.();
             setObjectToEdit(null);
         } catch (error: any) {
             console.error('Error updating light:', error);
@@ -203,9 +206,7 @@ const Light: React.FC<LightProps> = ({ objects, onAddObject, onStatusChange, add
             setIsDeleting(objectToDelete);
             const response = await deleteObject(objectToDelete);
             console.log('Delete successful:', response);
-            if (onStatusChange) {
-                onStatusChange();
-            }
+            onStatusChange?.();
         } catch (error: any) {
             console.error('Error deleting object:', error);
 
@@ -315,17 +316,7 @@ const Light: React.FC<LightProps> = ({ objects, onAddObject, onStatusChange, add
                                             </div>
                                         </div>
 
-                                        <div>
-                                            <label className="block text-xs font-medium text-gray-600 dark:text-gray-400 mb-1">Luminosité (%)</label>
-                                            <input
-                                                type="number"
-                                                value={newBrightness}
-                                                onChange={(e) => setNewBrightness(Number(e.target.value))}
-                                                min="0"
-                                                max="100"
-                                                className="w-full px-3 py-1.5 text-sm border border-gray-300 dark:border-gray-600 rounded bg-white dark:bg-gray-700 text-gray-900 dark:text-white"
-                                            />
-                                        </div>
+
 
                                         <div>
                                             <label className="block text-xs font-medium text-gray-600 dark:text-gray-400 mb-1">Consommation (Watts)</label>
@@ -393,9 +384,13 @@ const Light: React.FC<LightProps> = ({ objects, onAddObject, onStatusChange, add
                                             </div>
                                             <div>
                                                 <p className="font-medium text-gray-800 dark:text-white text-sm">{light.nom}</p>
-                                                <p className="text-xs text-gray-500 dark:text-gray-400">
-                                                    {light.etat === 'on' ? `${light.valeur_actuelle || 0}%` : 'Éteinte'} - Pos: {light.coord_x}, {light.coord_y}
-                                                </p>
+                                                <div className="flex items-center mt-1">
+                                                    <span className={`inline-flex items-center px-2 py-0.5 rounded-full text-xs ${light.etat === 'on'
+                                                        ? 'bg-yellow-100 text-yellow-800 dark:bg-yellow-900/30 dark:text-yellow-400'
+                                                        : 'bg-gray-200 text-gray-800 dark:bg-gray-700 dark:text-gray-400'}`}>
+                                                        {light.etat === 'on' ? 'Allumée' : 'Éteinte'}
+                                                    </span>
+                                                </div>
                                             </div>
                                         </div>
                                         <div className="flex items-center space-x-1">
@@ -407,7 +402,7 @@ const Light: React.FC<LightProps> = ({ objects, onAddObject, onStatusChange, add
                                                 <Info className="h-4 w-4 text-yellow-600 dark:text-yellow-400" />
                                             </button>
                                             <button
-                                                onClick={() => handleToggleState(light.id, light.etat === 'on' ? 'off' : 'on')}
+                                                onClick={() => handleToggleState(light.id, light.etat)}
                                                 disabled={toggleLoading === light.id}
                                                 className={`p-1.5 rounded-full hover:bg-yellow-100 dark:hover:bg-yellow-900/30 transition-colors ${toggleLoading === light.id ? 'opacity-50 cursor-not-allowed' : ''}`}
                                                 title={light.etat === 'on' ? 'Éteindre' : 'Allumer'}
@@ -446,58 +441,62 @@ const Light: React.FC<LightProps> = ({ objects, onAddObject, onStatusChange, add
                                             )}
                                         </div>
                                     </div>
-                                    <div className="p-3 bg-gray-50 dark:bg-gray-700/50 border-t border-gray-200 dark:border-gray-700">
-                                        <div className="grid grid-cols-2 gap-3 text-sm">
-                                            <div className="space-y-1">
-                                                <p className="text-xs text-gray-500 dark:text-gray-400">État</p>
-                                                <p className="font-medium">
-                                                    <span className={`inline-flex items-center px-2 py-0.5 rounded-full text-xs ${light.etat === 'on'
-                                                        ? 'bg-green-100 text-green-800 dark:bg-green-900/30 dark:text-green-400'
-                                                        : 'bg-red-100 text-red-800 dark:bg-red-900/30 dark:text-red-400'
-                                                        }`}>
-                                                        {light.etat === 'on' ? 'Allumée' : 'Éteinte'}
-                                                    </span>
-                                                </p>
-                                            </div>
-                                            <div className="space-y-1">
-                                                <p className="text-xs text-gray-500 dark:text-gray-400">Luminosité</p>
-                                                <p className="font-medium text-gray-700 dark:text-gray-300">{light.valeur_actuelle || 0}%</p>
-                                            </div>
-                                            <div className="space-y-1">
-                                                <p className="text-xs text-gray-500 dark:text-gray-400">Connexion</p>
-                                                <p className="font-medium text-gray-700 dark:text-gray-300">{light.connection || 'N/A'}</p>
-                                            </div>
-                                            <div className="space-y-1">
-                                                <p className="text-xs text-gray-500 dark:text-gray-400">Consommation</p>
-                                                <p className="font-medium text-gray-700 dark:text-gray-300">{light.consomation || 0} W</p>
-                                            </div>
-                                            <div className="space-y-1">
-                                                <p className="text-xs text-gray-500 dark:text-gray-400">Maintenance</p>
-                                                <p className={`text-xs font-medium ${light.maintenance === 'fonctionnel'
-                                                    ? 'text-green-600 dark:text-green-400'
-                                                    : 'text-red-600 dark:text-red-400'
-                                                    }`}>
-                                                    {light.maintenance === 'fonctionnel' ? 'Opérationnelle' : 'En panne'}
-                                                </p>
-                                            </div>
-                                        </div>
 
-                                        {/* Durability indicator */}
-                                        <div className="mt-3">
-                                            <div className="flex justify-between items-center mb-1">
-                                                <p className="text-xs text-gray-500 dark:text-gray-400">Durabilité</p>
-                                                <p className="text-xs font-medium text-gray-700 dark:text-gray-300">{light.durabilité || 0}%</p>
+                                    {/* Collapsible info panel */}
+                                    {showInfoId === light.id && (
+                                        <div className="p-3 bg-gray-50 dark:bg-gray-700/50 border-t border-gray-200 dark:border-gray-700">
+                                            <div className="grid grid-cols-2 gap-3 text-sm">
+                                                <div className="space-y-1">
+                                                    <p className="text-xs text-gray-500 dark:text-gray-400">État</p>
+                                                    <p className="font-medium">
+                                                        <span className={`inline-flex items-center px-2 py-0.5 rounded-full text-xs ${light.etat === 'on'
+                                                            ? 'bg-yellow-100 text-yellow-800 dark:bg-yellow-900/30 dark:text-yellow-400'
+                                                            : 'bg-gray-200 text-gray-800 dark:bg-gray-700 dark:text-gray-400'}`}>
+                                                            {light.etat === 'on' ? 'Allumée' : 'Éteinte'}
+                                                        </span>
+                                                    </p>
+                                                </div>
+
+                                                <div className="space-y-1">
+                                                    <p className="text-xs text-gray-500 dark:text-gray-400">Connexion</p>
+                                                    <p className="font-medium text-gray-700 dark:text-gray-300">{light.connection || 'N/A'}</p>
+                                                </div>
+                                                <div className="space-y-1">
+                                                    <p className="text-xs text-gray-500 dark:text-gray-400">Position</p>
+                                                    <p className="font-medium text-gray-700 dark:text-gray-300">X: {light.coord_x}, Y: {light.coord_y}</p>
+                                                </div>
+                                                <div className="space-y-1">
+                                                    <p className="text-xs text-gray-500 dark:text-gray-400">Consommation</p>
+                                                    <p className="font-medium text-gray-700 dark:text-gray-300">{light.consomation || 0} W</p>
+                                                </div>
+                                                <div className="space-y-1">
+                                                    <p className="text-xs text-gray-500 dark:text-gray-400">Maintenance</p>
+                                                    <p className={`text-xs font-medium ${light.maintenance === 'fonctionnel'
+                                                        ? 'text-green-600 dark:text-green-400'
+                                                        : 'text-red-600 dark:text-red-400'
+                                                        }`}>
+                                                        {light.maintenance === 'fonctionnel' ? 'Opérationnelle' : 'En panne'}
+                                                    </p>
+                                                </div>
                                             </div>
-                                            <div className="w-full bg-gray-200 dark:bg-gray-700 rounded-full h-1.5">
-                                                <div
-                                                    className={`h-1.5 rounded-full ${(light.durabilité || 0) > 70 ? 'bg-green-500' :
-                                                        (light.durabilité || 0) > 30 ? 'bg-yellow-500' : 'bg-red-500'
-                                                        }`}
-                                                    style={{ width: `${light.durabilité || 0}%` }}
-                                                ></div>
+
+                                            {/* Durability indicator */}
+                                            <div className="mt-3">
+                                                <div className="flex justify-between items-center mb-1">
+                                                    <p className="text-xs text-gray-500 dark:text-gray-400">Durabilité</p>
+                                                    <p className="text-xs font-medium text-gray-700 dark:text-gray-300">{light.durabilité || 0}%</p>
+                                                </div>
+                                                <div className="w-full bg-gray-200 dark:bg-gray-700 rounded-full h-1.5">
+                                                    <div
+                                                        className={`h-1.5 rounded-full ${(light.durabilité || 0) > 70 ? 'bg-green-500' :
+                                                            (light.durabilité || 0) > 30 ? 'bg-yellow-500' : 'bg-red-500'
+                                                            }`}
+                                                        style={{ width: `${light.durabilité || 0}%` }}
+                                                    ></div>
+                                                </div>
                                             </div>
                                         </div>
-                                    </div>
+                                    )}
                                 </div>
                             ) : (
                                 <div className="bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded-lg hover:border-yellow-300 dark:hover:border-yellow-700 transition-colors">
@@ -508,9 +507,13 @@ const Light: React.FC<LightProps> = ({ objects, onAddObject, onStatusChange, add
                                             </div>
                                             <div>
                                                 <p className="font-medium text-gray-800 dark:text-white text-sm">{light.nom}</p>
-                                                <p className="text-xs text-gray-500 dark:text-gray-400">
-                                                    {light.etat === 'on' ? `${light.valeur_actuelle || 0}%` : 'Éteinte'} - Pos: {light.coord_x}, {light.coord_y}
-                                                </p>
+                                                <div className="flex items-center mt-1">
+                                                    <span className={`inline-flex items-center px-2 py-0.5 rounded-full text-xs ${light.etat === 'on'
+                                                        ? 'bg-yellow-100 text-yellow-800 dark:bg-yellow-900/30 dark:text-yellow-400'
+                                                        : 'bg-gray-200 text-gray-800 dark:bg-gray-700 dark:text-gray-400'}`}>
+                                                        {light.etat === 'on' ? 'Allumée' : 'Éteinte'}
+                                                    </span>
+                                                </div>
                                             </div>
                                         </div>
                                         <div className="flex items-center space-x-1">
@@ -522,7 +525,7 @@ const Light: React.FC<LightProps> = ({ objects, onAddObject, onStatusChange, add
                                                 <Info className="h-4 w-4 text-yellow-600 dark:text-yellow-400" />
                                             </button>
                                             <button
-                                                onClick={() => handleToggleState(light.id, light.etat === 'on' ? 'off' : 'on')}
+                                                onClick={() => handleToggleState(light.id, light.etat)}
                                                 disabled={toggleLoading === light.id}
                                                 className={`p-1.5 rounded-full hover:bg-yellow-100 dark:hover:bg-yellow-900/30 transition-colors ${toggleLoading === light.id ? 'opacity-50 cursor-not-allowed' : ''}`}
                                                 title={light.etat === 'on' ? 'Éteindre' : 'Allumer'}

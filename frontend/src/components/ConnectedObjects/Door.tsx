@@ -367,16 +367,22 @@ const Door: React.FC<DoorProps> = ({ objects, onAddObject, onStatusChange, addPo
                                 <div className="bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded-lg hover:border-blue-300 dark:hover:border-blue-700 transition-colors">
                                     <div className="flex justify-between items-center p-3">
                                         <div className="flex items-center">
-                                            <div className={`p-1.5 rounded-full mr-2 ${door.etat === 'on' ? 'bg-green-100 dark:bg-green-900/30' : 'bg-red-100 dark:bg-red-900/30'}`}>
+                                            <div className={`p-1.5 rounded-full mr-2 ${door.etat === 'on' ? 'bg-blue-100 dark:bg-blue-900/30' : 'bg-gray-200 dark:bg-gray-700'}`}>
                                                 {door.etat === 'on' ? (
-                                                    <Lock className="h-4 w-4 text-green-600 dark:text-green-400" />
+                                                    <Lock className="h-4 w-4 text-blue-600 dark:text-blue-400" />
                                                 ) : (
-                                                    <Unlock className="h-4 w-4 text-red-600 dark:text-red-400" />
+                                                    <Unlock className="h-4 w-4 text-gray-500 dark:text-gray-400" />
                                                 )}
-                                            </div>
-                                            <div>
+                                            </div>                                            <div>
                                                 <p className="font-medium text-gray-800 dark:text-white text-sm">{door.nom}</p>
-                                                <p className="text-xs text-gray-500 dark:text-gray-400">Pos: {door.coord_x}, {door.coord_y}</p>
+                                                <div className="flex items-center mt-1">
+                                                    <span className={`inline-flex items-center px-2 py-0.5 rounded-full text-xs ${door.etat === 'on'
+                                                        ? 'bg-blue-100 text-blue-800 dark:bg-blue-900/30 dark:text-blue-400'
+                                                        : 'bg-gray-200 text-gray-800 dark:bg-gray-700 dark:text-gray-400'}`}
+                                                    >
+                                                        {door.etat === 'on' ? 'Verrouillée' : 'Déverrouillée'}
+                                                    </span>
+                                                </div>
                                             </div>
                                         </div>
                                         <div className="flex items-center space-x-1">
@@ -432,16 +438,18 @@ const Door: React.FC<DoorProps> = ({ objects, onAddObject, onStatusChange, addPo
                                                     <p className="text-xs text-gray-500 dark:text-gray-400">État</p>
                                                     <p className="font-medium">
                                                         <span className={`inline-flex items-center px-2 py-0.5 rounded-full text-xs ${door.etat === 'on'
-                                                            ? 'bg-green-100 text-green-800 dark:bg-green-900/30 dark:text-green-400'
-                                                            : 'bg-red-100 text-red-800 dark:bg-red-900/30 dark:text-red-400'
-                                                            }`}>
+                                                            ? 'bg-blue-100 text-blue-800 dark:bg-blue-900/30 dark:text-blue-400'
+                                                            : 'bg-gray-200 text-gray-800 dark:bg-gray-700 dark:text-gray-400'}`}>
                                                             {door.etat === 'on' ? 'Verrouillée' : 'Déverrouillée'}
                                                         </span>
                                                     </p>
-                                                </div>
-                                                <div className="space-y-1">
+                                                </div>                                                <div className="space-y-1">
                                                     <p className="text-xs text-gray-500 dark:text-gray-400">Connexion</p>
                                                     <p className="font-medium text-gray-700 dark:text-gray-300">{door.connection || 'N/A'}</p>
+                                                </div>
+                                                <div className="space-y-1">
+                                                    <p className="text-xs text-gray-500 dark:text-gray-400">Position</p>
+                                                    <p className="font-medium text-gray-700 dark:text-gray-300">X: {door.coord_x}, Y: {door.coord_y}</p>
                                                 </div>
                                                 <div className="space-y-1">
                                                     <p className="text-xs text-gray-500 dark:text-gray-400">Consommation</p>

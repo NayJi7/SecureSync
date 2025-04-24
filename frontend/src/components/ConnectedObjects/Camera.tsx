@@ -317,9 +317,13 @@ const Camera: React.FC<CameraProps> = ({ objects, onAddObject, onStatusChange, a
                                             </div>
                                             <div>
                                                 <p className="font-medium text-gray-800 dark:text-white text-sm">{camera.nom}</p>
-                                                <p className="text-xs text-gray-500 dark:text-gray-400">
-                                                    {camera.etat === 'on' ? 'Activée' : 'Éteinte'} - Pos: {camera.coord_x}, {camera.coord_y}
-                                                </p>
+                                                <div className="flex items-center mt-1">
+                                                    <span className={`inline-flex items-center px-2 py-0.5 rounded-full text-xs ${camera.etat === 'on'
+                                                        ? 'bg-purple-100 text-purple-800 dark:bg-purple-900/30 dark:text-purple-400'
+                                                        : 'bg-gray-200 text-gray-800 dark:bg-gray-700 dark:text-gray-400'}`}>
+                                                        {camera.etat === 'on' ? 'Active' : 'Inactive'}
+                                                    </span>
+                                                </div>
                                             </div>
                                         </div>
                                         <div className="flex items-center space-x-1">
@@ -336,7 +340,11 @@ const Camera: React.FC<CameraProps> = ({ objects, onAddObject, onStatusChange, a
                                                 className={`p-1.5 rounded-full hover:bg-purple-100 dark:hover:bg-purple-900/30 transition-colors ${toggleLoading === camera.id ? 'opacity-50 cursor-not-allowed' : ''}`}
                                                 title={camera.etat === 'on' ? 'Éteindre' : 'Allumer'}
                                             >
-                                                <ToggleLeft className="h-4 w-4 text-purple-600 dark:text-purple-400" />
+                                                {toggleLoading === camera.id ? (
+                                                    <div className="h-4 w-4 border-2 border-gray-500 border-t-transparent rounded-full animate-spin"></div>
+                                                ) : (
+                                                    <ToggleLeft className={`h-4 w-4 ${camera.etat === 'on' ? 'transform rotate-180' : ''}`} />
+                                                )}
                                             </button>
                                             <button
                                                 onClick={() => handleMenuToggle(camera.id)}
@@ -375,9 +383,8 @@ const Camera: React.FC<CameraProps> = ({ objects, onAddObject, onStatusChange, a
                                                     <p className="text-xs text-gray-500 dark:text-gray-400">État</p>
                                                     <p className="font-medium">
                                                         <span className={`inline-flex items-center px-2 py-0.5 rounded-full text-xs ${camera.etat === 'on'
-                                                            ? 'bg-green-100 text-green-800 dark:bg-green-900/30 dark:text-green-400'
-                                                            : 'bg-red-100 text-red-800 dark:bg-red-900/30 dark:text-red-400'
-                                                            }`}>
+                                                            ? 'bg-purple-100 text-purple-800 dark:bg-purple-900/30 dark:text-purple-400'
+                                                            : 'bg-gray-200 text-gray-800 dark:bg-gray-700 dark:text-gray-400'}`}>
                                                             {camera.etat === 'on' ? 'Activée' : 'Désactivée'}
                                                         </span>
                                                     </p>
@@ -385,6 +392,10 @@ const Camera: React.FC<CameraProps> = ({ objects, onAddObject, onStatusChange, a
                                                 <div className="space-y-1">
                                                     <p className="text-xs text-gray-500 dark:text-gray-400">Connexion</p>
                                                     <p className="font-medium text-gray-700 dark:text-gray-300">{camera.connection || 'N/A'}</p>
+                                                </div>
+                                                <div className="space-y-1">
+                                                    <p className="text-xs text-gray-500 dark:text-gray-400">Position</p>
+                                                    <p className="font-medium text-gray-700 dark:text-gray-300">X: {camera.coord_x}, Y: {camera.coord_y}</p>
                                                 </div>
                                                 <div className="space-y-1">
                                                     <p className="text-xs text-gray-500 dark:text-gray-400">Consommation</p>

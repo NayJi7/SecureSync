@@ -337,9 +337,13 @@ const Heater: React.FC<HeaterProps> = ({ objects, onAddObject, onStatusChange, a
                                             </div>
                                             <div>
                                                 <p className="font-medium text-gray-800 dark:text-white text-sm">{heater.nom}</p>
-                                                <p className="text-xs text-gray-500 dark:text-gray-400">
-                                                    {heater.etat === 'on' ? `${heater.valeur_actuelle || 20}°C` : 'Éteint'} - Pos: {heater.coord_x}, {heater.coord_y}
-                                                </p>
+                                                <div className="flex items-center mt-1">
+                                                    <span className={`inline-flex items-center px-2 py-0.5 rounded-full text-xs ${heater.etat === 'on'
+                                                        ? 'bg-orange-100 text-orange-800 dark:bg-orange-900/30 dark:text-orange-400'
+                                                        : 'bg-gray-200 text-gray-800 dark:bg-gray-700 dark:text-gray-400'}`}>
+                                                        {heater.etat === 'on' ? 'Activé' : 'Éteint'}
+                                                    </span>
+                                                </div>
                                             </div>
                                         </div>
                                         <div className="flex items-center space-x-1">
@@ -356,7 +360,11 @@ const Heater: React.FC<HeaterProps> = ({ objects, onAddObject, onStatusChange, a
                                                 className={`p-1.5 rounded-full hover:bg-orange-100 dark:hover:bg-orange-900/30 transition-colors ${toggleLoading === heater.id ? 'opacity-50 cursor-not-allowed' : ''}`}
                                                 title={heater.etat === 'on' ? 'Éteindre' : 'Allumer'}
                                             >
-                                                <ToggleLeft className="h-4 w-4 text-orange-600 dark:text-orange-400" />
+                                                {toggleLoading === heater.id ? (
+                                                    <div className="h-4 w-4 border-2 border-gray-500 border-t-transparent rounded-full animate-spin"></div>
+                                                ) : (
+                                                    <ToggleLeft className={`h-4 w-4 ${heater.etat === 'on' ? 'transform rotate-180' : ''}`} />
+                                                )}
                                             </button>
                                             <button
                                                 onClick={() => handleMenuToggle(heater.id)}
@@ -395,10 +403,9 @@ const Heater: React.FC<HeaterProps> = ({ objects, onAddObject, onStatusChange, a
                                                     <p className="text-xs text-gray-500 dark:text-gray-400">État</p>
                                                     <p className="font-medium">
                                                         <span className={`inline-flex items-center px-2 py-0.5 rounded-full text-xs ${heater.etat === 'on'
-                                                            ? 'bg-green-100 text-green-800 dark:bg-green-900/30 dark:text-green-400'
-                                                            : 'bg-red-100 text-red-800 dark:bg-red-900/30 dark:text-red-400'
-                                                            }`}>
-                                                            {heater.etat === 'on' ? 'Activé' : 'Désactivé'}
+                                                            ? 'bg-orange-100 text-orange-800 dark:bg-orange-900/30 dark:text-orange-400'
+                                                            : 'bg-gray-200 text-gray-800 dark:bg-gray-700 dark:text-gray-400'}`}>
+                                                            {heater.etat === 'on' ? 'Activé' : 'Éteint'}
                                                         </span>
                                                     </p>
                                                 </div>
@@ -409,6 +416,10 @@ const Heater: React.FC<HeaterProps> = ({ objects, onAddObject, onStatusChange, a
                                                 <div className="space-y-1">
                                                     <p className="text-xs text-gray-500 dark:text-gray-400">Connexion</p>
                                                     <p className="font-medium text-gray-700 dark:text-gray-300">{heater.connection || 'N/A'}</p>
+                                                </div>
+                                                <div className="space-y-1">
+                                                    <p className="text-xs text-gray-500 dark:text-gray-400">Position</p>
+                                                    <p className="font-medium text-gray-700 dark:text-gray-300">X: {heater.coord_x}, Y: {heater.coord_y}</p>
                                                 </div>
                                                 <div className="space-y-1">
                                                     <p className="text-xs text-gray-500 dark:text-gray-400">Consommation</p>

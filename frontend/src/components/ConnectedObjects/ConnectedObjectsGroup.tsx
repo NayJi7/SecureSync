@@ -25,7 +25,7 @@ const ConnectedObjectsGroup: React.FC<ConnectedObjectsGroupProps> = ({ prisonId,
     lumiere: objects.filter(obj => obj.type === 'lumiere'),
     camera: objects.filter(obj => obj.type === 'camera'),
     thermostat: objects.filter(obj => obj.type === 'thermostat'),
-    paneauAffichage: objects.filter(obj => obj.type === "paneau d'affichage"),
+    panneauAffichage: objects.filter(obj => obj.type === "panneau d'affichage"),
   };
 
   return (
@@ -34,7 +34,7 @@ const ConnectedObjectsGroup: React.FC<ConnectedObjectsGroupProps> = ({ prisonId,
       <Light objects={grouped.lumiere} addPoints={addPoints} />
       <Camera objects={grouped.camera} addPoints={addPoints} />
       <Heater objects={grouped.thermostat} addPoints={addPoints} />
-      <PanneauAffichage objects={grouped.paneauAffichage} addPoints={addPoints} />
+      <PanneauAffichage objects={grouped.panneauAffichage} addPoints={addPoints} />
     </div>
   );
 };

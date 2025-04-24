@@ -1,17 +1,19 @@
-import React, { useEffect, useState } from 'react';
+import React, { useEffect, useState, useRef } from 'react';
 import { ObjectType } from './types';
 import { getObjects } from '../../services/objectService';
 import { PieChart, DoorClosed, Lightbulb, Video, Thermometer, Activity, BarChart2, Plus, Wind, MonitorPlay } from 'lucide-react';
 
 // Define a type for the add object callback
-export type AddObjectCallback = (type: 'porte' | 'lumiere' | 'camera' | 'thermostat' | 'ventilation' | "paneau d'affichage") => void;
+export type AddObjectCallback = (type: 'porte' | 'lumiere' | 'camera' | 'thermostat' | 'ventilation' | "panneau d'affichage") => void;
 
 const ObjectsChart: React.FC<{ onAddObject?: AddObjectCallback }> = ({ onAddObject }) => {
     const [objects, setObjects] = useState<ObjectType[]>([]);
     const [loading, setLoading] = useState(true);
+    const [lastUpdateTime, setLastUpdateTime] = useState(new Date());
+    const intervalRef = useRef<NodeJS.Timeout | null>(null);
 
     // Function to handle adding an object by type
-    const handleAddObject = (type: 'porte' | 'lumiere' | 'camera' | 'thermostat' | 'ventilation' | "paneau d'affichage") => {
+    const handleAddObject = (type: 'porte' | 'lumiere' | 'camera' | 'thermostat' | 'ventilation' | "panneau d'affichage") => {
         if (onAddObject) {
             onAddObject(type);
         } else {
@@ -22,33 +24,47 @@ const ObjectsChart: React.FC<{ onAddObject?: AddObjectCallback }> = ({ onAddObje
     };
 
     // This part needs to be updated for each object type
-    const handleIconClick = (type: 'porte' | 'lumiere' | 'camera' | 'thermostat' | 'ventilation' | "paneau d'affichage") => {
+    const handleIconClick = (type: 'porte' | 'lumiere' | 'camera' | 'thermostat' | 'ventilation' | "panneau d'affichage") => {
         handleAddObject(type);
     };
 
+    const fetchObjects = async () => {
+        try {
+            // Récupérer tous les objets sans filtrage
+            const response = await getObjects();
+
+            // Récupérer l'identifiant de prison de l'utilisateur depuis le localStorage
+            const userPrisonId = localStorage.getItem('userPrison') || localStorage.getItem('selectedPrison');
+
+            // Filtrer les objets côté client par l'identifiant de prison
+            const filteredObjects = userPrisonId
+                ? response.data.filter(obj => obj.Prison_id === userPrisonId)
+                : [];
+
+            setObjects(filteredObjects);
+            setLoading(false);
+            setLastUpdateTime(new Date());
+        } catch (error) {
+            console.error('Error fetching objects:', error);
+            setLoading(false);
+        }
+    };
+
     useEffect(() => {
-        const fetchObjects = async () => {
-            try {
-                // Récupérer tous les objets sans filtrage
-                const response = await getObjects();
+        // Initial fetch
+        fetchObjects();
 
-                // Récupérer l'identifiant de prison de l'utilisateur depuis le localStorage
-                const userPrisonId = localStorage.getItem('userPrison') || localStorage.getItem('selectedPrison');
+        // Set up interval for periodic refresh (every second)
+        intervalRef.current = setInterval(() => {
+            fetchObjects();
+        }, 1000);
 
-                // Filtrer les objets côté client par l'identifiant de prison
-                const filteredObjects = userPrisonId
-                    ? response.data.filter(obj => obj.Prison_id === userPrisonId)
-                    : [];
-
-                setObjects(filteredObjects);
-                setLoading(false);
-            } catch (error) {
-                console.error('Error fetching objects:', error);
-                setLoading(false);
+        // Clean up interval on component unmount
+        return () => {
+            if (intervalRef.current) {
+                clearInterval(intervalRef.current);
             }
         };
-
-        fetchObjects();
     }, []);
 
     if (loading) {
@@ -76,7 +92,7 @@ const ObjectsChart: React.FC<{ onAddObject?: AddObjectCallback }> = ({ onAddObje
             camera: objects.filter(obj => obj.type === 'camera').length,
             thermostat: objects.filter(obj => obj.type === 'thermostat').length,
             ventilation: objects.filter(obj => obj.type === 'ventilation').length,
-            paneauAffichage: objects.filter(obj => obj.type === "paneau d'affichage").length,
+            paneauAffichage: objects.filter(obj => obj.type === "panneau d'affichage").length,
         }
     };
 
@@ -93,11 +109,7 @@ const ObjectsChart: React.FC<{ onAddObject?: AddObjectCallback }> = ({ onAddObje
                     </div>
                     <h3 className="text-md font-medium text-gray-700 dark:text-gray-300">Statistiques</h3>
                 </div>
-                <div>
-                    <span className="text-xs text-gray-500 dark:text-gray-400">
-                        Mise à jour: {new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}
-                    </span>
-                </div>
+
             </div>
 
             <div className="grid grid-cols-1 md:grid-cols-5 gap-4 mb-6">
@@ -211,7 +223,7 @@ const ObjectsChart: React.FC<{ onAddObject?: AddObjectCallback }> = ({ onAddObje
                 </div>
 
                 <div className="space-y-2">
-                    <h4 className="text-xs font-medium text-gray-600 dark:text-gray-400 uppercase mb-2">Suite</h4>
+
                     <div className="flex justify-between gap-2 items-center">
                         <div className="flex items-center">
                             <Video className="h-4 w-4 text-purple-600 dark:text-purple-400 mr-2" />
@@ -254,56 +266,7 @@ const ObjectsChart: React.FC<{ onAddObject?: AddObjectCallback }> = ({ onAddObje
                 </div>
             </div>
 
-            <div className="mt-6 grid grid-cols-5 gap-2 md:grid-cols-6">
-                <button
-                    onClick={() => handleIconClick('porte')}
-                    className="p-2 bg-blue-50 hover:bg-blue-100 dark:bg-blue-900/20 dark:hover:bg-blue-900/40 rounded-lg flex flex-col items-center justify-center transition-colors"
-                    title="Ajouter une porte"
-                >
-                    <DoorClosed className="h-5 w-5 text-blue-600 dark:text-blue-400 mb-1" />
-                    <span className="text-xs text-blue-700 dark:text-blue-300">Porte</span>
-                </button>
-                <button
-                    onClick={() => handleIconClick('lumiere')}
-                    className="p-2 bg-yellow-50 hover:bg-yellow-100 dark:bg-yellow-900/20 dark:hover:bg-yellow-900/40 rounded-lg flex flex-col items-center justify-center transition-colors"
-                    title="Ajouter une lumière"
-                >
-                    <Lightbulb className="h-5 w-5 text-yellow-600 dark:text-yellow-400 mb-1" />
-                    <span className="text-xs text-yellow-700 dark:text-yellow-300">Lumière</span>
-                </button>
-                <button
-                    onClick={() => handleIconClick('camera')}
-                    className="p-2 bg-purple-50 hover:bg-purple-100 dark:bg-purple-900/20 dark:hover:bg-purple-900/40 rounded-lg flex flex-col items-center justify-center transition-colors"
-                    title="Ajouter une caméra"
-                >
-                    <Video className="h-5 w-5 text-purple-600 dark:text-purple-400 mb-1" />
-                    <span className="text-xs text-purple-700 dark:text-purple-300">Caméra</span>
-                </button>
-                <button
-                    onClick={() => handleIconClick('thermostat')}
-                    className="p-2 bg-red-50 hover:bg-red-100 dark:bg-red-900/20 dark:hover:bg-red-900/40 rounded-lg flex flex-col items-center justify-center transition-colors"
-                    title="Ajouter un thermostat"
-                >
-                    <Thermometer className="h-5 w-5 text-red-600 dark:text-red-400 mb-1" />
-                    <span className="text-xs text-red-700 dark:text-red-300">Thermostat</span>
-                </button>
-                <button
-                    onClick={() => handleIconClick('ventilation')}
-                    className="p-2 bg-green-50 hover:bg-green-100 dark:bg-green-900/20 dark:hover:bg-green-900/40 rounded-lg flex flex-col items-center justify-center transition-colors"
-                    title="Ajouter une ventilation"
-                >
-                    <Wind className="h-5 w-5 text-green-600 dark:text-green-400 mb-1" />
-                    <span className="text-xs text-green-700 dark:text-green-300">Ventilation</span>
-                </button>
-                <button
-                    onClick={() => handleIconClick("paneau d'affichage")}
-                    className="p-2 bg-indigo-50 hover:bg-indigo-100 dark:bg-indigo-900/20 dark:hover:bg-indigo-900/40 rounded-lg flex flex-col items-center justify-center transition-colors"
-                    title="Ajouter un panneau d'affichage"
-                >
-                    <MonitorPlay className="h-5 w-5 text-indigo-600 dark:text-indigo-400 mb-1" />
-                    <span className="text-xs text-indigo-700 dark:text-indigo-300">Panneau</span>
-                </button>
-            </div>
+
         </div>
     );
 };
