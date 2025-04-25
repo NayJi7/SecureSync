@@ -1,7 +1,9 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 import { ObjectType, DoorObject } from './types';
-import { Lock, Unlock, Plus, DoorClosed, ToggleLeft, MoreVertical, Pencil, Trash2, X, Info, Save } from 'lucide-react';
-import { toggleObjectState, updateObject, deleteObject } from '../../services/objectService';
+import { Lock, Unlock, Plus, DoorClosed, ToggleLeft, MoreVertical, Pencil, Trash2, X, Info, Save, Wrench, AlertTriangle } from 'lucide-react';
+import { toggleObjectState, updateObject, deleteObject, repairObject } from '../../services/objectService';
+import { Switch } from "@/components/ui/switch";
+import { DotLottieReact } from '@lottiefiles/dotlottie-react';
 
 interface DoorProps {
     objects: ObjectType[];
@@ -29,6 +31,55 @@ const Door: React.FC<DoorProps> = ({ objects, onAddObject, onStatusChange, addPo
     const [isUpdating, setIsUpdating] = useState<number | null>(null);
     const [showDeleteModal, setShowDeleteModal] = useState(false);
     const [objectToDelete, setObjectToDelete] = useState<number | null>(null);
+    const [isRepairing, setIsRepairing] = useState<number | null>(null);
+    const [repairDialogId, setRepairDialogId] = useState<number | null>(null);
+    const [repairProgress, setRepairProgress] = useState<number>(0);
+    const [repairCountdown, setRepairCountdown] = useState<number>(6);
+    const [directRepairId, setDirectRepairId] = useState<number | null>(null);
+    const [repairInProgress, setRepairInProgress] = useState<number | null>(null);
+
+    const dropdownRef = useRef<HTMLDivElement>(null);
+
+    const [editFormData, setEditFormData] = useState<any>({});
+    const [deleteConfirmationId, setDeleteConfirmationId] = useState<number | null>(null);
+
+    useEffect(() => {
+        // Add event listener for clicks outside the dropdown
+        const handleClickOutside = (event: MouseEvent) => {
+            if (dropdownRef.current && !dropdownRef.current.contains(event.target as Node)) {
+                setActiveMenu(null);
+            }
+        };
+        
+        document.addEventListener('mousedown', handleClickOutside);
+        return () => {
+            document.removeEventListener('mousedown', handleClickOutside);
+        };
+    }, []);
+
+    useEffect(() => {
+        // Check if any active door has zero durability and turn it off
+        objects.forEach(door => {
+            if (door.etat === 'on' && 
+                ((door.durabilité !== undefined && door.durabilité <= 0) || 
+                door.maintenance === 'en panne')) {
+                // Turn off the device automatically when durability reaches zero
+                handleAutomaticTurnOff(door.id);
+            }
+        });
+    }, [objects]);
+
+    const handleAutomaticTurnOff = async (id: number) => {
+        try {
+            const response = await updateObject(id, { etat: 'off' });
+            console.log('Device automatically turned off due to zero durability:', response);
+            if (onStatusChange) {
+                onStatusChange();
+            }
+        } catch (error) {
+            console.error('Error automatically turning off device:', error);
+        }
+    };
 
     const handleAddClick = () => {
         if (onAddObject) {
@@ -40,16 +91,24 @@ const Door: React.FC<DoorProps> = ({ objects, onAddObject, onStatusChange, addPo
 
     const handleToggleState = async (id: number, currentState: 'on' | 'off') => {
         try {
+            // Find the door object
+            const door = objects.find(d => d.id === id);
+            
+            // Check if the device is broken or has zero durability
+            if (currentState === 'off' && door && 
+                ((door.durabilité !== undefined && door.durabilité <= 0) || 
+                 door.maintenance === 'en panne')) {
+                // Show repair dialog instead of directly starting repair
+                setRepairDialogId(id);
+                return;
+            }
+            
             setToggleLoading(id);
-            // Log the current state before toggle for debugging
-            console.log(`Door toggle: Currently ${currentState}, will toggle to ${currentState === 'on' ? 'off' : 'on'}`);
             const response = await toggleObjectState(id, currentState);
             console.log('Toggle successful:', response);
 
-            // Ajouter des points à l'utilisateur pour chaque interaction
             if (addPoints) {
-                // Attribution de 5 points pour l'interaction avec une porte
-                await addPoints(5);
+                await addPoints(4);
             }
 
             if (onStatusChange) {
@@ -57,20 +116,8 @@ const Door: React.FC<DoorProps> = ({ objects, onAddObject, onStatusChange, addPo
             }
         } catch (error: any) {
             console.error('Error toggling door state:', error);
-
-            // Special handling for authentication errors
-            if (error.response?.status === 401) {
-                alert('Session expirée. Veuillez vous reconnecter.');
-                // Clear any stale tokens that may be causing the JWT error
-                localStorage.removeItem('authToken');
-                localStorage.removeItem('sessionToken');
-                window.location.href = '/login'; // Redirect to login page
-                return;
-            }
-
-            // Generic error handling
             alert('Erreur lors du changement d\'état de la porte: ' +
-                (error.friendlyMessage || error.response?.data?.detail || 'Problème de connexion au serveur'));
+                (error.response?.data?.message || 'Problème de connexion au serveur'));
         } finally {
             setToggleLoading(null);
         }
@@ -217,6 +264,84 @@ const Door: React.FC<DoorProps> = ({ objects, onAddObject, onStatusChange, addPo
             setShowDeleteModal(false);
             setObjectToDelete(null);
         }
+    };
+
+    const startRepairProcess = async (id: number) => {
+        try {
+            // Initialiser les états de réparation
+            setRepairInProgress(id);
+            setRepairProgress(0);
+            setRepairCountdown(6);
+            
+            // Créer un intervalle qui s'exécute chaque seconde pour mettre à jour le pourcentage et le compte à rebours
+            const intervalId = setInterval(() => {
+                setRepairProgress(prev => {
+                    const newProgress = prev + (100/6); // Augmente de ~16.67% chaque seconde
+                    return Math.min(newProgress, 100);
+                });
+                
+                setRepairCountdown(prev => {
+                    const newCountdown = prev - 1;
+                    return Math.max(newCountdown, 0);
+                });
+            }, 1000);
+            
+            // Attendre 6 secondes avant d'appeler l'API de réparation
+            await new Promise(resolve => setTimeout(resolve, 6000));
+            
+            // Nettoyer l'intervalle
+            clearInterval(intervalId);
+            
+            // Appeler l'API pour réparer l'objet
+            const response = await repairObject(id);
+            console.log('Repair successful:', response);
+            
+            // Ajouter des points à l'utilisateur pour la réparation
+            if (addPoints) {
+                // Attribution de 10 points pour la réparation d'une porte
+                await addPoints(10);
+            }
+
+            if (onStatusChange) {
+                onStatusChange();
+            }
+            
+        } catch (error: any) {
+            console.error('Error repairing door:', error);
+
+            // Special handling for authentication errors
+            if (error.response?.status === 401) {
+                alert('Session expirée. Veuillez vous reconnecter.');
+                // Clear any stale tokens that may be causing the JWT error
+                localStorage.removeItem('authToken');
+                localStorage.removeItem('sessionToken');
+                window.location.href = '/login'; // Redirect to login page
+                return;
+            }
+
+            // Generic error handling
+            alert('Erreur lors de la réparation de la porte: ' +
+                (error.friendlyMessage || error.response?.data?.detail || 'Problème de connexion au serveur'));
+        } finally {
+            // Nettoyer tous les états de réparation
+            setRepairInProgress(null);
+            setRepairProgress(0);
+            setRepairCountdown(6);
+            setIsRepairing(null);
+            setRepairDialogId(null);
+            setDirectRepairId(null);
+        }
+    };
+
+    const handleRepair = (id: number) => {
+        setIsRepairing(id);
+        startRepairProcess(id);
+    };
+    
+    // Fonction pour gérer la réparation directe depuis le panneau d'info
+    const handleDirectRepair = (id: number) => {
+        setDirectRepairId(id);
+        startRepairProcess(id);
     };
 
     return (
@@ -410,7 +535,7 @@ const Door: React.FC<DoorProps> = ({ objects, onAddObject, onStatusChange, addPo
                                             </button>
 
                                             {activeMenu === door.id && (
-                                                <div className="absolute right-0 top-auto mt-8 w-48 bg-white dark:bg-gray-800 shadow-lg rounded-md border border-gray-200 dark:border-gray-700 z-10">
+                                                <div ref={dropdownRef} className="absolute right-0 top-auto mt-8 w-48 bg-white dark:bg-gray-800 shadow-lg rounded-md border border-gray-200 dark:border-gray-700 z-10">
                                                     <button
                                                         onClick={() => handleEditClick(door)}
                                                         className="flex items-center w-full px-4 py-2 text-sm text-left text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-700"
@@ -418,6 +543,7 @@ const Door: React.FC<DoorProps> = ({ objects, onAddObject, onStatusChange, addPo
                                                         <Pencil className="h-4 w-4 mr-2 text-gray-500 dark:text-gray-400" />
                                                         Modifier
                                                     </button>
+                                                    
                                                     <button
                                                         onClick={() => handleDeleteClick(door.id)}
                                                         className="flex items-center w-full px-4 py-2 text-sm text-left text-red-600 dark:text-red-400 hover:bg-red-50 dark:hover:bg-red-900/20"
@@ -466,11 +592,25 @@ const Door: React.FC<DoorProps> = ({ objects, onAddObject, onStatusChange, addPo
                                                 </div>
                                             </div>
 
-                                            {/* Durability indicator */}
+                                            {/* Durability indicator with repair button */}
                                             <div className="mt-3">
                                                 <div className="flex justify-between items-center mb-1">
                                                     <p className="text-xs text-gray-500 dark:text-gray-400">Durabilité</p>
-                                                    <p className="text-xs font-medium text-gray-700 dark:text-gray-300">{door.durabilité || 0}%</p>
+                                                    <div className="flex items-center space-x-2">
+                                                        <p className="text-xs font-medium text-gray-700 dark:text-gray-300">{door.durabilité || 0}%</p>
+                                                        <button
+                                                            onClick={() => handleRepair(door.id)}
+                                                            disabled={(door.durabilité || 0) > 0 && door.maintenance === 'fonctionnel'}
+                                                            className={`flex items-center px-3 py-1.5 text-sm rounded font-medium ${
+                                                                (door.durabilité !== undefined && door.durabilité <= 0) || door.maintenance !== 'fonctionnel'
+                                                                ? 'bg-green-600 hover:bg-green-700 text-white'
+                                                                : 'bg-gray-300 text-gray-600 cursor-default'
+                                                            }`}
+                                                        >
+                                                            <Wrench className="h-3 w-3 mr-0.5" />
+                                                            {(door.durabilité !== undefined && door.durabilité <= 0) || door.maintenance !== 'fonctionnel' ? 'Réparer' : 'OK'}
+                                                        </button>
+                                                    </div>
                                                 </div>
                                                 <div className="w-full bg-gray-200 dark:bg-gray-700 rounded-full h-1.5">
                                                     <div
@@ -487,6 +627,76 @@ const Door: React.FC<DoorProps> = ({ objects, onAddObject, onStatusChange, addPo
                             )}
                         </div>
                     ))}
+                </div>
+            )}
+
+            {/* Modal de réparation unifié */}
+            {repairInProgress !== null && (
+                <div className="fixed inset-0 flex items-center justify-center z-50">
+                    <div className="fixed inset-0 bg-black/15" onClick={() => {}}></div>
+                    <div className="bg-white dark:bg-gray-800 rounded-lg shadow-lg p-6 max-w-xs w-full mx-4 relative z-10">
+                        <div className="flex flex-col items-center">
+                            <div className="mb-4 w-40 h-40 filter grayscale brightness-[0.6] contrast-[1.2]">
+                                <DotLottieReact
+                                    src="https://lottie.host/bab12c80-4bd7-4261-b763-0f7ec72a2834/LE6JcmwrGJ.lottie"
+                                    loop
+                                    autoplay
+                                />
+                            </div>
+                            
+                            <div className="w-full bg-gray-200 dark:bg-gray-700 rounded-full h-2 mb-2">
+                                <div
+                                    className="h-2 rounded-full bg-green-500 transition-all duration-1000 ease-linear"
+                                    style={{ width: `${repairProgress}%` }}
+                                ></div>
+                            </div>
+                            
+                            <div className="flex justify-center items-center mt-1">
+                                <p className="text-sm font-medium text-gray-600 dark:text-gray-300">{repairCountdown}s</p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            )}
+
+            {/* Repair confirmation dialog */}
+            {repairDialogId !== null && (
+                <div className="fixed inset-0 flex items-center justify-center z-50">
+                    <div className="fixed inset-0 bg-black/30" onClick={() => setRepairDialogId(null)}></div>
+                    <div className="bg-white dark:bg-gray-800 rounded-lg shadow-lg p-5 max-w-md w-full mx-4 relative z-10 border-l-4 border-amber-500">
+                        <div className="flex items-start mb-3">
+                            <div className="mr-3 mt-0.5">
+                                <AlertTriangle className="h-5 w-5 text-amber-500" />
+                            </div>
+                            <div className="flex-1">
+                                <h3 className="text-lg font-medium text-gray-900 dark:text-white mb-1">
+                                    Appareil en panne
+                                </h3>
+                                <p className="text-gray-600 dark:text-gray-300 mb-4">
+                                    Cet appareil est en panne. Vous devez le réparer avant de pouvoir l'utiliser à nouveau.
+                                </p>
+                                <div className="flex justify-end space-x-3">
+                                    <button
+                                        onClick={() => setRepairDialogId(null)}
+                                        className="px-3 py-1.5 text-sm text-gray-600 bg-gray-100 hover:bg-gray-200 dark:text-gray-300 dark:bg-gray-700 dark:hover:bg-gray-600 rounded"
+                                    >
+                                        Annuler
+                                    </button>
+                                    <button
+                                        onClick={() => {
+                                            const id = repairDialogId;
+                                            setRepairDialogId(null);
+                                            handleRepair(id);
+                                        }}
+                                        className="px-3 py-1.5 text-sm text-white bg-green-600 hover:bg-green-700 dark:bg-green-700 dark:hover:bg-green-600 rounded flex items-center"
+                                    >
+                                        <Wrench className="h-3.5 w-3.5 mr-1.5" />
+                                        Réparer
+                                    </button>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
                 </div>
             )}
 

@@ -1,7 +1,8 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 import { ObjectType } from './types';
-import { Camera as CameraIcon, Plus, ToggleLeft, MoreVertical, Pencil, Trash2, X, Info, Save } from 'lucide-react';
-import { toggleObjectState, updateObject, deleteObject } from '../../services/objectService';
+import { Camera as CameraIcon, Plus, ToggleLeft, MoreVertical, Pencil, Trash2, X, Info, Save, Wrench, AlertTriangle } from 'lucide-react';
+import { toggleObjectState, updateObject, deleteObject, repairObject } from '../../services/objectService';
+import { DotLottieReact } from '@lottiefiles/dotlottie-react';
 
 interface CameraProps {
     objects: ObjectType[];
@@ -17,6 +18,8 @@ const Camera: React.FC<CameraProps> = ({ objects, onAddObject, onStatusChange, a
     const [activeMenu, setActiveMenu] = useState<number | null>(null);
     const [objectToEdit, setObjectToEdit] = useState<ObjectType | null>(null);
     const [showInfoId, setShowInfoId] = useState<number | null>(null);
+    const [isRepairing, setIsRepairing] = useState<number | null>(null);
+    const [repairDialogId, setRepairDialogId] = useState<number | null>(null);
 
     // Form state for editing
     const [newName, setNewName] = useState<string>('');
@@ -30,6 +33,27 @@ const Camera: React.FC<CameraProps> = ({ objects, onAddObject, onStatusChange, a
     const [showDeleteModal, setShowDeleteModal] = useState(false);
     const [objectToDelete, setObjectToDelete] = useState<number | null>(null);
 
+    // Add repair progress tracking
+    const [repairProgress, setRepairProgress] = useState<number>(0);
+    const [repairCountdown, setRepairCountdown] = useState<number>(6);
+    const [repairInProgress, setRepairInProgress] = useState<number | null>(null);
+
+    const dropdownRef = useRef<HTMLDivElement>(null);
+
+    useEffect(() => {
+        // Add event listener for clicks outside the dropdown
+        const handleClickOutside = (event: MouseEvent) => {
+            if (dropdownRef.current && !dropdownRef.current.contains(event.target as Node)) {
+                setActiveMenu(null);
+            }
+        };
+        
+        document.addEventListener('mousedown', handleClickOutside);
+        return () => {
+            document.removeEventListener('mousedown', handleClickOutside);
+        };
+    }, []);
+
     const handleAddClick = () => {
         if (onAddObject) {
             onAddObject();
@@ -40,6 +64,18 @@ const Camera: React.FC<CameraProps> = ({ objects, onAddObject, onStatusChange, a
 
     const handleToggleState = async (id: number, currentState: 'on' | 'off') => {
         try {
+            // Find the camera object
+            const camera = objects.find(c => c.id === id);
+            
+            // Check if the device is broken or has zero durability
+            if (currentState === 'off' && camera && 
+                ((camera.durabilité !== undefined && camera.durabilité <= 0) || 
+                 camera.maintenance === 'en panne')) {
+                // Show repair dialog instead of alert
+                setRepairDialogId(id);
+                return;
+            }
+            
             setToggleLoading(id);
             const response = await toggleObjectState(id, currentState);
             console.log('Toggle successful:', response);
@@ -58,6 +94,76 @@ const Camera: React.FC<CameraProps> = ({ objects, onAddObject, onStatusChange, a
                 (error.response?.data?.message || 'Problème de connexion au serveur'));
         } finally {
             setToggleLoading(null);
+        }
+    };
+
+    const handleRepair = async (id: number) => {
+        try {
+            // Initialize repair states
+            setIsRepairing(id);
+            setRepairInProgress(id);
+            setRepairProgress(0);
+            setRepairCountdown(6);
+            
+            // Create an interval that runs every second to update the percentage and countdown
+            const intervalId = setInterval(() => {
+                setRepairProgress(prev => {
+                    const newProgress = prev + (100/6); // Increases by ~16.67% each second
+                    return Math.min(newProgress, 100);
+                });
+                
+                setRepairCountdown(prev => {
+                    const newCountdown = prev - 1;
+                    return Math.max(newCountdown, 0);
+                });
+            }, 1000);
+            
+            // Wait 6 seconds before calling the repair API
+            await new Promise(resolve => setTimeout(resolve, 6000));
+            
+            // Clear the interval
+            clearInterval(intervalId);
+            
+            // Close the repair confirmation dialog
+            setRepairDialogId(null);
+            
+            const response = await repairObject(id);
+            console.log('Repair successful:', response);
+            
+            // Add points for the user for the repair
+            if (addPoints) {
+                // Award 10 points for repairing a camera
+                await addPoints(10);
+            }
+
+            if (onStatusChange) {
+                onStatusChange();
+            }
+            
+            // Close any open menus
+            setActiveMenu(null);
+        } catch (error: any) {
+            console.error('Error repairing camera:', error);
+
+            // Special handling for authentication errors
+            if (error.response?.status === 401) {
+                alert('Session expirée. Veuillez vous reconnecter.');
+                // Clear any stale tokens that may be causing the JWT error
+                localStorage.removeItem('authToken');
+                localStorage.removeItem('sessionToken');
+                window.location.href = '/login'; // Redirect to login page
+                return;
+            }
+
+            // Generic error handling
+            alert('Erreur lors de la réparation de la caméra: ' +
+                (error.friendlyMessage || error.response?.data?.detail || 'Problème de connexion au serveur'));
+        } finally {
+            // Reset all repair states
+            setIsRepairing(null);
+            setRepairInProgress(null);
+            setRepairProgress(0);
+            setRepairCountdown(6);
         }
     };
 
@@ -355,7 +461,7 @@ const Camera: React.FC<CameraProps> = ({ objects, onAddObject, onStatusChange, a
                                             </button>
 
                                             {activeMenu === camera.id && (
-                                                <div className="absolute right-0 top-auto mt-8 w-48 bg-white dark:bg-gray-800 shadow-lg rounded-md border border-gray-200 dark:border-gray-700 z-10">
+                                                <div ref={dropdownRef} className="absolute right-0 top-auto mt-8 w-48 bg-white dark:bg-gray-800 shadow-lg rounded-md border border-gray-200 dark:border-gray-700 z-10">
                                                     <button
                                                         onClick={() => handleEditClick(camera)}
                                                         className="flex items-center w-full px-4 py-2 text-sm text-left text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-700"
@@ -363,6 +469,7 @@ const Camera: React.FC<CameraProps> = ({ objects, onAddObject, onStatusChange, a
                                                         <Pencil className="h-4 w-4 mr-2 text-gray-500 dark:text-gray-400" />
                                                         Modifier
                                                     </button>
+
                                                     <button
                                                         onClick={() => handleDeleteClick(camera.id)}
                                                         className="flex items-center w-full px-4 py-2 text-sm text-left text-red-600 dark:text-red-400 hover:bg-red-50 dark:hover:bg-red-900/20"
@@ -412,11 +519,25 @@ const Camera: React.FC<CameraProps> = ({ objects, onAddObject, onStatusChange, a
                                                 </div>
                                             </div>
 
-                                            {/* Durability indicator */}
+                                            {/* Durability indicator with repair button */}
                                             <div className="mt-3">
                                                 <div className="flex justify-between items-center mb-1">
                                                     <p className="text-xs text-gray-500 dark:text-gray-400">Durabilité</p>
-                                                    <p className="text-xs font-medium text-gray-700 dark:text-gray-300">{camera.durabilité || 0}%</p>
+                                                    <div className="flex items-center space-x-2">
+                                                        <p className="text-xs font-medium text-gray-700 dark:text-gray-300">{camera.durabilité || 0}%</p>
+                                                        <button
+                                                            onClick={() => handleRepair(camera.id)}
+                                                            disabled={(camera.durabilité || 0) > 0 && camera.maintenance === 'fonctionnel'}
+                                                            className={`flex items-center px-3 py-1.5 text-sm rounded font-medium ${
+                                                                (camera.durabilité !== undefined && camera.durabilité <= 0) || camera.maintenance !== 'fonctionnel'
+                                                                ? 'bg-green-600 hover:bg-green-700 text-white'
+                                                                : 'bg-gray-300 text-gray-600 cursor-default'
+                                                            }`}
+                                                        >
+                                                            <Wrench className="h-3 w-3 mr-0.5" />
+                                                            {(camera.durabilité !== undefined && camera.durabilité <= 0) || camera.maintenance !== 'fonctionnel' ? 'Réparer' : 'OK'}
+                                                        </button>
+                                                    </div>
                                                 </div>
                                                 <div className="w-full bg-gray-200 dark:bg-gray-700 rounded-full h-1.5">
                                                     <div
@@ -433,6 +554,44 @@ const Camera: React.FC<CameraProps> = ({ objects, onAddObject, onStatusChange, a
                             )}
                         </div>
                     ))}
+                </div>
+            )}
+
+            {repairDialogId && (
+                <div className="fixed inset-0 flex items-center justify-center z-50">
+                    <div className="fixed inset-0 bg-black/30" onClick={() => setRepairDialogId(null)}></div>
+                    <div className="bg-white dark:bg-gray-800 rounded-lg shadow-lg p-5 max-w-md w-full mx-4 relative z-10 border-l-4 border-amber-500">
+                        <div className="flex items-start mb-3">
+                            <div className="mr-3 mt-0.5">
+                                <AlertTriangle className="h-5 w-5 text-amber-500" />
+                            </div>
+                            <div className="flex-1">
+                                <h3 className="text-lg font-medium text-gray-900 dark:text-white mb-1">
+                                    Appareil en panne
+                                </h3>
+                                <p className="text-gray-600 dark:text-gray-300 mb-4">
+                                    Cet appareil est en panne. Vous devez le réparer avant de pouvoir l'utiliser à nouveau.
+                                </p>
+                                <div className="flex justify-end space-x-3">
+                                    <button
+                                        onClick={() => setRepairDialogId(null)}
+                                        className="px-4 py-2 text-sm bg-gray-100 hover:bg-gray-200 text-gray-700 dark:bg-gray-700 dark:hover:bg-gray-600 dark:text-gray-300 rounded"
+                                    >
+                                        Annuler
+                                    </button>
+                                    <button
+                                        onClick={() => {
+                                            handleRepair(repairDialogId);
+                                            setRepairDialogId(null);
+                                        }}
+                                        className="px-4 py-2 text-sm bg-green-600 hover:bg-green-700 text-white rounded flex items-center"
+                                    >
+                                        <Wrench className="h-4 w-4 mr-1.5" /> Réparer maintenant
+                                    </button>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
                 </div>
             )}
 
@@ -461,6 +620,35 @@ const Camera: React.FC<CameraProps> = ({ objects, onAddObject, onStatusChange, a
                             >
                                 {isDeleting !== null ? 'Suppression...' : 'Supprimer'}
                             </button>
+                        </div>
+                    </div>
+                </div>
+            )}
+
+            {/* Replace the repair in progress modal with new UI */}
+            {repairInProgress !== null && (
+                <div className="fixed inset-0 flex items-center justify-center z-50">
+                    <div className="fixed inset-0 bg-black/15" onClick={() => {}}></div>
+                    <div className="bg-white dark:bg-gray-800 rounded-lg shadow-lg p-6 max-w-xs w-full mx-4 relative z-10">
+                        <div className="flex flex-col items-center">
+                            <div className="mb-4 w-40 h-40 filter grayscale brightness-[0.6] contrast-[1.2]">
+                                <DotLottieReact
+                                    src="https://lottie.host/bab12c80-4bd7-4261-b763-0f7ec72a2834/LE6JcmwrGJ.lottie"
+                                    loop
+                                    autoplay
+                                />
+                            </div>
+                            
+                            <div className="w-full bg-gray-200 dark:bg-gray-700 rounded-full h-2 mb-2">
+                                <div
+                                    className="h-2 rounded-full bg-green-500 transition-all duration-1000 ease-linear"
+                                    style={{ width: `${repairProgress}%` }}
+                                ></div>
+                            </div>
+                            
+                            <div className="flex justify-center items-center mt-1">
+                                <p className="text-sm font-medium text-gray-600 dark:text-gray-300">{repairCountdown}s</p>
+                            </div>
                         </div>
                     </div>
                 </div>

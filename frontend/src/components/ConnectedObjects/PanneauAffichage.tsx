@@ -1,7 +1,8 @@
-import React, { useState } from 'react';
-import { Info, MoreVertical, Pencil, Save, Trash2, ToggleLeft, X, MonitorPlay, Plus, MessageSquare } from 'lucide-react';
+import React, { useState, useRef, useEffect } from 'react';
+import { Info, MoreVertical, Pencil, Save, Trash2, ToggleLeft, X, MonitorPlay, Plus, MessageSquare, Wrench, AlertTriangle } from 'lucide-react';
 import { ObjectType } from './types';
-import { toggleObjectState, updateObject, deleteObject } from '../../services/objectService';
+import { toggleObjectState, updateObject, deleteObject, repairObject } from '../../services/objectService';
+import { DotLottieReact } from '@lottiefiles/dotlottie-react';
 
 interface PanneauAffichageProps {
     objects: ObjectType[];
@@ -28,6 +29,29 @@ const PanneauAffichage: React.FC<PanneauAffichageProps> = ({ objects, onStatusCh
     const [objectToDelete, setObjectToDelete] = useState<number | null>(null);
     const [showMessageInput, setShowMessageInput] = useState<number | null>(null);
     const [newMessage, setNewMessage] = useState<string>('');
+    const [isRepairing, setIsRepairing] = useState<number | null>(null);
+    const [repairDialogId, setRepairDialogId] = useState<number | null>(null);
+    
+    // Add repair progress tracking
+    const [repairProgress, setRepairProgress] = useState<number>(0);
+    const [repairCountdown, setRepairCountdown] = useState<number>(6);
+    const [repairInProgress, setRepairInProgress] = useState<number | null>(null);
+
+    const dropdownRef = useRef<HTMLDivElement>(null);
+    
+    useEffect(() => {
+        // Add event listener for clicks outside the dropdown
+        const handleClickOutside = (event: MouseEvent) => {
+            if (dropdownRef.current && !dropdownRef.current.contains(event.target as Node)) {
+                setActiveMenu(null);
+            }
+        };
+        
+        document.addEventListener('mousedown', handleClickOutside);
+        return () => {
+            document.removeEventListener('mousedown', handleClickOutside);
+        };
+    }, []);
 
     const handleAddClick = () => {
         if (onAddObject) {
@@ -39,6 +63,18 @@ const PanneauAffichage: React.FC<PanneauAffichageProps> = ({ objects, onStatusCh
 
     const handleToggleState = async (id: number, currentState: string) => {
         try {
+            // Find the panel object
+            const panneau = objects.find(p => p.id === id);
+            
+            // Check if the device is broken or has zero durability
+            if (currentState === 'off' && panneau && 
+                ((panneau.durabilité !== undefined && panneau.durabilité <= 0) || 
+                 panneau.maintenance === 'en panne')) {
+                // Show repair dialog instead of alert
+                setRepairDialogId(id);
+                return;
+            }
+            
             setToggleLoading(id);
             console.log(`Toggling panel ${id} state from ${currentState} to ${currentState === 'on' ? 'off' : 'on'}`);
 
@@ -163,7 +199,7 @@ const PanneauAffichage: React.FC<PanneauAffichageProps> = ({ objects, onStatusCh
                 }
                 alert(errorMessage);
             } else {
-                alert('Erreur lors de la mise à jour du panneau d\'affichage: ' +
+                alert('Erreur lors de la mise à jour du paneau d\'affichage: ' +
                     (error.friendlyMessage || error.response?.data?.detail || 'Problème de connexion au serveur'));
             }
         } finally {
@@ -192,6 +228,76 @@ const PanneauAffichage: React.FC<PanneauAffichageProps> = ({ objects, onStatusCh
                 (error.friendlyMessage || error.response?.data?.detail || 'Problème de connexion au serveur'));
         } finally {
             setIsDeleting(null);
+        }
+    };
+
+    const handleRepair = async (id: number) => {
+        try {
+            // Initialize repair states
+            setIsRepairing(id);
+            setRepairInProgress(id);
+            setRepairProgress(0);
+            setRepairCountdown(6);
+            
+            // Create an interval that runs every second to update the percentage and countdown
+            const intervalId = setInterval(() => {
+                setRepairProgress(prev => {
+                    const newProgress = prev + (100/6); // Increases by ~16.67% each second
+                    return Math.min(newProgress, 100);
+                });
+                
+                setRepairCountdown(prev => {
+                    const newCountdown = prev - 1;
+                    return Math.max(newCountdown, 0);
+                });
+            }, 1000);
+            
+            // Wait 6 seconds before calling the repair API
+            await new Promise(resolve => setTimeout(resolve, 6000));
+            
+            // Clear the interval
+            clearInterval(intervalId);
+            
+            const response = await repairObject(id);
+            console.log('Repair successful:', response);
+            
+            // Ajouter des points à l'utilisateur pour la réparation
+            if (addPoints) {
+                // Attribution de 10 points pour la réparation d'un panneau d'affichage
+                await addPoints(10);
+            }
+
+            if (onStatusChange) {
+                onStatusChange();
+            }
+            
+            // Close repair dialog
+            setRepairDialogId(null);
+            
+            // Close any open menus
+            setActiveMenu(null);
+        } catch (error: any) {
+            console.error('Error repairing display panel:', error);
+
+            // Special handling for authentication errors
+            if (error.response?.status === 401) {
+                alert('Session expirée. Veuillez vous reconnecter.');
+                // Clear any stale tokens that may be causing the JWT error
+                localStorage.removeItem('authToken');
+                localStorage.removeItem('sessionToken');
+                window.location.href = '/login'; // Redirect to login page
+                return;
+            }
+
+            // Generic error handling
+            alert('Erreur lors de la réparation du paneau d\'affichage: ' +
+                (error.friendlyMessage || error.response?.data?.detail || 'Problème de connexion au serveur'));
+        } finally {
+            // Reset all repair states
+            setIsRepairing(null);
+            setRepairInProgress(null);
+            setRepairProgress(0);
+            setRepairCountdown(6);
         }
     };
 
@@ -244,9 +350,9 @@ const PanneauAffichage: React.FC<PanneauAffichageProps> = ({ objects, onStatusCh
                     {objects.map((panneau) => (
                         <div
                             key={panneau.id}
-                            className="flex flex-col bg-white dark:bg-gray-800 border border-gray-100 dark:border-gray-700 rounded-lg p-3 hover:border-indigo-200 dark:hover:border-indigo-700 transition-colors"
+                            className="flex flex-col bg-white dark:bg-gray-800 border border-gray-100 dark:border-gray-700 rounded-lg hover:border-indigo-200 dark:hover:border-indigo-700 transition-colors"
                         >
-                            <div className="flex justify-between items-center">
+                            <div className="flex justify-between items-center p-3">
                                 <div className="flex items-center">
                                     <div className={`p-1.5 rounded-full mr-2 ${panneau.etat === 'on' ? 'bg-indigo-100 dark:bg-indigo-900/30' : 'bg-gray-200 dark:bg-gray-700'}`}>
                                         {getDisplayPanelIcon(panneau.valeur_actuelle)}
@@ -272,7 +378,7 @@ const PanneauAffichage: React.FC<PanneauAffichageProps> = ({ objects, onStatusCh
                                         )}
                                     </div>
                                 </div>
-                                <div className="flex items-center space-x-1">
+                                <div className="flex items-center space-x-1 relative">
                                     <button
                                         onClick={() => handleInfoToggle(panneau.id)}
                                         className="p-1.5 rounded-full hover:bg-indigo-100 dark:hover:bg-indigo-900/30 transition-colors"
@@ -296,7 +402,7 @@ const PanneauAffichage: React.FC<PanneauAffichageProps> = ({ objects, onStatusCh
                                         <MoreVertical className="h-4 w-4 text-gray-600 dark:text-gray-400" />
                                     </button>
                                     {activeMenu === panneau.id && (
-                                        <div className="absolute right-0 top-auto mt-2 w-48 bg-white dark:bg-gray-800 shadow-lg rounded-md border border-gray-200 dark:border-gray-700 z-10">
+                                        <div ref={dropdownRef} className="absolute right-0 top-auto mt-8 w-48 bg-white dark:bg-gray-800 shadow-lg rounded-md border border-gray-200 dark:border-gray-700 z-10">
                                             <button onClick={() => handleMessageClick(panneau.id)} className="flex items-center w-full px-4 py-2 text-sm text-left text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-700">
                                                 <MessageSquare className="h-4 w-4 mr-2 text-gray-500 dark:text-gray-400" />
                                                 Modifier message
@@ -442,7 +548,7 @@ const PanneauAffichage: React.FC<PanneauAffichageProps> = ({ objects, onStatusCh
                             )}
 
                             {showInfoId === panneau.id && (
-                                <div className="p-3 bg-gray-50 dark:bg-gray-700/50 border-t border-gray-200 dark:border-gray-700 mt-3 rounded-b-lg">
+                                <div className="p-3 bg-gray-50 dark:bg-gray-700/50 border-t border-gray-200 dark:border-gray-700">
                                     <div className="grid grid-cols-2 gap-3 text-sm">
                                         <div className="space-y-1">
                                             <p className="text-xs text-gray-500 dark:text-gray-400">État</p>
@@ -478,7 +584,21 @@ const PanneauAffichage: React.FC<PanneauAffichageProps> = ({ objects, onStatusCh
                                     <div className="mt-3">
                                         <div className="flex justify-between items-center mb-1">
                                             <p className="text-xs text-gray-500 dark:text-gray-400">Durabilité</p>
-                                            <p className="text-xs font-medium text-gray-700 dark:text-gray-300">{panneau.durabilité || 0}%</p>
+                                            <div className="flex items-center space-x-2">
+                                                <p className="text-xs font-medium text-gray-700 dark:text-gray-300">{panneau.durabilité || 0}%</p>
+                                                <button
+                                                    onClick={() => handleRepair(panneau.id)}
+                                                    disabled={(panneau.durabilité || 0) > 0 && panneau.maintenance === 'fonctionnel'}
+                                                    className={`flex items-center px-3 py-1.5 text-sm rounded font-medium ${
+                                                        (panneau.durabilité !== undefined && panneau.durabilité <= 0) || panneau.maintenance !== 'fonctionnel'
+                                                        ? 'bg-green-600 hover:bg-green-700 text-white'
+                                                        : 'bg-gray-300 text-gray-600 cursor-default'
+                                                    }`}
+                                                >
+                                                    <Wrench className="h-4 w-4 mr-1" />
+                                                    {(panneau.durabilité !== undefined && panneau.durabilité <= 0) || panneau.maintenance !== 'fonctionnel' ? 'Réparer' : 'OK'}
+                                                </button>
+                                            </div>
                                         </div>
                                         <div className="w-full bg-gray-200 dark:bg-gray-700 rounded-full h-1.5">
                                             <div
@@ -493,6 +613,73 @@ const PanneauAffichage: React.FC<PanneauAffichageProps> = ({ objects, onStatusCh
                             )}
                         </div>
                     ))}
+                </div>
+            )}
+
+            {repairDialogId && (
+                <div className="fixed inset-0 flex items-center justify-center z-50">
+                    <div className="fixed inset-0 bg-black/30" onClick={() => setRepairDialogId(null)}></div>
+                    <div className="bg-white dark:bg-gray-800 rounded-lg shadow-lg p-5 max-w-md w-full mx-4 relative z-10 border-l-4 border-amber-500">
+                        <div className="flex items-start mb-3">
+                            <div className="mr-3 mt-0.5">
+                                <AlertTriangle className="h-5 w-5 text-amber-500" />
+                            </div>
+                            <div className="flex-1">
+                                <h3 className="text-lg font-medium text-gray-900 dark:text-white mb-1">
+                                    Appareil en panne
+                                </h3>
+                                <p className="text-gray-600 dark:text-gray-300 mb-4">
+                                    Cet appareil est en panne. Vous devez le réparer avant de pouvoir l'utiliser à nouveau.
+                                </p>
+                                <div className="flex justify-end space-x-3">
+                                    <button
+                                        onClick={() => setRepairDialogId(null)}
+                                        className="px-4 py-2 text-sm bg-gray-100 hover:bg-gray-200 text-gray-700 dark:bg-gray-700 dark:hover:bg-gray-600 dark:text-gray-300 rounded"
+                                    >
+                                        Annuler
+                                    </button>
+                                    <button
+                                        onClick={() => {
+                                            handleRepair(repairDialogId);
+                                            setRepairDialogId(null);
+                                        }}
+                                        className="px-4 py-2 text-sm bg-green-600 hover:bg-green-700 text-white rounded flex items-center"
+                                    >
+                                        <Wrench className="h-4 w-4 mr-1.5" /> Réparer maintenant
+                                    </button>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            )}
+
+            {/* Replace the repair in progress modal */}
+            {repairInProgress !== null && (
+                <div className="fixed inset-0 flex items-center justify-center z-50">
+                    <div className="fixed inset-0 bg-black/15" onClick={() => {}}></div>
+                    <div className="bg-white dark:bg-gray-800 rounded-lg shadow-lg p-6 max-w-xs w-full mx-4 relative z-10">
+                        <div className="flex flex-col items-center">
+                            <div className="mb-4 w-40 h-40 filter grayscale brightness-[0.6] contrast-[1.2]">
+                                <DotLottieReact
+                                    src="https://lottie.host/bab12c80-4bd7-4261-b763-0f7ec72a2834/LE6JcmwrGJ.lottie"
+                                    loop
+                                    autoplay
+                                />
+                            </div>
+                            
+                            <div className="w-full bg-gray-200 dark:bg-gray-700 rounded-full h-2 mb-2">
+                                <div
+                                    className="h-2 rounded-full bg-green-500 transition-all duration-1000 ease-linear"
+                                    style={{ width: `${repairProgress}%` }}
+                                ></div>
+                            </div>
+                            
+                            <div className="flex justify-center items-center mt-1">
+                                <p className="text-sm font-medium text-gray-600 dark:text-gray-300">{repairCountdown}s</p>
+                            </div>
+                        </div>
+                    </div>
                 </div>
             )}
 

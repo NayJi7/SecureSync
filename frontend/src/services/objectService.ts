@@ -87,3 +87,34 @@ export const toggleObjectState = (id: number, currentState: 'on' | 'off') => {
     throw error;
   }
 };
+
+// Repair object - restore durability and set maintenance to functional
+export const repairObject = (id: number) => {
+  console.debug(`Repairing object with ID: ${id}`);
+  try {
+    // Update the object to restore durability to full and set maintenance to functional
+    return API.patch<ObjectType>(`${OBJECTS_ENDPOINT}${id}/`, { 
+      durabilité: 100, 
+      maintenance: 'fonctionnel' 
+    });
+  } catch (error) {
+    console.error('Error in repairObject:', error);
+    throw error;
+  }
+};
+
+export const modifyObject = async (id: number, objectData: Partial<ObjectType>): Promise<ObjectType> => {
+  try {
+    // Ensure durability is capped between 0-100 if present in the data
+    if (objectData.durabilité !== undefined) {
+      objectData.durabilité = Math.max(0, Math.min(100, objectData.durabilité));
+    }
+
+    const response = await API.patch<ObjectType>(`${OBJECTS_ENDPOINT}${id}/`, objectData);
+    
+    return response.data;
+  } catch (error) {
+    console.error('Erreur:', error);
+    throw error;
+  }
+};

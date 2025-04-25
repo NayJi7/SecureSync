@@ -1,4 +1,4 @@
-export type ObjectTypeName = 'porte' | 'lumiere' | 'camera' | 'thermostat' | 'ventilation' | "panneau d'affichage";
+export type ObjectTypeName = 'porte' | 'lumiere' | 'camera' | 'thermostat' | 'ventilation' | "paneau d'affichage";
 
 export interface ObjectType {
   id: number;
@@ -40,5 +40,5 @@ export interface VentilationObject extends ObjectType {
 }
 
 export interface PanneauAffichageObject extends ObjectType {
-  type: "panneau d'affichage";
+  type: "paneau d'affichage";
 }

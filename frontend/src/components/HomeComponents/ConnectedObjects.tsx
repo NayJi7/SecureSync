@@ -28,7 +28,7 @@ const ConnectedObjects: React.FC<ConnectedObjectsProps> = ({ prisonId, addPoints
     const [newObjectState, setNewObjectState] = useState<'on' | 'off'>('off');
     const [newConnection, setNewConnection] = useState<'wifi' | 'filaire'>('wifi');
     const [newConsumption, setNewConsumption] = useState<number>(0);
-    const [newDurability, setNewDurability] = useState<number>(1000);
+    const [newDurability, setNewDurability] = useState<number>(100);
     const [newTargetValue, setNewTargetValue] = useState<number>(22);
     const [isSaving, setIsSaving] = useState(false);
     const [error, setError] = useState<string | null>(null);
@@ -91,14 +91,16 @@ const ConnectedObjects: React.FC<ConnectedObjectsProps> = ({ prisonId, addPoints
     };
 
     const handleAddObject: AddObjectCallback = (type) => {
-        setAddingObjectType(type as 'porte' | 'lumiere' | 'camera' | 'thermostat' | 'ventilation' | "paneau d'affichage" | null);
+        // Convert "panneau d'affichage" (from UI/component definition) to "paneau d'affichage" (backend/database definition)
+        const fixedType = type === "panneau d'affichage" ? "paneau d'affichage" : type;
+        setAddingObjectType(fixedType);
         setNewObjectName('');
         setNewObjectX(0);
         setNewObjectY(0);
         setNewObjectState('off');
         setNewConnection('wifi');
         setNewConsumption(0);
-        setNewDurability(1000);
+        setNewDurability(100);
         setNewTargetValue(22);
         setError(null);
         setShowAddModal(true);
@@ -115,7 +117,7 @@ const ConnectedObjects: React.FC<ConnectedObjectsProps> = ({ prisonId, addPoints
         setNewObjectState('off');
         setNewConnection('wifi');
         setNewConsumption(0);
-        setNewDurability(1000);
+        setNewDurability(100);
         setNewTargetValue(22);
     };
 
@@ -158,10 +160,13 @@ const ConnectedObjects: React.FC<ConnectedObjectsProps> = ({ prisonId, addPoints
                 initialValue = "Bienvenue"; // Default message for display panel
             }
 
+            // Ensure durability is within 0-100 range
+            const cappedDurability = Math.max(0, Math.min(100, newDurability));
+
             // Use the service function instead of direct API call
             await createObject({
                 nom: newObjectName,
-                type: addingObjectType,
+                type: addingObjectType as any, // Cast to any to bypass type checking
                 etat: newObjectState,
                 coord_x: newObjectX,
                 coord_y: newObjectY,
@@ -170,7 +175,7 @@ const ConnectedObjects: React.FC<ConnectedObjectsProps> = ({ prisonId, addPoints
                 consomation: newConsumption, // Use the value from the form
                 valeur_actuelle: initialValue,
                 valeur_cible: addingObjectType === 'thermostat' ? newTargetValue : 0, // Use target value for thermostat
-                durabilité: newDurability, // Use the value from the form
+                durabilité: cappedDurability, // Use the capped durability value
                 connection: newConnection, // Use the connection type from the form
                 maintenance: 'fonctionnel' // État de maintenance par défaut
             });
@@ -284,7 +289,15 @@ const ConnectedObjects: React.FC<ConnectedObjectsProps> = ({ prisonId, addPoints
 
     // Render appropriate component based on object type
     const renderObject = (type: 'porte' | 'lumiere' | 'camera' | 'thermostat' | 'ventilation' | "paneau d'affichage", objects: ObjectType[]) => {
-        const addHandler = () => handleAddObject(type);
+        const addHandler = () => {
+            // When passing to handleAddObject, convert "paneau d'affichage" to "panneau d'affichage" for ObjectsChart
+            if (type === "paneau d'affichage") {
+                handleAddObject("panneau d'affichage" as any);
+            } else {
+                handleAddObject(type as any);
+            }
+        };
+        
         // The filtered objects are already passed in - no need to filter again
         // Ensure the objects are the correct type to fix the linter errors
 
@@ -307,22 +320,42 @@ const ConnectedObjects: React.FC<ConnectedObjectsProps> = ({ prisonId, addPoints
     // Render components by object type with the correct props
     const renderObjectComponents = () => {
         return (
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-                {/* Render objects that exist */}
-                {grouped.porte.length > 0 && renderObject('porte', grouped.porte)}
-                {grouped.lumiere.length > 0 && renderObject('lumiere', grouped.lumiere)}
-                {grouped.camera.length > 0 && renderObject('camera', grouped.camera)}
-                {grouped.thermostat.length > 0 && renderObject('thermostat', grouped.thermostat)}
-                {grouped.ventilation.length > 0 && renderObject('ventilation', grouped.ventilation)}
-                {grouped.paneauAffichage.length > 0 && renderObject("paneau d'affichage", grouped.paneauAffichage)}
+            <div className="grid grid-cols-1 gap-6">
+                {/* First row: display cameras and doors */}
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                    {grouped.camera.length > 0 && renderObject('camera', grouped.camera)}
+                    {grouped.camera.length === 0 && renderObject('camera', [])}
+                    
+                    {grouped.porte.length > 0 && renderObject('porte', grouped.porte)}
+                    {grouped.porte.length === 0 && renderObject('porte', [])}
+                </div>
 
-                {/* Add empty components with add button if no objects exist */}
-                {grouped.porte.length === 0 && renderObject('porte', [])}
-                {grouped.lumiere.length === 0 && renderObject('lumiere', [])}
-                {grouped.camera.length === 0 && renderObject('camera', [])}
-                {grouped.thermostat.length === 0 && renderObject('thermostat', [])}
-                {grouped.ventilation.length === 0 && renderObject('ventilation', [])}
-                {grouped.paneauAffichage.length === 0 && renderObject("paneau d'affichage", [])}
+                {/* Second row: display lights */}
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                    {grouped.lumiere.length > 0 && renderObject('lumiere', grouped.lumiere)}
+                    {grouped.lumiere.length === 0 && renderObject('lumiere', [])}
+            
+                    {grouped.paneauAffichage.length > 0 && renderObject("paneau d'affichage", grouped.paneauAffichage)}
+                    {grouped.paneauAffichage.length === 0 && renderObject("paneau d'affichage", [])}
+                </div>
+
+                {/* Third row: display thermostats and ventilation side by side */}
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                    {/* Left column: thermostats */}
+                    <div>
+                        {grouped.thermostat.length > 0 && renderObject('thermostat', grouped.thermostat)}
+                        {grouped.thermostat.length === 0 && renderObject('thermostat', [])}
+                    </div>
+                    
+                    {/* Right column: ventilation */}
+                    <div>
+                        {grouped.ventilation.length > 0 && renderObject('ventilation', grouped.ventilation)}
+                        {grouped.ventilation.length === 0 && renderObject('ventilation', [])}
+                    </div>
+                </div>
+
+                {/* Fourth row: display panels */}
+               
             </div>
         );
     };
@@ -564,9 +597,14 @@ const ConnectedObjects: React.FC<ConnectedObjectsProps> = ({ prisonId, addPoints
                                         id="durability"
                                         className="w-full px-4 py-2 border border-gray-300 dark:border-gray-600 rounded-md bg-white dark:bg-gray-700 text-gray-900 dark:text-white focus:ring-2 focus:ring-indigo-500 dark:focus:ring-indigo-600 focus:border-transparent"
                                         value={newDurability}
-                                        onChange={(e) => setNewDurability(Number(e.target.value))}
+                                        onChange={(e) => {
+                                            const value = Number(e.target.value);
+                                            // Ensure durability is within 0-100 range
+                                            const capped = Math.max(0, Math.min(100, value));
+                                            setNewDurability(capped);
+                                        }}
                                         min="0"
-                                        max="1000"
+                                        max="100"
                                     />
                                 </div>
                             </div>

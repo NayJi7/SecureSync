@@ -11,11 +11,17 @@ import {
     ChevronUp,
     ChevronDown,
     Info,
-    Save
+    Save,
+    Wrench,
+    AlertTriangle
 } from 'lucide-react';
-import { toggleObjectState, updateObject, deleteObject } from '../../services/objectService';
+import { toggleObjectState, updateObject, deleteObject, repairObject } from '../../services/objectService';
 import { Switch } from "@/components/ui/switch";
 import { Slider } from "@/components/ui/slider";
+import axios from 'axios';
+import { Input } from "@/components/ui/input";
+import { Button } from "@/components/ui/button";
+import { DotLottieReact } from '@lottiefiles/dotlottie-react';
 
 interface ThermostatProps {
     objects: ObjectType[];
@@ -25,6 +31,7 @@ interface ThermostatProps {
 }
 
 const Thermostat: React.FC<ThermostatProps> = ({ objects, onAddObject, onStatusChange, addPoints }) => {
+    const isEmpty = objects.length === 0;
     const [isHovering, setIsHovering] = useState(false);
     const [toggleLoading, setToggleLoading] = useState<number | null>(null);
     const [activeMenu, setActiveMenu] = useState<number | null>(null);
@@ -42,6 +49,46 @@ const Thermostat: React.FC<ThermostatProps> = ({ objects, onAddObject, onStatusC
     const [showInfoId, setShowInfoId] = useState<number | null>(null);
     const [thermostatsInProgress, setThermostatsInProgress] = useState<Set<number>>(new Set());
     const intervalRef = useRef<NodeJS.Timeout | null>(null);
+    const [isRepairing, setIsRepairing] = useState<number | null>(null);
+    const [repairDialogId, setRepairDialogId] = useState<number | null>(null);
+    
+    const dropdownRef = useRef<HTMLDivElement>(null);
+    
+    // Add repair progress tracking
+    const [repairProgress, setRepairProgress] = useState<number>(0);
+    const [repairCountdown, setRepairCountdown] = useState<number>(6);
+    const [repairInProgress, setRepairInProgress] = useState<number | null>(null);
+
+    useEffect(() => {
+        // Add event listener for clicks outside the dropdown
+        const handleClickOutside = (event: MouseEvent) => {
+            if (dropdownRef.current && !dropdownRef.current.contains(event.target as Node)) {
+                setActiveMenu(null);
+            }
+        };
+        
+        document.addEventListener('mousedown', handleClickOutside);
+        return () => {
+            document.removeEventListener('mousedown', handleClickOutside);
+        };
+    }, []);
+
+    // Check devices and turn off those with zero durability
+    useEffect(() => {
+        const checkDurabilityAndTurnOff = async () => {
+            for (const thermostat of objects) {
+                // If device is on, has zero durability or is broken, turn it off automatically
+                if (thermostat.etat === 'on' && 
+                    ((thermostat.durabilité !== undefined && thermostat.durabilité <= 0) || 
+                    thermostat.maintenance === 'en panne')) {
+                    console.log(`Auto turning off broken device: ${thermostat.id}`);
+                    await handleAutomaticTurnOff(thermostat.id);
+                }
+            }
+        };
+        
+        checkDurabilityAndTurnOff();
+    }, [objects]);
 
     const handleAddClick = () => {
         onAddObject ? onAddObject() : alert('Fonctionnalité à venir: Ajouter un thermostat');
@@ -49,6 +96,18 @@ const Thermostat: React.FC<ThermostatProps> = ({ objects, onAddObject, onStatusC
 
     const handleToggleState = async (id: number, currentState: 'on' | 'off') => {
         try {
+            // Find the thermostat object
+            const thermostat = objects.find(t => t.id === id);
+            
+            // Check if the device is broken or has zero durability
+            if (currentState === 'off' && thermostat && 
+                ((thermostat.durabilité !== undefined && thermostat.durabilité <= 0) || 
+                 thermostat.maintenance === 'en panne')) {
+                // Show repair dialog instead of alert
+                setRepairDialogId(id);
+                return;
+            }
+
             setToggleLoading(id);
             const response = await toggleObjectState(id, currentState);
             if (addPoints) await addPoints(4);
@@ -176,6 +235,60 @@ const Thermostat: React.FC<ThermostatProps> = ({ objects, onAddObject, onStatusC
         }
     };
 
+    const handleRepair = async (id: number) => {
+        try {
+            // Initialize repair states
+            setIsRepairing(id);
+            setRepairInProgress(id);
+            setRepairProgress(0);
+            setRepairCountdown(6);
+            
+            // Create an interval that runs every second to update the percentage and countdown
+            const intervalId = setInterval(() => {
+                setRepairProgress(prev => {
+                    const newProgress = prev + (100/6); // Increases by ~16.67% each second
+                    return Math.min(newProgress, 100);
+                });
+                
+                setRepairCountdown(prev => {
+                    const newCountdown = prev - 1;
+                    return Math.max(newCountdown, 0);
+                });
+            }, 1000);
+            
+            // Wait 6 seconds before calling the repair API
+            await new Promise(resolve => setTimeout(resolve, 6000));
+            
+            // Clear the interval
+            clearInterval(intervalId);
+            
+            // Call API to repair the object
+            await updateObject(id, {
+                durabilité: 100,
+                maintenance: 'fonctionnel'
+            });
+            
+            // Add points for repair
+            if (addPoints) {
+                await addPoints(10);
+            }
+            
+            // Refresh the list
+            onStatusChange?.();
+            
+            // Close the repair dialog
+            setRepairDialogId(null);
+        } catch (error) {
+            console.error('Error repairing device:', error);
+        } finally {
+            // Reset all repair states
+            setIsRepairing(null);
+            setRepairInProgress(null);
+            setRepairProgress(0);
+            setRepairCountdown(6);
+        }
+    };
+
     // This effect sets up a single interval to handle all temperature updates
     useEffect(() => {
         // Clear any existing interval when component mounts or remounts
@@ -238,6 +351,36 @@ const Thermostat: React.FC<ThermostatProps> = ({ objects, onAddObject, onStatusC
         };
     }, [objects, thermostatsInProgress, onStatusChange]);
 
+    useEffect(() => {
+        // Check if any active thermostat has zero durability and turn it off
+        objects.forEach(thermo => {
+            if (thermo.etat === 'on' && 
+                ((thermo.durabilité !== undefined && thermo.durabilité <= 0) || 
+                thermo.maintenance === 'en panne')) {
+                // Turn off the device automatically when durability reaches zero
+                handleAutomaticTurnOff(thermo.id);
+            }
+        });
+    }, [objects]);
+    
+    const handleAutomaticTurnOff = async (id: number) => {
+        try {
+            const thermostat = objects.find(t => t.id === id);
+            if (!thermostat) return;
+            
+            // Update the object state to 'off'
+            await updateObject(id, { etat: 'off' });
+            
+            if (onStatusChange) {
+                onStatusChange();
+            }
+            
+            console.log('Device automatically turned off due to low durability:', id);
+        } catch (error) {
+            console.error('Error turning off broken device:', error);
+        }
+    };
+
     // Update the target temperature function
     const updateTargetTemperature = async (id: number, newTemp: number) => {
         try {
@@ -274,7 +417,7 @@ const Thermostat: React.FC<ThermostatProps> = ({ objects, onAddObject, onStatusC
 
     return (
         <div
-            className="bg-white dark:bg-gray-800 p-6 rounded-lg shadow-lg border border-gray-100 dark:border-gray-700 hover:shadow-xl transition-shadow relative"
+            className="bg-white dark:bg-gray-800 p-6 rounded-lg shadow-lg border border-gray-100 dark:border-gray-700 hover:shadow-xl transition-shadow relative h-full"
             onMouseEnter={() => setIsHovering(true)}
             onMouseLeave={() => setIsHovering(false)}
         >
@@ -311,10 +454,10 @@ const Thermostat: React.FC<ThermostatProps> = ({ objects, onAddObject, onStatusC
                     </button>
                 </div>
             ) : (
-                <div className="space-y-2">
-                    {objects.map(thermo => (
-                        <div key={thermo.id} className="relative">
-                            {objectToEdit?.id === thermo.id ? (
+                <div className="space-y-4">
+                    {objects.map(thermostat => (
+                        <div key={thermostat.id} className="relative">
+                            {objectToEdit?.id === thermostat.id ? (
                                 <div className="p-4 bg-blue-50 dark:bg-blue-900/20 rounded-lg border border-blue-200 dark:border-blue-700">
                                     <div className="flex justify-between items-center mb-3">
                                         <h4 className="font-medium text-blue-800 dark:text-blue-300">Modifier le thermostat</h4>
@@ -409,122 +552,129 @@ const Thermostat: React.FC<ThermostatProps> = ({ objects, onAddObject, onStatusC
 
                                     <div className="flex justify-end mt-4">
                                         <button
-                                            onClick={() => handleSaveChanges(thermo.id)}
-                                            disabled={isUpdating === thermo.id}
-                                            className={`px-3 py-1.5 text-xs bg-blue-600 text-white rounded hover:bg-blue-700 transition-colors flex items-center ${isUpdating === thermo.id ? 'opacity-50 cursor-not-allowed' : ''}`}
+                                            onClick={() => handleSaveChanges(thermostat.id)}
+                                            disabled={isUpdating === thermostat.id}
+                                            className={`px-3 py-1.5 text-xs bg-blue-600 text-white rounded hover:bg-blue-700 transition-colors flex items-center ${isUpdating === thermostat.id ? 'opacity-50 cursor-not-allowed' : ''}`}
                                         >
-                                            {isUpdating === thermo.id ? 'Enregistrement...' : <><Save className="h-3.5 w-3.5 mr-1" /> Enregistrer</>}
+                                            {isUpdating === thermostat.id ? 'Enregistrement...' : <><Save className="h-3.5 w-3.5 mr-1" /> Enregistrer</>}
                                         </button>
                                     </div>
                                 </div>
                             ) : (
                                 <div className="bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded-lg hover:border-blue-300 dark:hover:border-blue-700 transition-colors">
-                                    <div className="flex justify-between items-center p-3">
-                                        <div className="flex items-center">
-                                            <div className={`p-1.5 rounded-full mr-2 ${thermo.etat === 'on' ? 'bg-blue-100 dark:bg-blue-900/30' : 'bg-gray-200 dark:bg-gray-700'}`}>
-                                                <Thermometer className={`h-4 w-4 ${thermo.etat === 'on' ? getTemperatureColor(Number(thermo.valeur_actuelle) || 20) : 'text-gray-500 dark:text-gray-400'}`} />
-                                            </div>
-                                            <div>
-                                                <p className="font-medium text-gray-800 dark:text-white text-sm">{thermo.nom}</p>
-                                                <div className="flex items-center mt-1">
-                                                    <span className={`inline-flex items-center px-2 py-0.5 rounded-full text-xs ${thermo.etat === 'on'
-                                                        ? 'bg-blue-100 text-blue-800 dark:bg-blue-900/30 dark:text-blue-400'
-                                                        : 'bg-gray-200 text-gray-800 dark:bg-gray-700 dark:text-gray-400'}`}
-                                                    >
-                                                        {thermo.etat === 'on' ? 'Actif' : 'Inactif'}
-                                                    </span>
+                                    <div className="flex flex-col p-3">
+                                        <div className="flex justify-between items-center">
+                                            <div className="flex items-center">
+                                                <div className={`p-1.5 rounded-full mr-2 ${thermostat.etat === 'on' ? 'bg-blue-100 dark:bg-blue-900/30' : 'bg-gray-200 dark:bg-gray-700'}`}>
+                                                    <Thermometer className={`h-4 w-4 ${thermostat.etat === 'on' ? getTemperatureColor(Number(thermostat.valeur_actuelle) || 20) : 'text-gray-500 dark:text-gray-400'}`} />
                                                 </div>
-                                                {thermo.etat === 'on' && (
-                                                    <div className="flex space-x-3 mt-1">
-                                                        <p className="text-xs text-gray-500 dark:text-gray-400">
-                                                            Actuelle: <span className={getTemperatureColor(Number(thermo.valeur_actuelle) || 20)}>
-                                                                {thermo.valeur_actuelle || 20}°C
-                                                                {thermostatsInProgress.has(thermo.id) && <span className="ml-1 inline-block animate-pulse text-blue-500 dark:text-blue-400">●</span>}
-                                                            </span>
-                                                        </p>
-                                                        <p className="text-xs text-gray-500 dark:text-gray-400">
-                                                            Cible: <span className="font-medium">
-                                                                {thermo.valeur_cible || 22}°C
-                                                            </span>
-                                                        </p>
+                                                <div>
+                                                    <p className="font-medium text-gray-800 dark:text-white text-sm">{thermostat.nom}</p>
+                                                    <div className="flex items-center mt-1">
+                                                        <span className={`inline-flex items-center px-2 py-0.5 rounded-full text-xs ${thermostat.etat === 'on'
+                                                            ? 'bg-blue-100 text-blue-800 dark:bg-blue-900/30 dark:text-blue-400'
+                                                            : 'bg-gray-200 text-gray-800 dark:bg-gray-700 dark:text-gray-400'}`}
+                                                        >
+                                                            {thermostat.etat === 'on' ? 'Actif' : 'Inactif'}
+                                                        </span>
                                                     </div>
-                                                )}
+                                                    {thermostat.etat === 'on' && (
+                                                        <div className="flex flex-wrap gap-x-3 mt-1">
+                                                            <p className="text-xs text-gray-500 dark:text-gray-400">
+                                                                Actuelle: <span className={getTemperatureColor(Number(thermostat.valeur_actuelle) || 20)}>
+                                                                    {thermostat.valeur_actuelle || 20}°C
+                                                                    {thermostatsInProgress.has(thermostat.id) && <span className="ml-1 inline-block animate-pulse text-blue-500 dark:text-blue-400">●</span>}
+                                                                </span>
+                                                            </p>
+                                                            <p className="text-xs text-gray-500 dark:text-gray-400">
+                                                                Cible: <span className="font-medium">
+                                                                    {thermostat.valeur_cible || 22}°C
+                                                                </span>
+                                                            </p>
+                                                        </div>
+                                                    )}
+                                                </div>
+                                            </div>
+                                            <div className="flex items-center space-x-1">
+                                                <button onClick={() => handleInfoToggle(thermostat.id)} className="p-1.5 rounded-full hover:bg-blue-100 dark:hover:bg-blue-900/30 transition-colors" title="Informations">
+                                                    <Info className="h-4 w-4 text-blue-600 dark:text-blue-400" />
+                                                </button>
+                                                <button onClick={() => handleToggleState(thermostat.id, thermostat.etat)} disabled={toggleLoading === thermostat.id} className={`p-1.5 rounded-full hover:bg-blue-100 dark:hover:bg-blue-900/30 transition-colors ${toggleLoading === thermostat.id ? 'opacity-50 cursor-not-allowed' : ''}`} title="Changer état">
+                                                    <ToggleLeft className="h-4 w-4 text-blue-600 dark:text-blue-400" />
+                                                </button>
+                                                <button onClick={() => handleMenuToggle(thermostat.id)} className="p-1.5 rounded-full hover:bg-gray-200 dark:hover:bg-gray-600 transition-colors" title="Options">
+                                                    <MoreVertical className="h-4 w-4 text-gray-600 dark:text-gray-400" />
+                                                </button>
                                             </div>
                                         </div>
-                                        <div className="flex items-center space-x-1">
-                                            {thermo.etat === 'on' && (
-                                                <div className="mr-2 flex flex-col w-60">
-                                                    <div className="flex justify-between text-xs text-gray-500 dark:text-gray-400 mb-1">
-                                                        <span className="font-medium">Température: {thermo.valeur_cible || 22}°C</span>
-                                                    </div>
-                                                    <Slider
-                                                        value={[Number(thermo.valeur_cible) || 22]}
-                                                        min={10}
-                                                        max={30}
-                                                        step={1}
-                                                        onValueChange={(value) => updateTargetTemperature(thermo.id, value[0])}
-                                                        className="w-full [&>[data-slot=slider-track]]:bg-blue-100 [&>[data-slot=slider-track]>[data-slot=slider-range]]:bg-blue-500 [&>[data-slot=slider-thumb]]:border-blue-500 dark:[&>[data-slot=slider-track]]:bg-blue-900/30 dark:[&>[data-slot=slider-track]>[data-slot=slider-range]]:bg-blue-400 dark:[&>[data-slot=slider-thumb]]:border-blue-400"
-                                                    />
-                                                    <div className="flex justify-between text-xs text-gray-500 dark:text-gray-400 mt-1">
-                                                        <span>10°C</span>
-                                                        <span>20°C</span>
-                                                        <span>30°C</span>
-                                                    </div>
+                                        
+                                        {thermostat.etat === 'on' && (
+                                            <div className="mt-3 flex flex-col w-full pr-1">
+                                                <div className="flex justify-between text-xs text-gray-500 dark:text-gray-400 mb-1">
+                                                    <span className="font-medium">Température: {thermostat.valeur_cible || 22}°C</span>
                                                 </div>
-                                            )}
-                                            <button onClick={() => handleInfoToggle(thermo.id)} className="p-1.5 rounded-full hover:bg-blue-100 dark:hover:bg-blue-900/30 transition-colors" title="Informations">
-                                                <Info className="h-4 w-4 text-blue-600 dark:text-blue-400" />
-                                            </button>
-                                            <button onClick={() => handleToggleState(thermo.id, thermo.etat)} disabled={toggleLoading === thermo.id} className={`p-1.5 rounded-full hover:bg-blue-100 dark:hover:bg-blue-900/30 transition-colors ${toggleLoading === thermo.id ? 'opacity-50 cursor-not-allowed' : ''}`} title="Changer état">
-                                                <ToggleLeft className="h-4 w-4 text-blue-600 dark:text-blue-400" />
-                                            </button>
-                                            <button onClick={() => handleMenuToggle(thermo.id)} className="p-1.5 rounded-full hover:bg-gray-200 dark:hover:bg-gray-600 transition-colors" title="Options">
-                                                <MoreVertical className="h-4 w-4 text-gray-600 dark:text-gray-400" />
-                                            </button>
-                                            {activeMenu === thermo.id && (
-                                                <div className="absolute right-0 top-auto mt-8 w-48 bg-white dark:bg-gray-800 shadow-lg rounded-md border border-gray-200 dark:border-gray-700 z-10">
-                                                    <button onClick={() => handleEditClick(thermo)} className="flex items-center w-full px-4 py-2 text-sm text-left text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-700">
-                                                        <Pencil className="h-4 w-4 mr-2 text-gray-500 dark:text-gray-400" />
-                                                        Modifier
-                                                    </button>
-                                                    <button onClick={() => handleDeleteClick(thermo.id)} className="flex items-center w-full px-4 py-2 text-sm text-left text-red-600 dark:text-red-400 hover:bg-red-50 dark:hover:bg-red-900/20">
-                                                        <Trash2 className="h-4 w-4 mr-2" />
-                                                        Supprimer
-                                                    </button>
+                                                <Slider
+                                                    value={[Number(thermostat.valeur_cible) || 22]}
+                                                    min={10}
+                                                    max={30}
+                                                    step={1}
+                                                    onValueChange={(value) => updateTargetTemperature(thermostat.id, value[0])}
+                                                    className="w-full [&>[data-slot=slider-track]]:bg-blue-100 [&>[data-slot=slider-track]>[data-slot=slider-range]]:bg-blue-500 [&>[data-slot=slider-thumb]]:border-blue-500 dark:[&>[data-slot=slider-track]]:bg-blue-900/30 dark:[&>[data-slot=slider-track]>[data-slot=slider-range]]:bg-blue-400 dark:[&>[data-slot=slider-thumb]]:border-blue-400"
+                                                />
+                                                <div className="flex justify-between text-xs text-gray-500 dark:text-gray-400 mt-1">
+                                                    <span>10°C</span>
+                                                    <span>20°C</span>
+                                                    <span>30°C</span>
                                                 </div>
-                                            )}
-                                        </div>
+                                            </div>
+                                        )}
+                                        
+                                        {/* Dropdown menu */}
+                                        {activeMenu === thermostat.id && (
+                                            <div ref={dropdownRef} className="absolute right-0 top-auto mt-8 w-48 bg-white dark:bg-gray-800 shadow-lg rounded-md border border-gray-200 dark:border-gray-700 z-10">
+                                                <button onClick={() => handleEditClick(thermostat)} className="flex items-center w-full px-4 py-2 text-sm text-left text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-700">
+                                                    <Pencil className="h-4 w-4 mr-2 text-gray-500 dark:text-gray-400" />
+                                                    Modifier
+                                                </button>
+                                                <button onClick={() => handleDeleteClick(thermostat.id)} className="flex items-center w-full px-4 py-2 text-sm text-left text-red-600 dark:text-red-400 hover:bg-red-50 dark:hover:bg-red-900/20">
+                                                    <Trash2 className="h-4 w-4 mr-2" />
+                                                    Supprimer
+                                                </button>
+                                            </div>
+                                        )}
                                     </div>
-                                    {showInfoId === thermo.id && (
+                                    
+                                    {/* Info panel */}
+                                    {showInfoId === thermostat.id && (
                                         <div className="p-3 bg-gray-50 dark:bg-gray-700/50 border-t border-gray-200 dark:border-gray-700">
                                             <div className="grid grid-cols-2 gap-3 text-sm">
                                                 <div className="space-y-1">
                                                     <p className="text-xs text-gray-500 dark:text-gray-400">État</p>
                                                     <p className="font-medium">
-                                                        <span className={`inline-flex items-center px-2 py-0.5 rounded-full text-xs ${thermo.etat === 'on' ? 'bg-blue-100 text-blue-800 dark:bg-blue-900/30 dark:text-blue-400' : 'bg-gray-200 text-gray-800 dark:bg-gray-700 dark:text-gray-400'}`}>
-                                                            {thermo.etat === 'on' ? 'Actif' : 'Inactif'}
+                                                        <span className={`inline-flex items-center px-2 py-0.5 rounded-full text-xs ${thermostat.etat === 'on' ? 'bg-blue-100 text-blue-800 dark:bg-blue-900/30 dark:text-blue-400' : 'bg-gray-200 text-gray-800 dark:bg-gray-700 dark:text-gray-400'}`}>
+                                                            {thermostat.etat === 'on' ? 'Actif' : 'Inactif'}
                                                         </span>
                                                     </p>
                                                 </div>
                                                 <div className="space-y-1">
                                                     <p className="text-xs text-gray-500 dark:text-gray-400">Connexion</p>
-                                                    <p className="font-medium text-gray-700 dark:text-gray-300">{thermo.connection || 'N/A'}</p>
+                                                    <p className="font-medium text-gray-700 dark:text-gray-300">{thermostat.connection || 'N/A'}</p>
                                                 </div>
                                                 <div className="space-y-1">
                                                     <p className="text-xs text-gray-500 dark:text-gray-400">Position</p>
-                                                    <p className="font-medium text-gray-700 dark:text-gray-300">X: {thermo.coord_x}, Y: {thermo.coord_y}</p>
+                                                    <p className="font-medium text-gray-700 dark:text-gray-300">X: {thermostat.coord_x}, Y: {thermostat.coord_y}</p>
                                                 </div>
                                                 <div className="space-y-1">
                                                     <p className="text-xs text-gray-500 dark:text-gray-400">Consommation</p>
-                                                    <p className="font-medium text-gray-700 dark:text-gray-300">{thermo.consomation || 0} W</p>
+                                                    <p className="font-medium text-gray-700 dark:text-gray-300">{thermostat.consomation || 0} W</p>
                                                 </div>
                                                 <div className="space-y-1">
                                                     <p className="text-xs text-gray-500 dark:text-gray-400">Maintenance</p>
-                                                    <p className={`text-xs font-medium ${thermo.maintenance === 'fonctionnel'
+                                                    <p className={`text-xs font-medium ${thermostat.maintenance === 'fonctionnel'
                                                         ? 'text-green-600 dark:text-green-400'
                                                         : 'text-red-600 dark:text-red-400'
                                                         }`}>
-                                                        {thermo.maintenance === 'fonctionnel' ? 'Opérationnel' : 'En panne'}
+                                                        {thermostat.maintenance === 'fonctionnel' ? 'Opérationnel' : 'En panne'}
                                                     </p>
                                                 </div>
                                             </div>
@@ -532,24 +682,104 @@ const Thermostat: React.FC<ThermostatProps> = ({ objects, onAddObject, onStatusC
                                             <div className="mt-3">
                                                 <div className="flex justify-between items-center mb-1">
                                                     <p className="text-xs text-gray-500 dark:text-gray-400">Durabilité</p>
-                                                    <p className="text-xs font-medium text-gray-700 dark:text-gray-300">{thermo.durabilité || 0}%</p>
+                                                    <div className="flex items-center space-x-2">
+                                                        <p className="text-xs font-medium text-gray-700 dark:text-gray-300">{thermostat.durabilité || 0}%</p>
+                                                        <button
+                                                            onClick={() => handleRepair(thermostat.id)}
+                                                            disabled={(thermostat.durabilité || 0) > 0 && thermostat.maintenance === 'fonctionnel'}
+                                                            className={`flex items-center px-3 py-1.5 text-sm rounded font-medium ${
+                                                                (thermostat.durabilité !== undefined && thermostat.durabilité <= 0) || thermostat.maintenance !== 'fonctionnel'
+                                                                ? 'bg-green-600 hover:bg-green-700 text-white'
+                                                                : 'bg-gray-300 text-gray-600 cursor-default'
+                                                            }`}
+                                                        >
+                                                            <Wrench className="h-4 w-4 mr-1" />
+                                                            {(thermostat.durabilité !== undefined && thermostat.durabilité <= 0) || thermostat.maintenance !== 'fonctionnel' ? 'Réparer' : 'OK'}
+                                                        </button>
+                                                    </div>
                                                 </div>
                                                 <div className="w-full bg-gray-200 dark:bg-gray-700 rounded-full h-1.5">
                                                     <div
-                                                        className={`h-1.5 rounded-full ${(thermo.durabilité || 0) > 70 ? 'bg-green-500' :
-                                                            (thermo.durabilité || 0) > 30 ? 'bg-yellow-500' : 'bg-red-500'
+                                                        className={`h-1.5 rounded-full ${(thermostat.durabilité || 0) > 70 ? 'bg-green-500' :
+                                                            (thermostat.durabilité || 0) > 30 ? 'bg-yellow-500' : 'bg-red-500'
                                                             }`}
-                                                        style={{ width: `${thermo.durabilité || 0}%` }}
+                                                        style={{ width: `${thermostat.durabilité || 0}%` }}
                                                     ></div>
                                                 </div>
                                             </div>
                                         </div>
-
                                     )}
                                 </div>
                             )}
                         </div>
                     ))}
+                </div>
+            )}
+
+            {repairDialogId !== null && (
+                <div className="fixed inset-0 flex items-center justify-center z-50">
+                    <div className="fixed inset-0 bg-black/30" onClick={() => setRepairDialogId(null)}></div>
+                    <div className="bg-white dark:bg-gray-800 rounded-lg shadow-lg p-5 max-w-md w-full mx-4 relative z-10 border-l-4 border-amber-500">
+                        <div className="flex items-start mb-3">
+                            <div className="mr-3 mt-0.5">
+                                <AlertTriangle className="h-5 w-5 text-amber-500" />
+                            </div>
+                            <div className="flex-1">
+                                <h3 className="text-lg font-medium text-gray-900 dark:text-white mb-1">
+                                    Appareil en panne
+                                </h3>
+                                <p className="text-gray-600 dark:text-gray-300 mb-4">
+                                    Cet appareil est en panne. Vous devez le réparer avant de pouvoir l'utiliser à nouveau.
+                                </p>
+                                <div className="flex justify-end space-x-3">
+                                    <button
+                                        onClick={() => setRepairDialogId(null)}
+                                        className="px-4 py-2 text-sm bg-gray-100 hover:bg-gray-200 text-gray-700 dark:bg-gray-700 dark:hover:bg-gray-600 dark:text-gray-300 rounded"
+                                    >
+                                        Annuler
+                                    </button>
+                                    <button
+                                        onClick={() => {
+                                            handleRepair(repairDialogId);
+                                            setRepairDialogId(null);
+                                        }}
+                                        className="px-4 py-2 text-sm bg-green-600 hover:bg-green-700 text-white rounded flex items-center"
+                                    >
+                                        <Wrench className="h-4 w-4 mr-1.5" /> Réparer maintenant
+                                    </button>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            )}
+
+            {/* Replace the repair in progress modal with the new UI */}
+            {repairInProgress !== null && (
+                <div className="fixed inset-0 flex items-center justify-center z-50">
+                    <div className="fixed inset-0 bg-black/15" onClick={() => {}}></div>
+                    <div className="bg-white dark:bg-gray-800 rounded-lg shadow-lg p-6 max-w-xs w-full mx-4 relative z-10">
+                        <div className="flex flex-col items-center">
+                            <div className="mb-4 w-40 h-40 filter grayscale brightness-[0.6] hue-rotate-210">
+                                <DotLottieReact
+                                    src="https://lottie.host/bab12c80-4bd7-4261-b763-0f7ec72a2834/LE6JcmwrGJ.lottie"
+                                    loop
+                                    autoplay
+                                />
+                            </div>
+                            
+                            <div className="w-full bg-gray-200 dark:bg-gray-700 rounded-full h-2 mb-2">
+                                <div
+                                    className="h-2 rounded-full bg-green-500 transition-all duration-1000 ease-linear"
+                                    style={{ width: `${repairProgress}%` }}
+                                ></div>
+                            </div>
+                            
+                            <div className="flex justify-center items-center mt-1">
+                                <p className="text-sm font-medium text-gray-600 dark:text-gray-300">{repairCountdown}s</p>
+                            </div>
+                        </div>
+                    </div>
                 </div>
             )}
 

@@ -135,6 +135,9 @@ export default function ObjectDashboard() {
         newDurability = Math.max(0, objectToUpdate.durabilité - Math.floor(Math.random() * 10 + 1));
       }
 
+      // Ensure durability is capped between 0-100
+      newDurability = Math.max(0, Math.min(100, newDurability));
+
       // Si la durabilité atteint 0, on le passe en panne
       const newMaintenance: MaintenanceState = newDurability <= 0 ? "en panne" : objectToUpdate.maintenance;
 
@@ -346,35 +349,61 @@ export default function ObjectDashboard() {
                 <p><strong>Maintenance</strong> : <span className={obj.maintenance === "en panne" ? "text-red-600 font-semibold" : "text-green-600"}>{obj.maintenance}</span></p>
               </div>
 
-              <div className="mb-4">
-                <div className="mb-1 flex justify-between">
-                  <span className="text-sm text-gray-300">Durabilité</span>
-                  <span className={`text-sm font-medium ${obj.durabilité > 70 ? "text-green-400" :
-                    obj.durabilité > 30 ? "text-yellow-400" :
-                      "text-red-400"
+              <div className="mb-4 border-t border-b border-gray-100 py-3">
+                <div className="flex justify-between items-center mb-2">
+                  <div className="flex items-center">
+                    <span className="text-sm font-medium text-gray-600">Durabilité:</span>
+                    <span className={`ml-2 text-sm font-bold ${
+                      obj.durabilité > 70 ? "text-green-600" :
+                      obj.durabilité > 30 ? "text-yellow-600" :
+                      "text-red-600"
                     }`}>{obj.durabilité}%</span>
+                  </div>
+                  
+                  <button
+                    onClick={() => repairObject(obj.id)}
+                    disabled={obj.durabilité > 0 && obj.maintenance === "fonctionnel"}
+                    className={`px-3 py-1 rounded text-white text-xs flex items-center ${
+                      obj.durabilité <= 0 || obj.maintenance !== "fonctionnel" 
+                      ? "bg-green-500 hover:bg-green-600" 
+                      : "bg-gray-400"
+                    }`}
+                  >
+                    <svg xmlns="http://www.w3.org/2000/svg" className="h-3 w-3 mr-1" viewBox="0 0 20 20" fill="currentColor">
+                      <path fillRule="evenodd" d="M11.49 3.17c-.38-1.56-2.6-1.56-2.98 0a1.532 1.532 0 01-2.286.948c-1.372-.836-2.942.734-2.106 2.106.54.886.061 2.042-.947 2.287-1.561.379-1.561 2.6 0 2.978a1.532 1.532 0 01.947 2.287c-.836 1.372.734 2.942 2.106 2.106a1.532 1.532 0 012.287.947c.379 1.561 2.6 1.561 2.978 0a1.533 1.533 0 012.287-.947c1.372.836 2.942-.734 2.106-2.106a1.533 1.533 0 01.947-2.287c1.561-.379 1.561-2.6 0-2.978a1.532 1.532 0 01-.947-2.287c.836-1.372-.734-2.942-2.106-2.106a1.532 1.532 0 01-2.287-.947zM10 13a3 3 0 100-6 3 3 0 000 6z" clipRule="evenodd" />
+                    </svg>
+                    {obj.durabilité <= 0 || obj.maintenance !== "fonctionnel" ? "Réparer" : "OK"}
+                  </button>
                 </div>
-                <div className="w-full bg-gray-700/50 rounded-full h-2.5">
+                
+                <div className="w-full bg-gray-200 rounded-full h-2.5">
                   <div
-                    className={`h-2.5 rounded-full ${obj.durabilité > 70 ? "bg-green-600" :
-                      obj.durabilité > 30 ? "bg-yellow-600" :
-                        "bg-red-600"
-                      }`}
+                    className={`h-2.5 rounded-full transition-all ${
+                      obj.durabilité > 70 ? "bg-green-500" :
+                      obj.durabilité > 30 ? "bg-yellow-500" :
+                      "bg-red-500"
+                    }`}
                     style={{ width: `${obj.durabilité}%` }}
                   ></div>
                 </div>
+                
+                {(obj.durabilité <= 0 || obj.maintenance !== "fonctionnel") && (
+                  <div className="mt-2 text-center text-red-500 text-xs font-medium">
+                    Cet appareil nécessite une réparation
+                  </div>
+                )}
               </div>
 
               <div className="flex flex-wrap gap-2 mt-4">
                 {obj.durabilité <= 0 || obj.maintenance === "en panne" ? (
                   <button
                     onClick={() => repairObject(obj.id)}
-                    className="flex-1 bg-blue-600/70 hover:bg-blue-700 text-white py-2 px-4 rounded-lg shadow-md transition-colors flex items-center justify-center"
+                    className="w-full py-2 px-4 rounded-lg shadow-md bg-green-500 hover:bg-green-600 text-white flex items-center justify-center"
                   >
                     <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5 mr-1.5" viewBox="0 0 20 20" fill="currentColor">
                       <path fillRule="evenodd" d="M11.49 3.17c-.38-1.56-2.6-1.56-2.98 0a1.532 1.532 0 01-2.286.948c-1.372-.836-2.942.734-2.106 2.106.54.886.061 2.042-.947 2.287-1.561.379-1.561 2.6 0 2.978a1.532 1.532 0 01.947 2.287c-.836 1.372.734 2.942 2.106 2.106a1.532 1.532 0 012.287.947c.379 1.561 2.6 1.561 2.978 0a1.533 1.533 0 012.287-.947c1.372.836 2.942-.734 2.106-2.106a1.533 1.533 0 01.947-2.287c1.561-.379 1.561-2.6 0-2.978a1.532 1.532 0 01-.947-2.287c.836-1.372-.734-2.942-2.106-2.106a1.532 1.532 0 01-2.287-.947zM10 13a3 3 0 100-6 3 3 0 000 6z" clipRule="evenodd" />
                     </svg>
-                    Réparer
+                    Réparer l'appareil
                   </button>
                 ) : (
                   <button
@@ -404,11 +433,12 @@ export default function ObjectDashboard() {
 
                 <button
                   onClick={() => deleteObject(obj.id)}
-                  className="px-3 py-1 mt-1 rounded text-white bg-gray-500 hover:bg-gray-600 text-sm"
+                  className="w-full py-2 px-4 rounded-lg text-white bg-gray-500 hover:bg-gray-600 flex items-center justify-center"
                 >
-                  <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5" viewBox="0 0 20 20" fill="currentColor">
+                  <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5 mr-1.5" viewBox="0 0 20 20" fill="currentColor">
                     <path fillRule="evenodd" d="M9 2a1 1 0 00-.894.553L7.382 4H4a1 1 0 000 2v10a2 2 0 002 2h8a2 2 0 002-2V6a1 1 0 100-2h-3.382l-.724-1.447A1 1 0 0011 2H9zM7 8a1 1 0 012 0v6a1 1 0 11-2 0V8zm5-1a1 1 0 00-1 1v6a1 1 0 102 0V8a1 1 0 00-1-1z" clipRule="evenodd" />
                   </svg>
+                  Supprimer
                 </button>
               </div>
             </div>

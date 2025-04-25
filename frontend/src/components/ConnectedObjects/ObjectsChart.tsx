@@ -57,7 +57,7 @@ const ObjectsChart: React.FC<{ onAddObject?: AddObjectCallback }> = ({ onAddObje
         // Set up interval for periodic refresh (every second)
         intervalRef.current = setInterval(() => {
             fetchObjects();
-        }, 1000);
+        }, 5000);
 
         // Clean up interval on component unmount
         return () => {
@@ -92,7 +92,7 @@ const ObjectsChart: React.FC<{ onAddObject?: AddObjectCallback }> = ({ onAddObje
             camera: objects.filter(obj => obj.type === 'camera').length,
             thermostat: objects.filter(obj => obj.type === 'thermostat').length,
             ventilation: objects.filter(obj => obj.type === 'ventilation').length,
-            paneauAffichage: objects.filter(obj => obj.type === "panneau d'affichage").length,
+            paneauAffichage: objects.filter(obj => obj.type === "paneau d'affichage").length,
         }
     };
 
@@ -192,76 +192,113 @@ const ObjectsChart: React.FC<{ onAddObject?: AddObjectCallback }> = ({ onAddObje
             </div>
 
             <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-                <div className="space-y-2">
+                <div className="space-y-3">
                     <h4 className="text-xs font-medium text-gray-600 dark:text-gray-400 uppercase mb-2">Distribution par type</h4>
-                    <div className="flex justify-between gap-2 items-center">
-                        <div className="flex items-center">
+                    
+                    {/* Porte */}
+                    <div className="flex items-center">
+                        <div className="w-32 flex items-center">
                             <DoorClosed className="h-4 w-4 text-blue-600 dark:text-blue-400 mr-2" />
                             <span className="text-sm text-gray-600 dark:text-gray-300">Portes</span>
                         </div>
-                        <div className="w-2/3 bg-gray-200 dark:bg-gray-700 rounded-full h-2">
+                        <div className="flex-1 bg-gray-200 dark:bg-gray-700 rounded-full h-2 mx-3">
                             <div
                                 className="bg-blue-600 h-2 rounded-full"
                                 style={{ width: `${stats.total ? (stats.byType.porte / stats.total) * 100 : 0}%` }}
                             ></div>
                         </div>
-                        <span className="text-sm font-medium text-gray-700 dark:text-gray-200">{stats.byType.porte}</span>
+                        <div className="w-10 text-right">
+                            <span className="text-sm font-medium text-gray-700 dark:text-gray-200">{stats.byType.porte}</span>
+                        </div>
                     </div>
-                    <div className="flex justify-between gap-2 items-center">
-                        <div className="flex items-center">
+                    
+                    {/* Lumière */}
+                    <div className="flex items-center">
+                        <div className="w-32 flex items-center">
                             <Lightbulb className="h-4 w-4 text-yellow-600 dark:text-yellow-400 mr-2" />
                             <span className="text-sm text-gray-600 dark:text-gray-300">Lumières</span>
                         </div>
-                        <div className="w-2/3 bg-gray-200 dark:bg-gray-700 rounded-full h-2">
+                        <div className="flex-1 bg-gray-200 dark:bg-gray-700 rounded-full h-2 mx-3">
                             <div
                                 className="bg-yellow-400 h-2 rounded-full"
                                 style={{ width: `${stats.total ? (stats.byType.lumiere / stats.total) * 100 : 0}%` }}
                             ></div>
                         </div>
-                        <span className="text-sm font-medium text-gray-700 dark:text-gray-200">{stats.byType.lumiere}</span>
+                        <div className="w-10 text-right">
+                            <span className="text-sm font-medium text-gray-700 dark:text-gray-200">{stats.byType.lumiere}</span>
+                        </div>
                     </div>
-                </div>
-
-                <div className="space-y-2">
-
-                    <div className="flex justify-between gap-2 items-center">
-                        <div className="flex items-center">
+                    
+                    {/* Camera */}
+                    <div className="flex items-center">
+                        <div className="w-32 flex items-center">
                             <Video className="h-4 w-4 text-purple-600 dark:text-purple-400 mr-2" />
                             <span className="text-sm text-gray-600 dark:text-gray-300">Caméras</span>
                         </div>
-                        <div className="w-2/3 bg-gray-200 dark:bg-gray-700 rounded-full h-2">
+                        <div className="flex-1 bg-gray-200 dark:bg-gray-700 rounded-full h-2 mx-3">
                             <div
                                 className="bg-purple-600 h-2 rounded-full"
                                 style={{ width: `${stats.total ? (stats.byType.camera / stats.total) * 100 : 0}%` }}
                             ></div>
                         </div>
-                        <span className="text-sm font-medium text-gray-700 dark:text-gray-200">{stats.byType.camera}</span>
+                        <div className="w-10 text-right">
+                            <span className="text-sm font-medium text-gray-700 dark:text-gray-200">{stats.byType.camera}</span>
+                        </div>
                     </div>
-                    <div className="flex justify-between gap-2 items-center">
-                        <div className="flex items-center">
+                </div>
+
+                <div className="space-y-3">
+                    <h4 className="text-xs font-medium text-gray-600 dark:text-gray-400 uppercase mb-2 invisible">Distribution par type</h4>
+                    
+                    {/* Thermostat */}
+                    <div className="flex items-center">
+                        <div className="w-32 flex items-center">
                             <Thermometer className="h-4 w-4 text-red-600 dark:text-red-400 mr-2" />
                             <span className="text-sm text-gray-600 dark:text-gray-300">Thermostat</span>
                         </div>
-                        <div className="w-2/3 bg-gray-200 dark:bg-gray-700 rounded-full h-2">
+                        <div className="flex-1 bg-gray-200 dark:bg-gray-700 rounded-full h-2 mx-3">
                             <div
                                 className="bg-red-600 h-2 rounded-full"
                                 style={{ width: `${stats.total ? (stats.byType.thermostat / stats.total) * 100 : 0}%` }}
                             ></div>
                         </div>
-                        <span className="text-sm font-medium text-gray-700 dark:text-gray-200">{stats.byType.thermostat}</span>
+                        <div className="w-10 text-right">
+                            <span className="text-sm font-medium text-gray-700 dark:text-gray-200">{stats.byType.thermostat}</span>
+                        </div>
                     </div>
-                    <div className="flex justify-between gap-2 items-center">
-                        <div className="flex items-center">
+                    
+                    {/* Ventilation */}
+                    <div className="flex items-center">
+                        <div className="w-32 flex items-center">
+                            <Wind className="h-4 w-4 text-green-600 dark:text-green-400 mr-2" />
+                            <span className="text-sm text-gray-600 dark:text-gray-300">Ventilation</span>
+                        </div>
+                        <div className="flex-1 bg-gray-200 dark:bg-gray-700 rounded-full h-2 mx-3">
+                            <div
+                                className="bg-green-600 h-2 rounded-full"
+                                style={{ width: `${stats.total ? (stats.byType.ventilation / stats.total) * 100 : 0}%` }}
+                            ></div>
+                        </div>
+                        <div className="w-10 text-right">
+                            <span className="text-sm font-medium text-gray-700 dark:text-gray-200">{stats.byType.ventilation}</span>
+                        </div>
+                    </div>
+                    
+                    {/* Panneau */}
+                    <div className="flex items-center">
+                        <div className="w-32 flex items-center">
                             <MonitorPlay className="h-4 w-4 text-indigo-600 dark:text-indigo-400 mr-2" />
                             <span className="text-sm text-gray-600 dark:text-gray-300">Panneaux</span>
                         </div>
-                        <div className="w-2/3 bg-gray-200 dark:bg-gray-700 rounded-full h-2">
+                        <div className="flex-1 bg-gray-200 dark:bg-gray-700 rounded-full h-2 mx-3">
                             <div
                                 className="bg-indigo-600 h-2 rounded-full"
                                 style={{ width: `${stats.total ? (stats.byType.paneauAffichage / stats.total) * 100 : 0}%` }}
                             ></div>
                         </div>
-                        <span className="text-sm font-medium text-gray-700 dark:text-gray-200">{stats.byType.paneauAffichage}</span>
+                        <div className="w-10 text-right">
+                            <span className="text-sm font-medium text-gray-700 dark:text-gray-200">{stats.byType.paneauAffichage}</span>
+                        </div>
                     </div>
                 </div>
             </div>
