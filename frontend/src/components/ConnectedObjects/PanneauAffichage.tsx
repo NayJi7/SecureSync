@@ -108,7 +108,7 @@ const PanneauAffichage: React.FC<PanneauAffichageProps> = ({ objects, onStatusCh
         setNewName(object.nom);
         setNewX(object.coord_x);
         setNewY(object.coord_y);
-        setNewConsumption(object.consomation || 0);
+        setNewConsumption(object.consommation || 0);
         setNewConnection(object.connection as 'wifi' | 'filaire' || 'wifi');
         setActiveMenu(null);
     };
@@ -171,7 +171,7 @@ const PanneauAffichage: React.FC<PanneauAffichageProps> = ({ objects, onStatusCh
                 nom: newName,
                 coord_x: newX,
                 coord_y: newY,
-                consomation: newConsumption,
+                consommation: newConsumption,
                 connection: newConnection
             });
 
@@ -568,7 +568,7 @@ const PanneauAffichage: React.FC<PanneauAffichageProps> = ({ objects, onStatusCh
                                         </div>
                                         <div className="space-y-1">
                                             <p className="text-xs text-gray-500 dark:text-gray-400">Consommation</p>
-                                            <p className="font-medium text-gray-700 dark:text-gray-300">{panneau.consomation || 0} W</p>
+                                            <p className="font-medium text-gray-700 dark:text-gray-300">{panneau.consommation || 0} W</p>
                                         </div>
                                         <div className="space-y-1">
                                             <p className="text-xs text-gray-500 dark:text-gray-400">Maintenance</p>

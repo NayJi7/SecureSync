@@ -66,7 +66,8 @@ def create_object(request):
                 nom=obj.nom,
                 etat=obj.etat,
                 commentaire="Création",
-                user=request.user  # Ajouter l'utilisateur courant
+                user=request.user,  # Ajouter l'utilisateur courant
+                prison_id=obj.Prison_id  # Ajouter l'ID de la prison de l'objet
             )
 
             return Response(serializer.data, status=status.HTTP_201_CREATED)
@@ -91,7 +92,8 @@ class ObjectViewSet(viewsets.ModelViewSet):
             nom=instance.nom,
             etat=instance.etat,
             commentaire="Création",
-            user=self.request.user
+            user=self.request.user,
+            prison_id=instance.Prison_id
         )
     
     def perform_update(self, serializer):
@@ -109,7 +111,8 @@ class ObjectViewSet(viewsets.ModelViewSet):
                 nom=instance.nom,
                 etat=instance.etat,
                 commentaire=f"État changé de {old_etat} à {instance.etat}",
-                user=self.request.user
+                user=self.request.user,
+                prison_id=instance.Prison_id
             )
     
     def perform_destroy(self, instance):
@@ -120,7 +123,8 @@ class ObjectViewSet(viewsets.ModelViewSet):
             nom=instance.nom,
             etat=instance.etat,
             commentaire="Suppression",
-            user=self.request.user
+            user=self.request.user,
+            prison_id=instance.Prison_id
         )
         instance.delete()
 

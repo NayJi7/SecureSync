@@ -22,6 +22,7 @@ urlpatterns = [
     path('api/profile/update/', views.update_profile_api_view, name='update_profile_api'),
     path('api/verify-password/', views.verify_password_view, name='verify_password'),
     path('api/staff/', StaffView.as_view(), name='staff-list'),  
+    path('api/staff/<str:username>/', StaffView.as_view(), name='staff-detail'),
     path('api/account/delete/<str:username>/', views.delete_account, name='delete-account'),
     path('api/user/add_point/', views.add_point),
     path('api/update-user-prison/', views.update_user_prison, name='update-user-prison'),

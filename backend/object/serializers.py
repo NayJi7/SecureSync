@@ -22,5 +22,5 @@ class ObjetLogSerializer(serializers.ModelSerializer):
     
     class Meta:
         model = ObjetLog
-        fields = ['id', 'objet', 'type', 'nom', 'etat', 'date', 'commentaire', 'user', 'user_info']
+        fields = ['id', 'objet', 'type', 'nom', 'etat', 'date', 'commentaire', 'prison_id', 'user', 'user_info']
         read_only_fields = ['date']

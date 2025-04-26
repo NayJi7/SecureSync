@@ -151,7 +151,7 @@ const Door: React.FC<DoorProps> = ({ objects, onAddObject, onStatusChange, addPo
         setNewName(object.nom);
         setNewX(object.coord_x);
         setNewY(object.coord_y);
-        setNewConsumption(object.consomation || 0);
+        setNewConsumption(object.consommation || 0);
         setNewConnection(object.connection as 'wifi' | 'filaire' || 'wifi');
         // Close any open menus
         setActiveMenu(null);
@@ -182,7 +182,7 @@ const Door: React.FC<DoorProps> = ({ objects, onAddObject, onStatusChange, addPo
                 nom: newName,
                 coord_x: newX,
                 coord_y: newY,
-                consomation: newConsumption,
+                consommation: newConsumption,
                 connection: newConnection
             });
 
@@ -579,7 +579,7 @@ const Door: React.FC<DoorProps> = ({ objects, onAddObject, onStatusChange, addPo
                                                 </div>
                                                 <div className="space-y-1">
                                                     <p className="text-xs text-gray-500 dark:text-gray-400">Consommation</p>
-                                                    <p className="font-medium text-gray-700 dark:text-gray-300">{door.consomation || 0} W</p>
+                                                    <p className="font-medium text-gray-700 dark:text-gray-300">{door.consommation || 0} W</p>
                                                 </div>
                                                 <div className="space-y-1">
                                                     <p className="text-xs text-gray-500 dark:text-gray-400">Maintenance</p>

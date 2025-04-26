@@ -140,7 +140,7 @@ const ProfileModal: React.FC<ProfileModalProps> = ({
                 'Authorization': `Bearer ${token}` 
               }
             });
-            console.log("API response data:", response.data);
+            // console.log("API response data:", response.data);
             setProfile(response.data);
             setEditedProfile(response.data);
             
@@ -670,4 +670,3 @@ const ProfileModal: React.FC<ProfileModalProps> = ({
 };
 
 export default ProfileModal;
-console.log('Bouton cliqué');

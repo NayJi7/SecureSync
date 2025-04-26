@@ -148,7 +148,7 @@ const Light: React.FC<LightProps> = ({ objects, onAddObject, onStatusChange, add
         setNewX(object.coord_x);
         setNewY(object.coord_y);
         setNewBrightness(Number(object.valeur_actuelle) || 100);
-        setNewConsumption(object.consomation || 0);
+        setNewConsumption(object.consommation || 0);
         setNewConnection(object.connection as 'wifi' | 'filaire' || 'wifi');
         // Close any open menus
         setActiveMenu(null);
@@ -184,7 +184,7 @@ const Light: React.FC<LightProps> = ({ objects, onAddObject, onStatusChange, add
                 nom: newName,
                 coord_x: newX,
                 coord_y: newY,
-                consomation: newConsumption,
+                consommation: newConsumption,
                 connection: newConnection,
                 valeur_actuelle: newBrightness // Using valeur_actuelle to store brightness
             });
@@ -572,7 +572,7 @@ const Light: React.FC<LightProps> = ({ objects, onAddObject, onStatusChange, add
                                                 </div>
                                                 <div className="space-y-1">
                                                     <p className="text-xs text-gray-500 dark:text-gray-400">Consommation</p>
-                                                    <p className="font-medium text-gray-700 dark:text-gray-300">{light.consomation || 0} W</p>
+                                                    <p className="font-medium text-gray-700 dark:text-gray-300">{light.consommation || 0} W</p>
                                                 </div>
                                                 <div className="space-y-1">
                                                     <p className="text-xs text-gray-500 dark:text-gray-400">Maintenance</p>

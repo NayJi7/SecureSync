@@ -52,27 +52,11 @@ export default function PrisonSelectionPage() {
       try {
         const token = localStorage.getItem('sessionToken');
         
-        // Essayer de charger depuis l'API
-        try {
-          const response = await axios.get('http://localhost:8000/api/prisons/', {
-            headers: { 'Authorization': `Bearer ${token}` }
-          });
-          
-          if (response.data && Array.isArray(response.data)) {
-            setPrisons(response.data);
-            setLoading(false);
-            return;
-          }
-        } catch (apiError) {
-          console.warn("Erreur API pour charger les prisons, utilisation des données de test", apiError);
-        }
-        
-        // Données de test au cas où l'API n'est pas prête
         setPrisons([
           { id: "paris", name: "Centre Pénitentiaire de Paris", location: "Paris", detainees_count: 876, security_level: "Haute" },
+          { id: "cergy", name: "Centre Pénitentiaire de Cergy", location: "Cergy", detainees_count: 421, security_level: "Moyenne" },
           { id: "lyon", name: "Centre Pénitentiaire de Lyon", location: "Lyon", detainees_count: 542, security_level: "Moyenne" },
           { id: "marseille", name: "Centre Pénitentiaire de Marseille", location: "Marseille", detainees_count: 653, security_level: "Haute" },
-          { id: "cergy", name: "Centre Pénitentiaire de Cergy", location: "Cergy", detainees_count: 421, security_level: "Moyenne" },
         ]);
         setLoading(false);
         
@@ -89,7 +73,7 @@ export default function PrisonSelectionPage() {
   const handleSelectPrison = async (prisonId: string) => {
     try {
         // Stocker l'ID de la prison sélectionnée localement
-        localStorage.setItem('selectedPrison', prisonId);
+        localStorage.setItem('userPrison', prisonId);
         
         // Mettre à jour le Prison_id dans la base de données
         const token = localStorage.getItem('sessionToken');

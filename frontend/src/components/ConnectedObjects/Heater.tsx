@@ -111,7 +111,7 @@ const Heater: React.FC<HeaterProps> = ({ objects, onAddObject, onStatusChange, a
         setNewX(object.coord_x);
         setNewY(object.coord_y);
         setNewTemperature(Number(object.valeur_actuelle) || 20);
-        setNewConsumption(object.consomation || 0);
+        setNewConsumption(object.consommation || 0);
         setNewConnection(object.connection as 'wifi' | 'filaire' || 'wifi');
         // Close any open menus
         setActiveMenu(null);
@@ -148,7 +148,7 @@ const Heater: React.FC<HeaterProps> = ({ objects, onAddObject, onStatusChange, a
                 coord_x: newX,
                 coord_y: newY,
                 valeur_actuelle: newTemperature,
-                consomation: newConsumption,
+                consommation: newConsumption,
                 connection: newConnection
             });
 
@@ -513,7 +513,7 @@ const Heater: React.FC<HeaterProps> = ({ objects, onAddObject, onStatusChange, a
                                                 </div>
                                                 <div className="space-y-1">
                                                     <p className="text-xs text-gray-500 dark:text-gray-400">Consommation</p>
-                                                    <p className="font-medium text-gray-700 dark:text-gray-300">{heater.consomation || 0} W</p>
+                                                    <p className="font-medium text-gray-700 dark:text-gray-300">{heater.consommation || 0} W</p>
                                                 </div>
                                                 <div className="space-y-1">
                                                     <p className="text-xs text-gray-500 dark:text-gray-400">Maintenance</p>

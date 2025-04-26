@@ -133,7 +133,7 @@ const Ventilation: React.FC<VentilationProps> = ({ objects, onAddObject, onStatu
         setNewName(object.nom);
         setNewX(object.coord_x);
         setNewY(object.coord_y);
-        setNewConsumption(object.consomation || 0);
+        setNewConsumption(object.consommation || 0);
         setNewConnection(object.connection as 'wifi' | 'filaire' || 'wifi');
         setActiveMenu(null);
     };
@@ -172,7 +172,7 @@ const Ventilation: React.FC<VentilationProps> = ({ objects, onAddObject, onStatu
                 nom: newName,
                 coord_x: newX,
                 coord_y: newY,
-                consomation: newConsumption,
+                consommation: newConsumption,
                 connection: newConnection
             });
 
@@ -357,7 +357,7 @@ const Ventilation: React.FC<VentilationProps> = ({ objects, onAddObject, onStatu
                     <div className="bg-green-100 dark:bg-green-900/30 p-2 rounded-lg mr-3">
                         <Wind className="h-5 w-5 text-green-600 dark:text-green-400" />
                     </div>
-                    <h3 className="text-lg font-semibold text-gray-900 dark:text-white">Ventilation</h3>
+                    <h3 className="text-lg font-semibold text-gray-900 dark:text-white">Ventilations</h3>
                 </div>
                 <div className="flex items-center space-x-2">
                     <span className="bg-green-100 text-green-800 text-xs font-medium px-2.5 py-1 rounded dark:bg-green-900 dark:text-green-300">
@@ -583,7 +583,7 @@ const Ventilation: React.FC<VentilationProps> = ({ objects, onAddObject, onStatu
                                                 </div>
                                                 <div className="space-y-1">
                                                     <p className="text-xs text-gray-500 dark:text-gray-400">Consommation</p>
-                                                    <p className="font-medium text-gray-700 dark:text-gray-300">{ventilation.consomation || 0} W</p>
+                                                    <p className="font-medium text-gray-700 dark:text-gray-300">{ventilation.consommation || 0} W</p>
                                                 </div>
                                                 <div className="space-y-1">
                                                     <p className="text-xs text-gray-500 dark:text-gray-400">Maintenance</p>

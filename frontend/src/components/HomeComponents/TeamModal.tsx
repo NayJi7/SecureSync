@@ -2,11 +2,13 @@ import React, { useState, useEffect } from 'react';
 import { Modal, ModalBody, ModalHeader } from "flowbite-react";
 import axios from 'axios';
 import { useDevice } from '@/hooks/use-device';
+import TeamEditModal from "./TeamEditModal";
 
 // Définir le type pour les membres du personnel
 interface StaffMember {
   id?: string; // Optionnel car peut ne pas être inclus dans le sérialiseur
   username: string;
+  email?: string;
   first_name: string;
   last_name: string;
   sexe: string;
@@ -15,6 +17,7 @@ interface StaffMember {
   role: string;
   section: string;
   prison: string; // "p" minuscule pour correspondre au sérialiseur
+  points?: number; // Points de l'employé (optionnel)
 }
 
 // Mapping objet pour l'affichage français des rôles
@@ -65,6 +68,15 @@ const StaffModal: React.FC<StaffModalProps> = ({ isOpen, onClose, prisonId }) =>
   });
   const { isMobile } = useDevice();
   
+  // État pour le modal d'édition
+  const [editModal, setEditModal] = useState<{
+    isOpen: boolean;
+    member: StaffMember | null;
+  }>({
+    isOpen: false,
+    member: null
+  });
+  
   // États pour le formulaire d'ajout de membre
   const [showAddMemberForm, setShowAddMemberForm] = useState<boolean>(false);
   const [formData, setFormData] = useState<NewMemberFormData>({
@@ -83,10 +95,12 @@ const StaffModal: React.FC<StaffModalProps> = ({ isOpen, onClose, prisonId }) =>
   const [formError, setFormError] = useState<string | null>(null);
   const [formSuccess, setFormSuccess] = useState<string | null>(null);
   
+  
   // États pour l'affichage des mots de passe
   const [showPassword1, setShowPassword1] = useState<boolean>(false);
   const [showPassword2, setShowPassword2] = useState<boolean>(false);
   
+
   // État pour le système de tri
   const [sortCriteria, setSortCriteria] = useState<string>("none"); // Valeurs possibles: "none", "role", "section"
 
@@ -112,15 +126,15 @@ const StaffModal: React.FC<StaffModalProps> = ({ isOpen, onClose, prisonId }) =>
       ]);
       
       // Définir les membres du staff
-      console.log('Réponse API staff:', staffResponse.data);
+      // console.log('Réponse API staff:', staffResponse.data);
       if (Array.isArray(staffResponse.data)) {
         // Vérifier si les utilisateurs ont une date d'embauche
-        console.log('Premier utilisateur:', staffResponse.data[0]);
+        // console.log('Premier utilisateur:', staffResponse.data[0]);
         setStaff(staffResponse.data);
       } else if (staffResponse.data && typeof staffResponse.data === 'object') {
         const dataField = Object.keys(staffResponse.data).find(key => Array.isArray(staffResponse.data[key]));
         if (dataField) {
-          console.log('Premier utilisateur:', staffResponse.data[dataField][0]);
+          // console.log('Premier utilisateur:', staffResponse.data[dataField][0]);
           setStaff(staffResponse.data[dataField]);
         } else {
           setError('Format de données inattendu reçu du serveur');
@@ -143,6 +157,14 @@ const StaffModal: React.FC<StaffModalProps> = ({ isOpen, onClose, prisonId }) =>
       fetchStaffData();
     }
   }, [isOpen]);
+  
+  // Debug des valeurs
+  useEffect(() => {
+    if (currentUser) {
+      // console.log('currentUser:', currentUser);
+      // console.log('isAdmin:', currentUser.role === 'admin');
+    }
+  }, [currentUser]);
 
   // Gérer la suppression d'un utilisateur
   const handleOpenDeleteModal = (username: string, userId: string) => {
@@ -164,6 +186,21 @@ const StaffModal: React.FC<StaffModalProps> = ({ isOpen, onClose, prisonId }) =>
   const handleUserDeleted = () => {
     // Rafraîchir la liste après suppression
     fetchStaffData();
+  };
+  
+  // Fonctions pour gérer le modal d'édition
+  const handleOpenEditModal = (member: StaffMember) => {
+    setEditModal({
+      isOpen: true,
+      member
+    });
+  };
+  
+  const handleCloseEditModal = () => {
+    setEditModal({
+      isOpen: false,
+      member: null
+    });
   };
   
   // Handlers pour le formulaire d'ajout de membre
@@ -456,7 +493,22 @@ const StaffModal: React.FC<StaffModalProps> = ({ isOpen, onClose, prisonId }) =>
             <p className="text-sm text-gray-500">@{member.username}</p>
           </div>
             
-          <div className="flex-grow flex justify-end items-center">
+          <div className="flex-grow flex justify-end items-center space-x-2">
+              {/* Règles d'édition:
+            - Admins et gérants peuvent modifier les infos des membres */}
+
+              {(currentUser?.role === 'admin' || currentUser?.role === 'gerant') && currentUser?.username !== member.username && (
+                <button
+                  onClick={() => handleOpenEditModal(member)}
+                  className="text-blue-500 hover:text-blue-700 cursor-pointer"
+                  title="Modifier"
+                >
+                  <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M15.232 5.232l3.536 3.536m-2.036-5.036a2.5 2.5 0 113.536 3.536L6.5 21.036H3v-3.572L16.732 3.732z" />
+                  </svg>
+                </button>
+              )}
+
               {/* Règles de suppression:
             - Admins peuvent supprimer tout le monde sauf eux-mêmes
             - Gérants peuvent supprimer gestionnaires et employés
@@ -850,6 +902,17 @@ const StaffModal: React.FC<StaffModalProps> = ({ isOpen, onClose, prisonId }) =>
             </div>
           </div>
         </div>
+      )}
+
+      {/* Afficher le modal d'édition quand il est ouvert */}
+      {editModal.isOpen && editModal.member && (
+        <TeamEditModal
+          isOpen={editModal.isOpen}
+          onClose={handleCloseEditModal}
+          member={editModal.member}
+          onMemberUpdated={fetchStaffData}
+          isAdmin={currentUser?.role === 'admin'}
+        />
       )}
     </Modal>
   );

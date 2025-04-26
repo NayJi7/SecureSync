@@ -143,7 +143,7 @@ export default function HomePage({ children }: { children?: React.ReactNode }) {
       
       // Important : supprimer la classe dark du document lorsqu'on quitte la page
       document.documentElement.classList.remove("dark");
-      console.log("HomePage démontée : mode sombre désactivé");
+      // console.log("HomePage démontée : mode sombre désactivé");
     };
   }, []);
 
@@ -183,8 +183,17 @@ export default function HomePage({ children }: { children?: React.ReactNode }) {
 
       const data: UserPoints = await response.json();
       setPointsTotal(data.new_total);
-      setPointsMessage(`+${points} points ! Total: ${data.new_total} points`);
-      setShowPointsMessage(true);
+      
+      // Vérifier si les notifications sont activées avant d'afficher la popup
+      const notificationsEnabled = localStorage.getItem("notifications") !== "disabled";
+      if (notificationsEnabled) {
+        setPointsMessage(`+${points} points ! Total: ${data.new_total} points`);
+        setShowPointsMessage(true);
+        
+        setTimeout(() => {
+          setShowPointsMessage(false);
+        }, 3000);
+      }
 
       // Met à jour le profil avec les nouveaux points
       if (profile) {
@@ -193,10 +202,6 @@ export default function HomePage({ children }: { children?: React.ReactNode }) {
           points: data.new_total
         });
       }
-
-      setTimeout(() => {
-        setShowPointsMessage(false);
-      }, 3000);
     } catch (err) {
       console.error("Erreur lors de l'ajout de points:", err);
     }
@@ -212,12 +217,12 @@ export default function HomePage({ children }: { children?: React.ReactNode }) {
             'Authorization': `Bearer ${token}`
           }
         });
-        console.log("API response data:", response.data);
+        // console.log("API response data:", response.data);
 
         // Sauvegarder le rôle dans localStorage si présent dans la réponse API
         if (response.data.role) {
           localStorage.setItem('role', response.data.role);
-          console.log('Rôle sauvegardé dans localStorage:', response.data.role);
+          // console.log('Rôle sauvegardé dans localStorage:', response.data.role);
         }
 
         setProfile(response.data);

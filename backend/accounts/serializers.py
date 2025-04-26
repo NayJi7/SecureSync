@@ -94,12 +94,23 @@ from .models import CustomUser
 class StaffSerializer(serializers.ModelSerializer):
     class Meta:
         model = CustomUser
-        fields = ['username', 'first_name', 'last_name', 'sexe', 'date_naissance', 'role', 'section', 'prison']
+        fields = ['username', 'email', 'first_name', 'last_name', 'sexe', 'date_naissance', 'role', 'section', 'prison', 'points']
 
 class UserActivityLogSerializer(serializers.ModelSerializer):
-    user = CustomUserSerializer()
+    user = serializers.SerializerMethodField()
 
     class Meta:
         model = UserActivityLog
         fields = ['id', 'user', 'action', 'timestamp']
+        
+    def get_user(self, obj):
+        if obj.user:
+            return {
+                'id': obj.user.id,
+                'username': obj.user.username,
+                'role': obj.user.role,
+                'prison': obj.user.prison,
+                'full_name': f"{obj.user.first_name} {obj.user.last_name}".strip() or obj.user.username
+            }
+        return None
 

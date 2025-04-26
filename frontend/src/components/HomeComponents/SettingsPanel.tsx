@@ -92,39 +92,8 @@ const SettingsPanel: React.FC = () => {
 
         setProfile(response.data);
 
-        // Récupérer les paramètres depuis l'API
-        try {
-          // Vérifier si l'endpoint existe avant d'essayer de l'appeler
-          const settingsEndpoint = 'http://localhost:8000/api/user/settings/';
-          
-          // On pourrait faire un check préalable avec une requête HEAD ou OPTIONS
-          // mais pour le moment, gérons mieux l'erreur 404 si elle se produit
-          const settingsResponse = await axios.get(settingsEndpoint, {
-            headers: {
-              'Authorization': `Bearer ${token}`
-            }
-          });
-          
-          if (settingsResponse.data) {
-            setSettings(prev => ({
-              ...prev,
-              ...settingsResponse.data,
-            }));
-          }
-        } catch (settingsError: any) {
-          // Vérifier le type d'erreur
-          if (settingsError.response?.status === 404) {
-            console.log("L'endpoint des paramètres utilisateur n'est pas disponible. Utilisation des paramètres locaux.");
-            // Endpoint n'existe pas, on utilise les paramètres locaux sans signaler d'erreur
-          } else {
-            console.warn("Impossible de récupérer les paramètres utilisateur:", settingsError);
-          }
-          // On continue avec les paramètres par défaut dans tous les cas
-        }
-
         setLoading(false);
       } catch (err: any) {
-        console.error("Erreur API:", err);
 
         if (err.response?.status === 401) {
           setError('Session expirée. Veuillez vous reconnecter.');
@@ -170,6 +139,12 @@ const SettingsPanel: React.FC = () => {
       localStorage.setItem("securityAlerts", settings.security_alerts.toString());
       localStorage.setItem("activityAlerts", settings.activity_alerts.toString());
       localStorage.setItem("maintenanceAlerts", settings.maintenance_alerts.toString());
+      
+      // Émettre un événement pour mettre à jour le gestionnaire de session
+      const sessionTimeoutEvent = new CustomEvent("sessionTimeoutChanged", { 
+        detail: { timeout: settings.session_timeout } 
+      });
+      document.dispatchEvent(sessionTimeoutEvent);
 
       // Afficher une notification de succès plus visible (comme celle des erreurs)
       setError(null);
@@ -241,7 +216,6 @@ const SettingsPanel: React.FC = () => {
     { id: "appearance", label: "Apparence", icon: <Moon className="h-5 w-5" /> },
     { id: "notifications", label: "Notifications", icon: <Bell className="h-5 w-5" /> },
     { id: "security", label: "Sécurité", icon: <Shield className="h-5 w-5" /> },
-    { id: "language", label: "Langue", icon: <Globe className="h-5 w-5" /> },
     { id: "privacy", label: "Confidentialité", icon: <Lock className="h-5 w-5" /> }
   ];
 
@@ -293,113 +267,73 @@ const SettingsPanel: React.FC = () => {
           {/* Contenu principal */}
           <div className="md:col-span-3">
             <div className="overflow-x-auto backdrop-blur-md bg-white/10 p-6 rounded-lg border border-gray-200 dark:border-gray-700 shadow-sm">
-              {/* Onglet d'apparence */}
-              {activeSideTab === "appearance" && (
+                {/* Onglet d'apparence */}
+                {activeSideTab === "appearance" && (
                 <div className="space-y-6">
                   <h3 className="text-xl font-semibold text-gray-800 dark:text-white mb-4">Apparence</h3>
                   <div className="space-y-4">
-                    <Card className="p-4">
-                      <div className="flex items-center justify-between">
-                        <Label htmlFor="dark-mode" className="flex items-center gap-2">
-                          <Moon className="h-5 w-5" />
-                          Mode sombre
-                        </Label>
-                        <Switch
-                          id="dark-mode"
-                          checked={settings.dark_mode}
-                          onCheckedChange={(checked) => handleChange("dark_mode", checked)}
-                        />
-                      </div>
-                    </Card>
+                  <Card className="p-4">
+                    <div className="flex items-center justify-between">
+                    <div>
+                      <Label htmlFor="dark-mode" className="flex items-center gap-2">
+                      <Moon className="h-5 w-5" />
+                      Mode sombre
+                      </Label>
+                      <p className="text-sm text-gray-600 dark:text-gray-400 mt-2">
+                      Adapte l'interface avec des couleurs sombres pour réduire la fatigue visuelle et économiser la batterie.
+                      </p>
+                    </div>
+                    <Switch
+                      id="dark-mode"
+                      checked={settings.dark_mode}
+                      onCheckedChange={(checked) => handleChange("dark_mode", checked)}
+                    />
+                    </div>
+                  </Card>
                   </div>
                 </div>
-              )}
+                )}
 
-              {/* Onglet de notifications */}
-              {activeSideTab === "notifications" && (
+                {/* Onglet de notifications */}
+                {activeSideTab === "notifications" && (
                 <div className="space-y-6">
                   <h3 className="text-xl font-semibold text-gray-800 dark:text-white mb-4">Notifications</h3>
                   <div className="space-y-4">
-                    <Card className="p-4">
-                      <div className="flex items-center justify-between mb-4">
-                        <Label htmlFor="notifications-toggle">Activer les notifications</Label>
-                        <Switch
-                          id="notifications-toggle"
-                          checked={settings.notifications_enabled}
-                          onCheckedChange={(checked) => handleChange("notifications_enabled", checked)}
-                        />
-                      </div>
-                      
-                      {settings.notifications_enabled && (
-                        <div className="space-y-4 pt-4 border-t border-gray-200 dark:border-gray-700">
-                          <h4 className="font-medium text-gray-700 dark:text-gray-300">Types d'alertes</h4>
-                          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                            <div className="flex items-center justify-between">
-                              <Label htmlFor="security-alerts">Alertes de sécurité</Label>
-                              <Switch
-                                id="security-alerts"
-                                checked={settings.security_alerts}
-                                onCheckedChange={(checked) => handleChange("security_alerts", checked)}
-                              />
-                            </div>
-                            <div className="flex items-center justify-between">
-                              <Label htmlFor="system-updates">Mises à jour système</Label>
-                              <Switch
-                                id="system-updates"
-                                checked={settings.system_alerts}
-                                onCheckedChange={(checked) => handleChange("system_alerts", checked)}
-                              />
-                            </div>
-                            <div className="flex items-center justify-between">
-                              <Label htmlFor="activity-alerts">Activités inhabituelles</Label>
-                              <Switch
-                                id="activity-alerts"
-                                checked={settings.activity_alerts}
-                                onCheckedChange={(checked) => handleChange("activity_alerts", checked)}
-                              />
-                            </div>
-                            <div className="flex items-center justify-between">
-                              <Label htmlFor="maintenance-alerts">Maintenance</Label>
-                              <Switch
-                                id="maintenance-alerts"
-                                checked={settings.maintenance_alerts}
-                                onCheckedChange={(checked) => handleChange("maintenance_alerts", checked)}
-                              />
-                            </div>
-                          </div>
-                        </div>
-                      )}
-                    </Card>
+                  <Card className="p-4">
+                    <div className="flex items-center justify-between mb-2">
+                    <div>
+                      <Label htmlFor="notifications-toggle" className="flex items-center gap-2">
+                        <Bell className="h-5 w-5" />
+                        Activer les notifications
+                      </Label>
+                      <p className="text-sm text-gray-600 dark:text-gray-400 mt-2">
+                      Permet d'être informé des gains de points liés à l'utilisation de l'application.
+                      </p>
+                    </div>
+                    <Switch
+                      id="notifications-toggle"
+                      checked={settings.notifications_enabled}
+                      onCheckedChange={(checked) => handleChange("notifications_enabled", checked)}
+                    />
+                    </div>
+                  </Card>
                   </div>
                 </div>
-              )}
+                )}
 
               {/* Onglet de sécurité */}
               {activeSideTab === "security" && (
                 <div className="space-y-6">
                   <h3 className="text-xl font-semibold text-gray-800 dark:text-white mb-4">Sécurité</h3>
                   <Card className="p-4 space-y-6">
-                    <div className="space-y-2">
-                      <Label>Niveau de sécurité</Label>
-                      <Select 
-                        value={settings.security_level} 
-                        onValueChange={(value) => handleChange("security_level", value)}
-                      >
-                        <SelectTrigger>
-                          <SelectValue placeholder="Sélectionner un niveau" />
-                        </SelectTrigger>
-                        <SelectContent>
-                          <SelectItem value="standard">Standard</SelectItem>
-                          <SelectItem value="elevated">Élevé</SelectItem>
-                          <SelectItem value="maximum">Maximum</SelectItem>
-                        </SelectContent>
-                      </Select>
-                    </div>
                     
-                    <div className="space-y-4 pt-4 border-t border-gray-200 dark:border-gray-700">
+                    <div className="space-y-4">
                       <div className="space-y-2">
                         <div className="flex items-center justify-between">
-                          <Label>Expiration de session (minutes)</Label>
+                          <Label className="flex items-center gap-2">
+                            <Shield className="h-5 w-5" />
+                            Expiration de session (minutes)
+                          </Label>
                           <span className="text-sm font-medium">{settings.session_timeout}</span>
                         </div>
                         <Slider
@@ -413,32 +347,11 @@ const SettingsPanel: React.FC = () => {
                           <span>15 min</span>
                           <span>120 min</span>
                         </div>
+                        <p className="text-sm text-gray-600 dark:text-gray-400 mt-2">
+                          Votre session expirera automatiquement après {settings.session_timeout} minutes d'inactivité, vous obligeant à vous reconnecter pour des raisons de sécurité. Cette mesure protège vos données en votre absence.
+                        </p>
                       </div>
                     </div>
-                  </Card>
-                </div>
-              )}
-
-              {/* Onglet de langue */}
-              {activeSideTab === "language" && (
-                <div className="space-y-6">
-                  <h3 className="text-xl font-semibold text-gray-800 dark:text-white mb-4">Langue</h3>
-                  <Card className="p-4">
-                    <Label className="mb-2 block">Sélectionner une langue</Label>
-                    <Select 
-                      value={settings.language} 
-                      onValueChange={(value) => handleChange("language", value)}
-                    >
-                      <SelectTrigger>
-                        <SelectValue placeholder="Sélectionner une langue" />
-                      </SelectTrigger>
-                      <SelectContent>
-                        <SelectItem value="fr">Français</SelectItem>
-                        <SelectItem value="en">English</SelectItem>
-                        <SelectItem value="es">Español</SelectItem>
-                        <SelectItem value="de">Deutsch</SelectItem>
-                      </SelectContent>
-                    </Select>
                   </Card>
                 </div>
               )}
@@ -447,9 +360,10 @@ const SettingsPanel: React.FC = () => {
               {activeSideTab === "privacy" && (
                 <div className="space-y-6">
                   <h3 className="text-xl font-semibold text-gray-800 dark:text-white mb-4">Confidentialité</h3>
-                  <Card className="p-4 space-y-4">
+                  <Card className="p-4">
                     <div className="flex items-center justify-between">
-                      <Label htmlFor="analytics-consent">
+                      <Label htmlFor="analytics-consent" className="flex items-center gap-2">
+                        <Lock className="h-5 w-5" />
                         Autoriser la collecte de données analytiques
                       </Label>
                       <Switch
@@ -459,7 +373,7 @@ const SettingsPanel: React.FC = () => {
                       />
                     </div>
                     
-                    <div className="text-sm text-gray-600 dark:text-gray-400 pt-4 border-t border-gray-200 dark:border-gray-700">
+                    <div className="text-sm text-gray-600 dark:text-gray-400">
                       <p>
                         Ces données nous aident à comprendre comment vous utilisez notre application 
                         et à l'améliorer. Aucune information personnelle n'est collectée.

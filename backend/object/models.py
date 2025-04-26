@@ -62,7 +62,7 @@ class Object(models.Model):
         null=True,
         verbose_name="Prison ID"
     )
-    consomation = models.IntegerField()
+    consomation = models.IntegerField(help_text="Consommation électrique de l'objet")  # Orthographe correspondant à la base de données
     valeur_actuelle = models.CharField(blank=True)
     valeur_cible = models.CharField(blank=True)
     durabilité = models.IntegerField(default=100)
@@ -101,6 +101,7 @@ class ObjetLog(models.Model):
     etat = models.CharField(max_length=50, choices=ETAT_CHOICES, verbose_name="État")
     date = models.DateTimeField(auto_now_add=True)  # Date du log
     commentaire = models.TextField(blank=True, null=True)
+    prison_id = models.CharField(max_length=10, choices=[('paris', 'Paris'), ('lyon', 'Lyon'), ('marseille', 'Marseille'), ('cergy', 'Cergy')], null=True, blank=True, verbose_name="Prison ID")
     user = models.ForeignKey('accounts.CustomUser', on_delete=models.SET_NULL, null=True, blank=True, related_name='object_logs')
     
     def __str__(self):
@@ -169,7 +170,8 @@ def log_object_repair(sender, instance, **kwargs):
                 nom=instance.nom,
                 etat=instance.etat,
                 commentaire="Réparation de l'objet",
-                user=None  # Pas d'info utilisateur disponible dans le signal
+                user=None,  # Pas d'info utilisateur disponible dans le signal
+                prison_id=instance.Prison_id  # Ajouter l'ID de la prison
             )
     except Object.DoesNotExist:
         pass  # l'objet n'existait pas encore

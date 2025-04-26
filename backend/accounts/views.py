@@ -320,14 +320,24 @@ def verify_password_view(request):
 class StaffView(APIView):
     permission_classes = [AllowAny]
     
-    def get(self, request):
-        # Récupère tous les utilisateurs
-        users = CustomUser.objects.all()
-        # Sérialiser les utilisateurs
-        serializer = StaffSerializer(users, many=True)
-        # Pour déboguer
-        print("Données renvoyées:", serializer.data)
-        return Response(serializer.data)
+    def get(self, request, username=None):
+        # Si un nom d'utilisateur est spécifié, renvoyer les détails de cet utilisateur
+        if username:
+            try:
+                user = CustomUser.objects.get(username=username)
+                serializer = StaffSerializer(user)
+                print(f"Détails utilisateur récupérés pour {username}:", serializer.data)
+                return Response(serializer.data)
+            except CustomUser.DoesNotExist:
+                return Response({"error": "Utilisateur non trouvé"}, status=status.HTTP_404_NOT_FOUND)
+        else:
+            # Récupère tous les utilisateurs
+            users = CustomUser.objects.all()
+            # Sérialiser les utilisateurs
+            serializer = StaffSerializer(users, many=True)
+            # Pour déboguer
+            print("Données renvoyées:", serializer.data)
+            return Response(serializer.data)
 
 
 User = get_user_model()

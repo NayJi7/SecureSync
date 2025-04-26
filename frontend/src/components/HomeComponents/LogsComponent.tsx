@@ -85,7 +85,7 @@ const LogsComponent: React.FC<{ prisonId: string }> = ({ prisonId }) => {
                 },
             });
             
-            console.log('Logs utilisateurs bruts:', userLogsResponse.data);
+            // console.log('Logs utilisateurs bruts:', userLogsResponse.data);
             
             // Transformer les données pour correspondre à notre interface UserLog
             const transformedUserLogs = userLogsResponse.data.map((log: any) => {
@@ -95,14 +95,14 @@ const LogsComponent: React.FC<{ prisonId: string }> = ({ prisonId }) => {
                     user_info: typeof log.user === 'object' ? {
                         id: log.user.id,
                         username: log.user.username,
-                        full_name: log.user.username, // Utiliser username comme fallback pour full_name
-                        role: log.user.role || 'user', // Valeur par défaut 'user' si role n'existe pas
-                        prison: log.user.prison || prisonId // Utiliser prisonId comme valeur par défaut
+                        full_name: log.user.full_name || log.user.username, // Utiliser full_name si disponible
+                        role: log.user.role || 'user', // Récupérer le rôle de l'utilisateur depuis l'API
+                        prison: log.user.prison || prisonId // Récupérer la prison depuis l'API
                     } : undefined
                 };
             });
             
-            console.log('Logs utilisateurs transformés:', transformedUserLogs);
+            // console.log('Logs utilisateurs transformés:', transformedUserLogs);
             setUserLogs(transformedUserLogs);
             
             setLoading(false);
@@ -181,7 +181,7 @@ const LogsComponent: React.FC<{ prisonId: string }> = ({ prisonId }) => {
                 log.user_info && log.user_info.role !== 'admin'
             );
             
-            // Filtrer pour la prison actuelle
+            // Filtrer pour la prison actuelle (par utilisateur)
             if (prisonId) {
                 userLogsFiltered = userLogsFiltered.filter(log => {
                     if (!log.user_info) return false;
@@ -382,16 +382,23 @@ const LogsComponent: React.FC<{ prisonId: string }> = ({ prisonId }) => {
     const endIndex = Math.min(startIndex + itemsPerPage, filteredLogs.length);
     const currentLogs = filteredLogs.slice(startIndex, endIndex);
 
-    // Get unique object types for filter dropdown
-    const objectTypes = [...new Set(objectLogs.map(log => log.type))];
+    // Filtrer d'abord les logs d'objets par utilisateur de la prison actuelle
+    const currentPrisonObjectLogs = objectLogs.filter(log => {
+        // Seuls les logs avec des utilisateurs appartenant à la prison actuelle
+        if (!log.user_info) return false;
+        return log.user_info.prison === prisonId && log.user_info.role !== 'admin';
+    });
 
-    // Get unique users for filter dropdown from both log types
-    const objectLogUsers = objectLogs
+    // Get unique object types for filter dropdown (uniquement pour la prison actuelle)
+    const objectTypes = [...new Set(currentPrisonObjectLogs.map(log => log.type))];
+
+    // Get unique users for filter dropdown from both log types (filtrés par prison)
+    const objectLogUsers = currentPrisonObjectLogs
         .filter(log => log.user_info !== undefined && log.user_info !== null)
         .map(log => log.user_info!);
     
     const userLogUsers = userLogs
-        .filter(log => log.user_info !== undefined && log.user_info !== null)
+        .filter(log => log.user_info !== undefined && log.user_info !== null && log.user_info.prison === prisonId)
         .map(log => log.user_info!);
     
     const allUsers = [...objectLogUsers, ...userLogUsers];
@@ -401,14 +408,16 @@ const LogsComponent: React.FC<{ prisonId: string }> = ({ prisonId }) => {
 
     // Get unique action types from both object and user logs
     const defaultObjectActionTypes = ['Création', 'Suppression', 'Changement d\'état', 'Réparation'];
-    const objectActionTypes = [...new Set(objectLogs.map(log => log.commentaire || '').filter(Boolean))];
+    const objectActionTypes = [...new Set(currentPrisonObjectLogs.map(log => log.commentaire || '').filter(Boolean))];
     
-    const userActionTypes = [...new Set(userLogs.map(log => translateUserAction(log.action)))];
+    const userActionTypes = [...new Set(userLogs
+        .filter(log => log.user_info?.prison === prisonId)
+        .map(log => translateUserAction(log.action)))];
     
     const allActionTypes = [...new Set([...defaultObjectActionTypes, ...objectActionTypes, ...userActionTypes])];
 
-    // Get unique object names for filter dropdown
-    const uniqueObjectNames = [...new Set(objectLogs.map(log => log.nom))];
+    // Get unique object names for filter dropdown (uniquement pour la prison actuelle)
+    const uniqueObjectNames = [...new Set(currentPrisonObjectLogs.map(log => log.nom))];
 
     // Function to get user role label
     const getUserRoleLabel = (role: string): string => {
@@ -425,11 +434,6 @@ const LogsComponent: React.FC<{ prisonId: string }> = ({ prisonId }) => {
     // Check if log is ObjectLog type
     const isObjectLog = (log: any): log is ObjetLog => {
         return 'type' in log && 'etat' in log;
-    };
-
-    // Check if log is UserLog type
-    const isUserLog = (log: any): log is UserLog => {
-        return 'action' in log && 'timestamp' in log;
     };
 
     return (
@@ -500,7 +504,9 @@ const LogsComponent: React.FC<{ prisonId: string }> = ({ prisonId }) => {
                         <span className="text-sm font-medium text-gray-700 dark:text-gray-300">Filtres:</span>
                     </div>
 
-                    {activeLogType !== 'user' && (
+                    {/* Filtres spécifiques aux objets */}
+                    {(activeLogType === 'object' || activeLogType === 'all') && (
+                        <>
                         <select
                             id="filterType"
                             value={filterType}
@@ -517,9 +523,7 @@ const LogsComponent: React.FC<{ prisonId: string }> = ({ prisonId }) => {
                                 </option>
                             ))}
                         </select>
-                    )}
 
-                    {activeLogType !== 'user' && (
                         <select
                             id="filterObject"
                             value={filterObject}
@@ -531,20 +535,55 @@ const LogsComponent: React.FC<{ prisonId: string }> = ({ prisonId }) => {
                                 <option key={name} value={name}>Objet: {name}</option>
                             ))}
                         </select>
+                        
+                        {/* Actions spécifiques aux objets dans la vue objets */}
+                        {activeLogType === 'object' && (
+                            <select
+                                id="filterAction"
+                                value={filterAction}
+                                onChange={(e) => setFilterAction(e.target.value)}
+                                className="flex-1 min-w-[120px] px-2 py-1.5 text-sm bg-white dark:bg-gray-700 border border-gray-300 dark:border-gray-600 rounded-md shadow-sm focus:outline-none focus:ring-indigo-500 focus:border-indigo-500"
+                            >
+                                <option value="">Action: Toutes</option>
+                                {[...defaultObjectActionTypes, ...objectActionTypes].filter((v, i, a) => a.indexOf(v) === i).map(action => (
+                                    <option key={action} value={action}>Action: {action}</option>
+                                ))}
+                            </select>
+                        )}
+                        </>
                     )}
 
-                    <select
-                        id="filterAction"
-                        value={filterAction}
-                        onChange={(e) => setFilterAction(e.target.value)}
-                        className="flex-1 min-w-[120px] px-2 py-1.5 text-sm bg-white dark:bg-gray-700 border border-gray-300 dark:border-gray-600 rounded-md shadow-sm focus:outline-none focus:ring-indigo-500 focus:border-indigo-500"
-                    >
-                        <option value="">Action: Toutes</option>
-                        {allActionTypes.map(action => (
-                            <option key={action} value={action}>Action: {action}</option>
-                        ))}
-                    </select>
+                    {/* Filtres spécifiques aux utilisateurs */}
+                    {activeLogType === 'user' && (
+                        <select
+                            id="filterAction"
+                            value={filterAction}
+                            onChange={(e) => setFilterAction(e.target.value)}
+                            className="flex-1 min-w-[120px] px-2 py-1.5 text-sm bg-white dark:bg-gray-700 border border-gray-300 dark:border-gray-600 rounded-md shadow-sm focus:outline-none focus:ring-indigo-500 focus:border-indigo-500"
+                        >
+                            <option value="">Action: Toutes</option>
+                            {userActionTypes.map(action => (
+                                <option key={action} value={action}>Action: {action}</option>
+                            ))}
+                        </select>
+                    )}
 
+                    {/* Actions mixtes pour la vue "Tous les logs" */}
+                    {activeLogType === 'all' && (
+                        <select
+                            id="filterAction"
+                            value={filterAction}
+                            onChange={(e) => setFilterAction(e.target.value)}
+                            className="flex-1 min-w-[120px] px-2 py-1.5 text-sm bg-white dark:bg-gray-700 border border-gray-300 dark:border-gray-600 rounded-md shadow-sm focus:outline-none focus:ring-indigo-500 focus:border-indigo-500"
+                        >
+                            <option value="">Action: Toutes</option>
+                            {allActionTypes.map(action => (
+                                <option key={action} value={action}>Action: {action}</option>
+                            ))}
+                        </select>
+                    )}
+
+                    {/* Filtre utilisateur - montré sur toutes les vues */}
                     <select
                         id="filterUser"
                         value={filterUser}
@@ -552,7 +591,6 @@ const LogsComponent: React.FC<{ prisonId: string }> = ({ prisonId }) => {
                         className="flex-1 min-w-[120px] px-2 py-1.5 text-sm bg-white dark:bg-gray-700 border border-gray-300 dark:border-gray-600 rounded-md shadow-sm focus:outline-none focus:ring-indigo-500 focus:border-indigo-500"
                     >
                         <option value="">Utilisateur: Tous</option>
-                        <option value="system">Utilisateur: Système</option>
                         {uniqueUsers.map(user => (
                             <option key={user.id} value={user.id.toString()}>Utilisateur: {user.full_name}</option>
                         ))}
@@ -561,10 +599,24 @@ const LogsComponent: React.FC<{ prisonId: string }> = ({ prisonId }) => {
                     {(filterType || filterObject || filterAction || filterUser) && (
                         <button
                             onClick={() => {
-                                setFilterType('');
-                                setFilterObject('');
-                                setFilterAction('');
-                                setFilterUser('');
+                                // Ne réinitialiser que les filtres pertinents pour la vue active
+                                if (activeLogType === 'object') {
+                                    // Pour la vue objets, réinitialiser les filtres d'objets
+                                    setFilterType('');
+                                    setFilterObject('');
+                                    setFilterAction('');
+                                    setFilterUser('');
+                                } else if (activeLogType === 'user') {
+                                    // Pour la vue utilisateurs, réinitialiser uniquement les filtres d'utilisateurs
+                                    setFilterAction('');
+                                    setFilterUser('');
+                                } else {
+                                    // Pour la vue "tous", réinitialiser tous les filtres
+                                    setFilterType('');
+                                    setFilterObject('');
+                                    setFilterAction('');
+                                    setFilterUser('');
+                                }
                             }}
                             className="whitespace-nowrap px-3 py-1.5 text-sm text-red-600 dark:text-red-400 bg-red-50 dark:bg-red-900/20 border border-red-200 dark:border-red-800/30 rounded-md hover:bg-red-100 dark:hover:bg-red-900/30 transition-colors"
                         >

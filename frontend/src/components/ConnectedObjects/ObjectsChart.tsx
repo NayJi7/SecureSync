@@ -15,30 +15,31 @@ const ObjectsChart: React.FC<{ onAddObject?: AddObjectCallback }> = ({ onAddObje
 
     const fetchObjects = async () => {
         try {
-            // Récupérer tous les objets sans filtrage
+            const prisonId = localStorage.getItem('userPrison') || localStorage.getItem('selectedPrison');
+            
+            // console.log("Prison ID utilisé pour la requête:", prisonId);
+            
             const response = await getObjects();
+            
+            // Log the raw response to debug
+            // console.log("Objects data received:", response.data);
 
-            // Récupérer les paramètres de l'URL pour identifier la prison actuelle
-            const pathname = window.location.pathname;
-            const urlPrisonId = pathname.split('/')[1]; // Le format devrait être /:prisonId/page
-            
-            // Récupérer l'ID de prison - priorité à l'ID dans l'URL, puis aux valeurs localStorage
-            const prisonId = urlPrisonId || localStorage.getItem('userPrison') || localStorage.getItem('selectedPrison');
-            
-            console.log("URL Prison ID:", urlPrisonId);
-            console.log("Prison ID utilisé:", prisonId);
-            console.log("Prison ID localStorage:", localStorage.getItem('userPrison'));
-            
-            // Filtrer les objets côté client par l'identifiant de prison
-            const filteredObjects = prisonId
-                ? response.data.filter(obj => String(obj.Prison_id) === String(prisonId))
-                : [];
-            
-            console.log("Objets avant filtrage:", response.data);
-            console.log("Objets filtrés:", filteredObjects);
-            console.log("ID Prison utilisé pour le filtrage:", prisonId);
-            
-            setObjects(filteredObjects);
+            // Filter objects to only include those matching the prison ID
+            if (prisonId && response.data && Array.isArray(response.data)) {
+                // Filter objects where the prisonId matches
+                const filteredObjects = response.data.filter(obj => 
+                    obj.Prison_id === prisonId
+                );
+                
+                // console.log(`Filtered ${filteredObjects.length} objects for prison ID ${prisonId}`);
+                response.data = filteredObjects;
+                // console.log("Filtered objects data:", response.data);
+            } else {
+                console.warn("Prison ID not found or response data is not an array:", prisonId);
+            }
+
+            // Si le backend filtre correctement, on n'a plus besoin de filtrer côté client
+            setObjects(response.data);
             setLoading(false);
             setLastUpdateTime(new Date());
         } catch (error) {
@@ -82,7 +83,7 @@ const ObjectsChart: React.FC<{ onAddObject?: AddObjectCallback }> = ({ onAddObje
     // Gérer les cas où les propriétés peuvent être undefined
     const getConsommation = (obj: ObjectType) => {
         // Si la propriété n'existe pas ou est undefined, on retourne une valeur par défaut
-        if (obj.consomation === undefined) {
+        if (obj.consommation === undefined) {
             // Définition d'une consommation par défaut selon le type
             switch(obj.type) {
                 case 'porte': return 15;
@@ -94,7 +95,7 @@ const ObjectsChart: React.FC<{ onAddObject?: AddObjectCallback }> = ({ onAddObje
                 default: return 10;
             }
         }
-        return obj.consomation;
+        return obj.consommation;
     };
 
     const stats = {
@@ -380,7 +381,7 @@ const ObjectsChart: React.FC<{ onAddObject?: AddObjectCallback }> = ({ onAddObje
                                 <div className="flex items-center">
                                     <div className="w-32 flex items-center">
                                         <Thermometer className="h-4 w-4 text-red-600 dark:text-red-400 mr-2" />
-                                        <span className="text-sm text-gray-600 dark:text-gray-300">Thermostat</span>
+                                        <span className="text-sm text-gray-600 dark:text-gray-300">Thermostats</span>
                                     </div>
                                     <div className="flex-1 bg-gray-200 dark:bg-gray-700 rounded-full h-2 mx-3">
                                         <div
@@ -397,7 +398,7 @@ const ObjectsChart: React.FC<{ onAddObject?: AddObjectCallback }> = ({ onAddObje
                                 <div className="flex items-center">
                                     <div className="w-32 flex items-center">
                                         <Wind className="h-4 w-4 text-green-600 dark:text-green-400 mr-2" />
-                                        <span className="text-sm text-gray-600 dark:text-gray-300">Ventilation</span>
+                                        <span className="text-sm text-gray-600 dark:text-gray-300">Ventilations</span>
                                     </div>
                                     <div className="flex-1 bg-gray-200 dark:bg-gray-700 rounded-full h-2 mx-3">
                                         <div
@@ -515,7 +516,7 @@ const ObjectsChart: React.FC<{ onAddObject?: AddObjectCallback }> = ({ onAddObje
                             <div className="flex items-center">
                                 <div className="w-28 flex items-center">
                                     <Wind className="h-4 w-4 text-green-600 dark:text-green-400 mr-2" />
-                                    <span className="text-xs text-gray-600 dark:text-gray-400">Ventilation</span>
+                                    <span className="text-xs text-gray-600 dark:text-gray-400">Ventilations</span>
                                 </div>
                                 <div className="flex-1 bg-gray-200 dark:bg-gray-700 rounded-full h-2 mx-3">
                                     <div

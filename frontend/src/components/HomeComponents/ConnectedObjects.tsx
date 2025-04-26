@@ -49,7 +49,7 @@ const ConnectedObjects: React.FC<ConnectedObjectsProps> = ({ prisonId, addPoints
                 ? response.data.filter(obj => obj.Prison_id === currentPrisonId)
                 : response.data;
 
-            console.log(`Filtered objects for prison ${currentPrisonId}: ${filteredObjects.length} of ${response.data.length}`);
+            // console.log(`Filtered objects for prison ${currentPrisonId}: ${filteredObjects.length} of ${response.data.length}`);
 
             setObjects(filteredObjects);
             setLoading(false);
@@ -172,7 +172,7 @@ const ConnectedObjects: React.FC<ConnectedObjectsProps> = ({ prisonId, addPoints
                 coord_y: newObjectY,
                 Prison_id: prisonId, // Utiliser une variable explicite
                 // Champs requis par le modèle backend
-                consomation: newConsumption, // Use the value from the form
+                consommation: newConsumption, // Use the value from the form
                 valeur_actuelle: initialValue,
                 valeur_cible: addingObjectType === 'thermostat' ? newTargetValue : 0, // Use target value for thermostat
                 durabilité: cappedDurability, // Use the capped durability value
