@@ -8,10 +8,11 @@ export const useAuth = () => {
   const [isAuthenticated, setIsAuthenticated] = useState(false);
   const [loading, setLoading] = useState(true);
   const [user, setUser] = useState(null);
+  const [prisonId, setPrisonId] = useState(null);
   const navigate = useNavigate();
 
   // Verify a token format is valid before trying to use it
-  const isValidTokenFormat = (token) => {
+  const isValidTokenFormat = (token: string) => {
     if (!token) return false;
 
     // JWT tokens should be a string with 3 parts separated by dots
@@ -31,7 +32,7 @@ export const useAuth = () => {
   };
 
   // Add this function to help debug token issues
-  const debugToken = (token) => {
+  const debugToken = (token: string) => {
     if (!token) {
       console.debug('Token is null or undefined');
       return;
@@ -122,7 +123,7 @@ export const useAuth = () => {
     setLoading(false);
   };
 
-  const fetchUserInfo = async (token) => {
+  const fetchUserInfo = async (token: string) => {
     try {
       // Don't try to fetch if we don't have a token
       if (!token) return;
@@ -138,7 +139,16 @@ export const useAuth = () => {
 
       console.debug('User info fetched successfully');
       setUser(response.data);
-    } catch (error) {
+      
+      // Récupération de l'ID de la prison de l'utilisateur
+      if (response.data && response.data.Prison_id) {
+        console.debug('Prison ID trouvé:', response.data.Prison_id);
+        setPrisonId(response.data.Prison_id);
+        
+        // Stocker l'ID de prison dans localStorage pour plus de sécurité
+        localStorage.setItem('userPrison', String(response.data.Prison_id));
+      }
+    } catch (error: any) {
       console.error('Error fetching user info:', error);
 
       // Handle token validation errors
@@ -150,7 +160,7 @@ export const useAuth = () => {
     }
   };
 
-  const login = (token, refreshToken = null, sessionToken = null) => {
+  const login = (token: string, refreshToken = null, sessionToken = null) => {
     console.debug('Storing authentication tokens');
 
     // Validate token before storing
@@ -211,6 +221,7 @@ export const useAuth = () => {
     isAuthenticated,
     loading,
     user,
+    prisonId,
     login,
     logout,
     checkAuth

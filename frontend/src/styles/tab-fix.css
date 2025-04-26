@@ -1,0 +1,6 @@
+/* Style pour corriger les onglets Flowbite en mode sombre */
+.dark [role="tab"][aria-selected="true"],
+.dark [role="tab"][aria-selected="true"] span,
+.dark [role="tab"][aria-selected="true"] svg {
+  color: #ffffff !important;
+}

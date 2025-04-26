@@ -19,8 +19,8 @@ import Waves from '../blocks/Backgrounds/Waves/Waves'
 import TeamModal from '../components/HomeComponents/TeamModal'
 import ProfileModal from '../components/HomeComponents/ProfileModal'
 import ConnectedObjects from '../components/HomeComponents/ConnectedObjects';
-import ObjectLogs from '../components/HomeComponents/ObjectLogs'
-import ParametersPage from './ParametersPage'
+import LogsComponent from '../components/HomeComponents/LogsComponent'
+import SettingsPanel from '../components/HomeComponents/SettingsPanel'
 
 // Icônes
 import { HiAdjustments, HiClipboardList, HiDotsVertical, HiTrash } from "react-icons/hi"
@@ -70,7 +70,7 @@ export default function HomePage({ children }: { children?: React.ReactNode }) {
   const isAdmin = localStorage.getItem('role') === 'admin';
   // Vérification des droits d'accès en récupérant le rôle utilisateur
   const role = localStorage.getItem('role');
-
+  
   // État pour stocker les données du profil utilisateur
   const [profile, setProfile] = useState<UserProfile | null>(null);
   const [loading, setLoading] = useState(true);
@@ -81,6 +81,71 @@ export default function HomePage({ children }: { children?: React.ReactNode }) {
   const [pointsTotal, setPointsTotal] = useState<number | null>(null);
   const [showPointsMessage, setShowPointsMessage] = useState(false);
   const [pointsMessage, setPointsMessage] = useState("");
+  // État pour le thème (clair/sombre)
+  const [darkMode, setDarkMode] = useState(localStorage.getItem("theme") === "dark");
+
+  // Effet pour appliquer le thème en fonction du localStorage
+  useEffect(() => {
+    // Vérifier le thème actuel stocké dans localStorage
+    const theme = localStorage.getItem("theme");
+    setDarkMode(theme === "dark");
+    
+    // Appliquer la classe dark au document uniquement pour la HomePage
+    if (theme === "dark") {
+      document.documentElement.classList.add("dark");
+    } else {
+      document.documentElement.classList.remove("dark");
+    }
+    
+    // Observer les changements de thème via localStorage
+    interface ThemeStorageEvent extends StorageEvent {
+      key: string | null;
+      newValue: string | null;
+    }
+
+    // Écouteur pour les changements de localStorage entre différents onglets
+    const handleStorageChange = (event: ThemeStorageEvent) => {
+      if (event.key === "theme") {
+        const isDark = event.newValue === "dark";
+        setDarkMode(isDark);
+        
+        // Mettre à jour la classe dark sur le document
+        if (isDark) {
+          document.documentElement.classList.add("dark");
+        } else {
+          document.documentElement.classList.remove("dark");
+        }
+      }
+    };
+
+    // Écouteur d'événements personnalisé pour les changements de thème dans la même page
+    const handleThemeChange = (event: any) => {
+      const isDark = event.detail?.dark || false;
+      setDarkMode(isDark);
+      
+      // Mettre à jour la classe dark sur le document
+      if (isDark) {
+        document.documentElement.classList.add("dark");
+      } else {
+        document.documentElement.classList.remove("dark");
+      }
+    };
+
+    // Écouter les événements de stockage pour les autres onglets
+    window.addEventListener("storage", handleStorageChange);
+    
+    // Écouter un événement personnalisé pour les changements de thème
+    document.addEventListener("homeThemeChanged", handleThemeChange);
+
+    return () => {
+      window.removeEventListener("storage", handleStorageChange);
+      document.removeEventListener("homeThemeChanged", handleThemeChange);
+      
+      // Important : supprimer la classe dark du document lorsqu'on quitte la page
+      document.documentElement.classList.remove("dark");
+      console.log("HomePage démontée : mode sombre désactivé");
+    };
+  }, []);
 
   // Mise à jour des droits d'accès quand le profil est chargé
   useEffect(() => {
@@ -181,14 +246,14 @@ export default function HomePage({ children }: { children?: React.ReactNode }) {
     settings: (
       <div className="relative h-full">
         <div className="my-8">
-          <ParametersPage />
+          <SettingsPanel />
         </div>
       </div>
     ),
     logs: (
       <div className="relative h-full">
         <div className="my-8">
-          <ObjectLogs prisonId={currentPrison} />
+          <LogsComponent prisonId={currentPrison} />
         </div>
       </div>
     ),
@@ -225,6 +290,27 @@ export default function HomePage({ children }: { children?: React.ReactNode }) {
     navigate('/prison-selection');
   };
 
+  // Style pour les onglets en mode sombre
+  useEffect(() => {
+    // Créer un élément de style
+    const styleElement = document.createElement('style');
+    styleElement.innerHTML = `
+      .dark [role="tab"][aria-selected="true"],
+      .dark [role="tab"][aria-selected="true"] span,
+      .dark [role="tab"][aria-selected="true"] svg {
+        color: #ffffff !important;
+      }
+    `;
+    
+    // Ajouter le style au document
+    document.head.appendChild(styleElement);
+    
+    // Nettoyer lors du démontage du composant
+    return () => {
+      document.head.removeChild(styleElement);
+    };
+  }, []);
+
   return (
     <div className="flex flex-col min-h-screen">
       {/* Notification des points gagnés - affichée en bas à droite */}
@@ -240,8 +326,8 @@ export default function HomePage({ children }: { children?: React.ReactNode }) {
       )}
 
       <Waves
-        lineColor="#000"
-        backgroundColor="rgba(255, 255, 255, 0.2)"
+        lineColor={darkMode ? "#FFF" : "#000"}
+        backgroundColor={darkMode ? "rgba(32,44,52)" : "rgba(255, 255, 255)"}
         waveSpeedX={0.02}
         waveSpeedY={0.01}
         waveAmpX={40}
@@ -255,10 +341,10 @@ export default function HomePage({ children }: { children?: React.ReactNode }) {
       />
       <div className="w-full flex justify-between items-center h-full">
         <div className="flex-1 flex gap-4 h-full">
-          <div className="bg-white p-4 w-full flex-1 flex gap-4 h-20 z-10">
+          <div className="bg-white dark:bg-gray-800 p-4 w-full flex-1 flex gap-4 h-20 z-10">
             <div className={`flex items-center justify-center z-10 h-full ${isSmallScreen ? 'w-1/2' : ''}`}>
               <a href="/landing" className="flex items-center">
-                <img src="/src/assets/logo-band.png" alt="SmartHub Logo" className={`${isSmallScreen ? 'w-32' : 'w-38'}`} />
+                <img src={darkMode ? "/src/assets/logo-band-inverted.png" : "/src/assets/logo-band.png"} alt="SmartHub Logo" className={`${isSmallScreen ? 'w-32' : 'w-38'}`} />
               </a>
             </div>
             {children}
@@ -266,7 +352,7 @@ export default function HomePage({ children }: { children?: React.ReactNode }) {
             {isSmallScreen ? (
               <div className="w-full mt-1.5">
                 <div className="flex justify-between items-center">
-                  <h2 className="text-lg font-medium z-10 ml-2">
+                  <h2 className="text-lg font-medium z-10 ml-2 text-gray-800 dark:text-white">
                     {activeTab === "dashboard" ? "Tableau de Bord" :
                       activeTab === "settings" ? "Paramètres" :
                         activeTab === "logs" ? "Historique" : ""}
@@ -304,7 +390,7 @@ export default function HomePage({ children }: { children?: React.ReactNode }) {
                 </div>
 
                 {/* Contenu des onglets avec styles améliorés pour assurer la visibilité */}
-                <div className="absolute left-0 pt-6 px-4 w-full min-h-[calc(100vh-120px)] z-5">
+                <div className="absolute left-0 pt-6 px-4 w-full min-h-[calc(100vh-120px)] z-5 dark:bg-gray-900 dark:text-white">
                   {activeTab === "dashboard" && tabContents.dashboard}
                   {activeTab === "settings" && tabContents.settings}
                   {activeTab === "logs" && tabContents.logs}
@@ -315,10 +401,15 @@ export default function HomePage({ children }: { children?: React.ReactNode }) {
                 className="w-full [&_button]:cursor-pointer z-10"
                 aria-label="Onglets avec icônes"
                 variant="underline"
+                style={{
+                  // Assurer que le contenu des onglets est bien affiché
+                  height: 'calc(100vh - 80px)',
+                  overflow: 'visible'
+                }}
                 onActiveTabChange={(tab) => {
                   if (tab === 0) setActiveTab("dashboard");
-                  else if (tab === 1) setActiveTab("settings");
-                  else if (tab === 2) setActiveTab("logs");
+                  else if (tab === 1) setActiveTab("logs");
+                  else if (tab === 2) setActiveTab("settings");
                 }}
               >
                 <TabItem title="Tableau de Bord" icon={MdDashboard}>

@@ -7,12 +7,14 @@ import { Shield, Lock, Users, Building, Activity, Globe, Server } from 'lucide-r
 import Squares from '../blocks/Backgrounds/Squares/squares.tsx';
 import Header from '@/components/Header.tsx';
 import Footer from '@/components/Footer.tsx';
+import useAuth from '@/hooks/useAuth';
 
 export default function LandingPage() {
   const { isMobile } = useDevice();
   const [isScrolled, setIsScrolled] = useState(false);
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
   const navigate = useNavigate();
+  const { isAuthenticated, prisonId, user } = useAuth();
 
   useEffect(() => {
     // Set direct styles instead of just adding a class
@@ -75,7 +77,46 @@ export default function LandingPage() {
                   size="lg" 
                   className="bg-green-600 hover:bg-green-700 text-black font-semibold px-6 py-3"
                   onClick={() => {
-                      navigate('/login');
+                      // Affichage détaillé pour le débogage
+                      console.log("Clic sur Accéder au Tableau de Bord");
+                      console.log("État d'authentification:", isAuthenticated);
+                      console.log("Prison ID:", prisonId);
+                      console.log("Données utilisateur:", user);
+                      
+                      // Vérifier si une prison est sélectionnée dans le localStorage (prioritaire)
+                      const selectedPrisonId = localStorage.getItem('selectedPrison');
+                      console.log("Prison sélectionnée dans localStorage:", selectedPrisonId);
+
+                      if (isAuthenticated) {
+                        // Si l'utilisateur est authentifié
+                        if (selectedPrisonId) {
+                          // Toujours privilégier la sélection manuelle faite par l'admin
+                          console.log("Redirection vers la prison sélectionnée manuellement:", selectedPrisonId);
+                          navigate(`/${selectedPrisonId}/home`);
+                        } else if (prisonId) {
+                          // Si l'ID de prison est défini via le hook useAuth
+                          console.log("Redirection vers la page d'accueil avec l'ID de prison de l'utilisateur:", prisonId);
+                          navigate(`/${prisonId}/home`);
+                        } else if (user && (user as any).Prison_id) {
+                          // Vérification directe dans l'objet user avec cast pour éviter erreur TypeScript
+                          console.log("Redirection vers la page d'accueil avec l'ID de prison trouvé dans user:", (user as any).Prison_id);
+                          navigate(`/${(user as any).Prison_id}/home`);
+                        } else {
+                          // Fallback sur l'ID stocké dans userPrison
+                          const userPrisonId = localStorage.getItem('userPrison');
+                          if (userPrisonId) {
+                            console.log("Redirection vers la page d'accueil avec l'ID userPrison:", userPrisonId);
+                            navigate(`/${userPrisonId}/home`);
+                          }
+                          else {
+                            console.log("Aucun ID de prison trouvé, impossible de rediriger");
+                          }
+                        }
+                      } else {
+                        // Non authentifié, redirection vers login
+                        console.log("Non authentifié, redirection vers login");
+                        navigate('/login');
+                      }
                   }}
                 >
                   Accéder au Tableau de Bord

@@ -17,6 +17,14 @@ interface StaffMember {
   prison: string; // "p" minuscule pour correspondre au sérialiseur
 }
 
+// Mapping objet pour l'affichage français des rôles
+export const roleDictionary: Record<string, string> = {
+  gestionnaire: "Gestionnaire",
+  gerant: "Gérant",
+  employe: "Employé",
+  admin: "Admin"
+};
+
 interface CurrentUser {
   role: string;
   username: string;
@@ -476,28 +484,24 @@ const StaffModal: React.FC<StaffModalProps> = ({ isOpen, onClose, prisonId }) =>
                   <div className="grid grid-cols-2 gap-2">
                     <div>
                       <p className="text-sm font-medium text-gray-500">Poste</p>
-                      <p className="text-sm text-gray-900">{member.role || 'Non spécifié'}</p>
+                      <p className="text-sm text-gray-900">{roleDictionary[member.role] || member.role || 'Non spécifié'}</p>
                     </div>
                     <div>
                       <p className="text-sm font-medium text-gray-500">Section</p>
-                      <p className="text-sm text-gray-900">{member.section || 'Non spécifié'}</p>
+                      <p className="text-sm text-gray-900">{member.section ? member.section.charAt(0).toUpperCase() + member.section.slice(1) : 'Non spécifié'}</p>
                     </div>
                     <div>
-                      <p className="text-sm font-medium text-gray-500">Prison</p>
-                      <p className="text-sm text-gray-900">{member.prison || 'Non spécifié'}</p>
-                    </div>
-                    <div>
-                      <p className="text-sm font-medium text-gray-500">Âge</p>
-                      <p className="text-sm text-gray-900">
-                        {member.date_naissance ? `${calculateAge(member.date_naissance)} ans` : 'Non spécifié'}
-                      </p>
-                    </div>
-                    <div className="col-span-2 border-t border-gray-200 mt-2 pt-2">
                       <p className="text-sm font-medium text-gray-500">Date d'embauche</p>
                       <p className="text-sm text-gray-900">
                         {member.date_joined ? formatDate(member.date_joined) : 
                          (member as any).date_joined ? formatDate((member as any).date_joined) : 
                          formatDate((member as any)?.dateJoined || new Date().toISOString())}
+                      </p>
+                    </div>
+                    <div>
+                      <p className="text-sm font-medium text-gray-500">Âge</p>
+                      <p className="text-sm text-gray-900">
+                        {member.date_naissance ? `${calculateAge(member.date_naissance)} ans` : 'Non spécifié'}
                       </p>
                     </div>
                   </div>

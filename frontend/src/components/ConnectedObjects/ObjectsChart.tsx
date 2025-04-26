@@ -10,37 +10,34 @@ const ObjectsChart: React.FC<{ onAddObject?: AddObjectCallback }> = ({ onAddObje
     const [objects, setObjects] = useState<ObjectType[]>([]);
     const [loading, setLoading] = useState(true);
     const [lastUpdateTime, setLastUpdateTime] = useState(new Date());
+    const [showConsommation, setShowConsommation] = useState(false);
     const intervalRef = useRef<NodeJS.Timeout | null>(null);
-
-    // Function to handle adding an object by type
-    const handleAddObject = (type: 'porte' | 'lumiere' | 'camera' | 'thermostat' | 'ventilation' | "panneau d'affichage") => {
-        if (onAddObject) {
-            onAddObject(type);
-        } else {
-            console.log(`Add object of type: ${type}`);
-            // Default implementation if no callback is provided
-            alert(`Fonctionnalité à venir: Ajouter un objet de type ${type}`);
-        }
-    };
-
-    // This part needs to be updated for each object type
-    const handleIconClick = (type: 'porte' | 'lumiere' | 'camera' | 'thermostat' | 'ventilation' | "panneau d'affichage") => {
-        handleAddObject(type);
-    };
 
     const fetchObjects = async () => {
         try {
             // Récupérer tous les objets sans filtrage
             const response = await getObjects();
 
-            // Récupérer l'identifiant de prison de l'utilisateur depuis le localStorage
-            const userPrisonId = localStorage.getItem('userPrison') || localStorage.getItem('selectedPrison');
-
+            // Récupérer les paramètres de l'URL pour identifier la prison actuelle
+            const pathname = window.location.pathname;
+            const urlPrisonId = pathname.split('/')[1]; // Le format devrait être /:prisonId/page
+            
+            // Récupérer l'ID de prison - priorité à l'ID dans l'URL, puis aux valeurs localStorage
+            const prisonId = urlPrisonId || localStorage.getItem('userPrison') || localStorage.getItem('selectedPrison');
+            
+            console.log("URL Prison ID:", urlPrisonId);
+            console.log("Prison ID utilisé:", prisonId);
+            console.log("Prison ID localStorage:", localStorage.getItem('userPrison'));
+            
             // Filtrer les objets côté client par l'identifiant de prison
-            const filteredObjects = userPrisonId
-                ? response.data.filter(obj => obj.Prison_id === userPrisonId)
+            const filteredObjects = prisonId
+                ? response.data.filter(obj => String(obj.Prison_id) === String(prisonId))
                 : [];
-
+            
+            console.log("Objets avant filtrage:", response.data);
+            console.log("Objets filtrés:", filteredObjects);
+            console.log("ID Prison utilisé pour le filtrage:", prisonId);
+            
             setObjects(filteredObjects);
             setLoading(false);
             setLastUpdateTime(new Date());
@@ -82,10 +79,38 @@ const ObjectsChart: React.FC<{ onAddObject?: AddObjectCallback }> = ({ onAddObje
         </div>;
     }
 
+    // Gérer les cas où les propriétés peuvent être undefined
+    const getConsommation = (obj: ObjectType) => {
+        // Si la propriété n'existe pas ou est undefined, on retourne une valeur par défaut
+        if (obj.consomation === undefined) {
+            // Définition d'une consommation par défaut selon le type
+            switch(obj.type) {
+                case 'porte': return 15;
+                case 'lumiere': return 10;
+                case 'camera': return 8;
+                case 'thermostat': return 5;
+                case 'ventilation': return 20;
+                case "paneau d'affichage": return 25;
+                default: return 10;
+            }
+        }
+        return obj.consomation;
+    };
+
     const stats = {
         total: objects.length,
         active: objects.filter(obj => obj.etat === 'on').length,
         inactive: objects.filter(obj => obj.etat === 'off').length,
+        // Calcul de la consommation totale (uniquement pour les objets actifs)
+        consommationTotale: objects
+            .filter(obj => obj.etat === 'on')
+            .reduce((total, obj) => total + getConsommation(obj), 0),
+        // Calcul de la consommation moyenne par objet actif
+        consommationMoyenne: objects.filter(obj => obj.etat === 'on').length > 0 ?
+            objects
+                .filter(obj => obj.etat === 'on')
+                .reduce((total, obj) => total + getConsommation(obj), 0) / 
+                objects.filter(obj => obj.etat === 'on').length : 0,
         byType: {
             porte: objects.filter(obj => obj.type === 'porte').length,
             lumiere: objects.filter(obj => obj.type === 'lumiere').length,
@@ -93,6 +118,27 @@ const ObjectsChart: React.FC<{ onAddObject?: AddObjectCallback }> = ({ onAddObje
             thermostat: objects.filter(obj => obj.type === 'thermostat').length,
             ventilation: objects.filter(obj => obj.type === 'ventilation').length,
             paneauAffichage: objects.filter(obj => obj.type === "paneau d'affichage").length,
+        },
+        // Consommation par type d'objet (uniquement pour les objets actifs)
+        consommationParType: {
+            porte: objects
+                .filter(obj => obj.type === 'porte' && obj.etat === 'on')
+                .reduce((total, obj) => total + getConsommation(obj), 0),
+            lumiere: objects
+                .filter(obj => obj.type === 'lumiere' && obj.etat === 'on')
+                .reduce((total, obj) => total + getConsommation(obj), 0),
+            camera: objects
+                .filter(obj => obj.type === 'camera' && obj.etat === 'on')
+                .reduce((total, obj) => total + getConsommation(obj), 0),
+            thermostat: objects
+                .filter(obj => (obj.type === 'thermostat') && obj.etat === 'on')
+                .reduce((total, obj) => total + getConsommation(obj), 0),
+            ventilation: objects
+                .filter(obj => obj.type === 'ventilation' && obj.etat === 'on')
+                .reduce((total, obj) => total + getConsommation(obj), 0),
+            paneauAffichage: objects
+                .filter(obj => obj.type === "paneau d'affichage" && obj.etat === 'on')
+                .reduce((total, obj) => total + getConsommation(obj), 0),
         }
     };
 
@@ -191,118 +237,324 @@ const ObjectsChart: React.FC<{ onAddObject?: AddObjectCallback }> = ({ onAddObje
                 </div>
             </div>
 
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-                <div className="space-y-3">
-                    <h4 className="text-xs font-medium text-gray-600 dark:text-gray-400 uppercase mb-2">Distribution par type</h4>
-                    
-                    {/* Porte */}
-                    <div className="flex items-center">
-                        <div className="w-32 flex items-center">
-                            <DoorClosed className="h-4 w-4 text-blue-600 dark:text-blue-400 mr-2" />
-                            <span className="text-sm text-gray-600 dark:text-gray-300">Portes</span>
-                        </div>
-                        <div className="flex-1 bg-gray-200 dark:bg-gray-700 rounded-full h-2 mx-3">
-                            <div
-                                className="bg-blue-600 h-2 rounded-full"
-                                style={{ width: `${stats.total ? (stats.byType.porte / stats.total) * 100 : 0}%` }}
-                            ></div>
-                        </div>
-                        <div className="w-10 text-right">
-                            <span className="text-sm font-medium text-gray-700 dark:text-gray-200">{stats.byType.porte}</span>
-                        </div>
-                    </div>
-                    
-                    {/* Lumière */}
-                    <div className="flex items-center">
-                        <div className="w-32 flex items-center">
-                            <Lightbulb className="h-4 w-4 text-yellow-600 dark:text-yellow-400 mr-2" />
-                            <span className="text-sm text-gray-600 dark:text-gray-300">Lumières</span>
-                        </div>
-                        <div className="flex-1 bg-gray-200 dark:bg-gray-700 rounded-full h-2 mx-3">
-                            <div
-                                className="bg-yellow-400 h-2 rounded-full"
-                                style={{ width: `${stats.total ? (stats.byType.lumiere / stats.total) * 100 : 0}%` }}
-                            ></div>
-                        </div>
-                        <div className="w-10 text-right">
-                            <span className="text-sm font-medium text-gray-700 dark:text-gray-200">{stats.byType.lumiere}</span>
-                        </div>
-                    </div>
-                    
-                    {/* Camera */}
-                    <div className="flex items-center">
-                        <div className="w-32 flex items-center">
-                            <Video className="h-4 w-4 text-purple-600 dark:text-purple-400 mr-2" />
-                            <span className="text-sm text-gray-600 dark:text-gray-300">Caméras</span>
-                        </div>
-                        <div className="flex-1 bg-gray-200 dark:bg-gray-700 rounded-full h-2 mx-3">
-                            <div
-                                className="bg-purple-600 h-2 rounded-full"
-                                style={{ width: `${stats.total ? (stats.byType.camera / stats.total) * 100 : 0}%` }}
-                            ></div>
-                        </div>
-                        <div className="w-10 text-right">
-                            <span className="text-sm font-medium text-gray-700 dark:text-gray-200">{stats.byType.camera}</span>
-                        </div>
-                    </div>
+            {/* Section pour les statistiques de consommation avec toggle */}
+            <div className="mt-8 border-t border-gray-200 dark:border-gray-700 pt-6">
+                <div className="flex justify-between items-center mb-4">
+                    <h4 className="text-xs font-medium text-gray-600 dark:text-gray-400 uppercase">Consommation énergétique</h4>
+                    <button 
+                        onClick={() => setShowConsommation(prev => !prev)} 
+                        className="flex items-center text-xs font-medium text-indigo-600 dark:text-indigo-400 hover:text-indigo-800 dark:hover:text-indigo-300 transition-colors"
+                    >
+                        <span>{showConsommation ? 'Masquer les détails' : 'Afficher les détails'}</span>
+                        <svg 
+                            xmlns="http://www.w3.org/2000/svg" 
+                            width="16" 
+                            height="16" 
+                            viewBox="0 0 24 24" 
+                            fill="none" 
+                            stroke="currentColor" 
+                            strokeWidth="2" 
+                            strokeLinecap="round" 
+                            strokeLinejoin="round" 
+                            className={`ml-1 transition-transform duration-200 ${showConsommation ? 'rotate-180' : ''}`}
+                        >
+                            <polyline points="6 9 12 15 18 9"></polyline>
+                        </svg>
+                    </button>
                 </div>
+                
+                {/* Afficher les statistiques de consommation uniquement si toggle activé */}
+                {showConsommation && (
+                    <>
+                        <div className="grid grid-cols-1 md:grid-cols-3 gap-4 mb-5 animate-fadeIn">
+                            {/* Consommation totale */}
+                            <div className="bg-orange-50 dark:bg-orange-900/20 p-4 rounded-lg border border-orange-100 dark:border-orange-900/30 flex flex-col justify-between">
+                                <div className="flex items-center mb-2">
+                                    <div className="bg-orange-100 dark:bg-orange-900/50 p-1.5 rounded-md mr-2">
+                                        <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="text-orange-600 dark:text-orange-400">
+                                            <path d="M12 2v10m0 0 4-4m-4 4-4-4M4.6 19.4a8 8 0 1 0 14.8 0"></path>
+                                        </svg>
+                                    </div>
+                                    <h5 className="text-sm font-medium text-gray-600 dark:text-gray-300">Consommation totale</h5>
+                                </div>
+                                <div className="flex justify-between items-end">
+                                    <p className="text-2xl font-bold text-orange-600 dark:text-orange-400">{stats.consommationTotale.toFixed(0)}</p>
+                                    <p className="text-xs text-gray-500 dark:text-gray-400">watts/h</p>
+                                </div>
+                            </div>
 
-                <div className="space-y-3">
-                    <h4 className="text-xs font-medium text-gray-600 dark:text-gray-400 uppercase mb-2 invisible">Distribution par type</h4>
-                    
-                    {/* Thermostat */}
-                    <div className="flex items-center">
-                        <div className="w-32 flex items-center">
-                            <Thermometer className="h-4 w-4 text-red-600 dark:text-red-400 mr-2" />
-                            <span className="text-sm text-gray-600 dark:text-gray-300">Thermostat</span>
+                            {/* Consommation moyenne */}
+                            <div className="bg-orange-50 dark:bg-orange-900/20 p-4 rounded-lg border border-orange-100 dark:border-orange-900/30 flex flex-col justify-between">
+                                <div className="flex items-center mb-2">
+                                    <div className="bg-orange-100 dark:bg-orange-900/50 p-1.5 rounded-md mr-2">
+                                        <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="text-orange-600 dark:text-orange-400">
+                                            <path d="M8.5 14.5A2.5 2.5 0 0 0 11 12c0-1.38-.5-2-1-3-1.072-2.143-.224-4.054 2-6 .5 2.5 2 4.9 4 6.5 2 1.6 3 3.5 3 5.5a7 7 0 1 1-14 0c0-1.153.433-2.294 1-3a2.5 2.5 0 0 0 2.5 2.5z"></path>
+                                        </svg>
+                                    </div>
+                                    <h5 className="text-sm font-medium text-gray-600 dark:text-gray-300">Consommation moyenne</h5>
+                                </div>
+                                <div className="flex justify-between items-end">
+                                    <p className="text-2xl font-bold text-orange-600 dark:text-orange-400">{stats.consommationMoyenne.toFixed(1)}</p>
+                                    <p className="text-xs text-gray-500 dark:text-gray-400">watts/h/objet</p>
+                                </div>
+                            </div>
+
+                            {/* Estimation du prix par heure */}
+                            <div className="bg-orange-50 dark:bg-orange-900/20 p-4 rounded-lg border border-orange-100 dark:border-orange-900/30 flex flex-col justify-between">
+                                <div className="flex items-center mb-2">
+                                    <div className="bg-orange-100 dark:bg-orange-900/50 p-1.5 rounded-md mr-2">
+                                        <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="text-orange-600 dark:text-orange-400">
+                                            <path d="M12 1v22M17 5H9.5a3.5 3.5 0 0 0 0 7h5a3.5 3.5 0 0 1 0 7H6"></path>
+                                        </svg>
+                                    </div>
+                                    <h5 className="text-sm font-medium text-gray-600 dark:text-gray-300">Coût horaire</h5>
+                                </div>
+                                <div className="flex justify-between items-end">
+                                    <p className="text-2xl font-bold text-orange-600 dark:text-orange-400">{(stats.consommationTotale * 0.15 / 1000).toFixed(2)}</p>
+                                    <p className="text-xs text-gray-500 dark:text-gray-400">€/heure</p>
+                                </div>
+                            </div>
                         </div>
-                        <div className="flex-1 bg-gray-200 dark:bg-gray-700 rounded-full h-2 mx-3">
-                            <div
-                                className="bg-red-600 h-2 rounded-full"
-                                style={{ width: `${stats.total ? (stats.byType.thermostat / stats.total) * 100 : 0}%` }}
-                            ></div>
+
+                        {/* Distribution par type */}
+                        <div className="grid grid-cols-1 md:grid-cols-2 gap-6 mb-5 animate-fadeIn">
+                            <div className="space-y-3">
+                                <h4 className="text-xs font-medium text-gray-600 dark:text-gray-400 uppercase mb-2">Distribution par type</h4>
+                                
+                                {/* Porte */}
+                                <div className="flex items-center">
+                                    <div className="w-32 flex items-center">
+                                        <DoorClosed className="h-4 w-4 text-blue-600 dark:text-blue-400 mr-2" />
+                                        <span className="text-sm text-gray-600 dark:text-gray-300">Portes</span>
+                                    </div>
+                                    <div className="flex-1 bg-gray-200 dark:bg-gray-700 rounded-full h-2 mx-3">
+                                        <div
+                                            className="bg-blue-600 h-2 rounded-full"
+                                            style={{ width: `${stats.total ? (stats.byType.porte / stats.total) * 100 : 0}%` }}
+                                        ></div>
+                                    </div>
+                                    <div className="w-10 text-right">
+                                        <span className="text-sm font-medium text-gray-700 dark:text-gray-200">{stats.byType.porte}</span>
+                                    </div>
+                                </div>
+                                
+                                {/* Lumière */}
+                                <div className="flex items-center">
+                                    <div className="w-32 flex items-center">
+                                        <Lightbulb className="h-4 w-4 text-yellow-600 dark:text-yellow-400 mr-2" />
+                                        <span className="text-sm text-gray-600 dark:text-gray-300">Lumières</span>
+                                    </div>
+                                    <div className="flex-1 bg-gray-200 dark:bg-gray-700 rounded-full h-2 mx-3">
+                                        <div
+                                            className="bg-yellow-400 h-2 rounded-full"
+                                            style={{ width: `${stats.total ? (stats.byType.lumiere / stats.total) * 100 : 0}%` }}
+                                        ></div>
+                                    </div>
+                                    <div className="w-10 text-right">
+                                        <span className="text-sm font-medium text-gray-700 dark:text-gray-200">{stats.byType.lumiere}</span>
+                                    </div>
+                                </div>
+                                
+                                {/* Camera */}
+                                <div className="flex items-center">
+                                    <div className="w-32 flex items-center">
+                                        <Video className="h-4 w-4 text-purple-600 dark:text-purple-400 mr-2" />
+                                        <span className="text-sm text-gray-600 dark:text-gray-300">Caméras</span>
+                                    </div>
+                                    <div className="flex-1 bg-gray-200 dark:bg-gray-700 rounded-full h-2 mx-3">
+                                        <div
+                                            className="bg-purple-600 h-2 rounded-full"
+                                            style={{ width: `${stats.total ? (stats.byType.camera / stats.total) * 100 : 0}%` }}
+                                        ></div>
+                                    </div>
+                                    <div className="w-10 text-right">
+                                        <span className="text-sm font-medium text-gray-700 dark:text-gray-200">{stats.byType.camera}</span>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <div className="space-y-3">
+                                <h4 className="text-xs font-medium text-gray-600 dark:text-gray-400 uppercase mb-2 invisible">Distribution par type</h4>
+                                
+                                {/* Thermostat */}
+                                <div className="flex items-center">
+                                    <div className="w-32 flex items-center">
+                                        <Thermometer className="h-4 w-4 text-red-600 dark:text-red-400 mr-2" />
+                                        <span className="text-sm text-gray-600 dark:text-gray-300">Thermostat</span>
+                                    </div>
+                                    <div className="flex-1 bg-gray-200 dark:bg-gray-700 rounded-full h-2 mx-3">
+                                        <div
+                                            className="bg-red-600 h-2 rounded-full"
+                                            style={{ width: `${stats.total ? (stats.byType.thermostat / stats.total) * 100 : 0}%` }}
+                                        ></div>
+                                    </div>
+                                    <div className="w-10 text-right">
+                                        <span className="text-sm font-medium text-gray-700 dark:text-gray-200">{stats.byType.thermostat}</span>
+                                    </div>
+                                </div>
+                                
+                                {/* Ventilation */}
+                                <div className="flex items-center">
+                                    <div className="w-32 flex items-center">
+                                        <Wind className="h-4 w-4 text-green-600 dark:text-green-400 mr-2" />
+                                        <span className="text-sm text-gray-600 dark:text-gray-300">Ventilation</span>
+                                    </div>
+                                    <div className="flex-1 bg-gray-200 dark:bg-gray-700 rounded-full h-2 mx-3">
+                                        <div
+                                            className="bg-green-600 h-2 rounded-full"
+                                            style={{ width: `${stats.total ? (stats.byType.ventilation / stats.total) * 100 : 0}%` }}
+                                        ></div>
+                                    </div>
+                                    <div className="w-10 text-right">
+                                        <span className="text-sm font-medium text-gray-700 dark:text-gray-200">{stats.byType.ventilation}</span>
+                                    </div>
+                                </div>
+                                
+                                {/* Panneau */}
+                                <div className="flex items-center">
+                                    <div className="w-32 flex items-center">
+                                        <MonitorPlay className="h-4 w-4 text-indigo-600 dark:text-indigo-400 mr-2" />
+                                        <span className="text-sm text-gray-600 dark:text-gray-300">Panneaux</span>
+                                    </div>
+                                    <div className="flex-1 bg-gray-200 dark:bg-gray-700 rounded-full h-2 mx-3">
+                                        <div
+                                            className="bg-indigo-600 h-2 rounded-full"
+                                            style={{ width: `${stats.total ? (stats.byType.paneauAffichage / stats.total) * 100 : 0}%` }}
+                                        ></div>
+                                    </div>
+                                    <div className="w-10 text-right">
+                                        <span className="text-sm font-medium text-gray-700 dark:text-gray-200">{stats.byType.paneauAffichage}</span>
+                                    </div>
+                                </div>
+                            </div>
                         </div>
-                        <div className="w-10 text-right">
-                            <span className="text-sm font-medium text-gray-700 dark:text-gray-200">{stats.byType.thermostat}</span>
+                    <div className="bg-white dark:bg-gray-800/60 p-4 rounded-lg border border-gray-200 dark:border-gray-700 animate-fadeIn">
+                        <h5 className="text-sm font-medium text-gray-600 dark:text-gray-300 mb-3">Consommation par type</h5>
+                        <div className="space-y-3">
+                            {/* Portes */}
+                            <div className="flex items-center">
+                                <div className="w-28 flex items-center">
+                                    <DoorClosed className="h-4 w-4 text-blue-600 dark:text-blue-400 mr-2" />
+                                    <span className="text-xs text-gray-600 dark:text-gray-400">Portes</span>
+                                </div>
+                                <div className="flex-1 bg-gray-200 dark:bg-gray-700 rounded-full h-2 mx-3">
+                                    <div
+                                        className="bg-blue-600 h-2 rounded-full"
+                                        style={{
+                                            width: `${stats.consommationTotale ? 
+                                                Math.min((stats.consommationParType.porte / stats.consommationTotale) * 100, 100) : 0}%`
+                                        }}
+                                    ></div>
+                                </div>
+                                <div className="w-24 text-right">
+                                    <span className="text-xs font-medium text-gray-700 dark:text-gray-300">{stats.consommationParType.porte.toFixed(0)} W</span>
+                                </div>
+                            </div>
+
+                            {/* Lumières */}
+                            <div className="flex items-center">
+                                <div className="w-28 flex items-center">
+                                    <Lightbulb className="h-4 w-4 text-yellow-600 dark:text-yellow-400 mr-2" />
+                                    <span className="text-xs text-gray-600 dark:text-gray-400">Lumières</span>
+                                </div>
+                                <div className="flex-1 bg-gray-200 dark:bg-gray-700 rounded-full h-2 mx-3">
+                                    <div
+                                        className="bg-yellow-400 h-2 rounded-full"
+                                        style={{
+                                            width: `${stats.consommationTotale ? 
+                                                Math.min((stats.consommationParType.lumiere / stats.consommationTotale) * 100, 100) : 0}%`
+                                        }}
+                                    ></div>
+                                </div>
+                                <div className="w-24 text-right">
+                                    <span className="text-xs font-medium text-gray-700 dark:text-gray-300">{stats.consommationParType.lumiere.toFixed(0)} W</span>
+                                </div>
+                            </div>
+
+                            {/* Caméras */}
+                            <div className="flex items-center">
+                                <div className="w-28 flex items-center">
+                                    <Video className="h-4 w-4 text-purple-600 dark:text-purple-400 mr-2" />
+                                    <span className="text-xs text-gray-600 dark:text-gray-400">Caméras</span>
+                                </div>
+                                <div className="flex-1 bg-gray-200 dark:bg-gray-700 rounded-full h-2 mx-3">
+                                    <div
+                                        className="bg-purple-600 h-2 rounded-full"
+                                        style={{
+                                            width: `${stats.consommationTotale ? 
+                                                Math.min((stats.consommationParType.camera / stats.consommationTotale) * 100, 100) : 0}%`
+                                        }}
+                                    ></div>
+                                </div>
+                                <div className="w-24 text-right">
+                                    <span className="text-xs font-medium text-gray-700 dark:text-gray-300">{stats.consommationParType.camera.toFixed(0)} W</span>
+                                </div>
+                            </div>
+
+                            {/* Thermostats */}
+                            <div className="flex items-center">
+                                <div className="w-28 flex items-center">
+                                    <Thermometer className="h-4 w-4 text-red-600 dark:text-red-400 mr-2" />
+                                    <span className="text-xs text-gray-600 dark:text-gray-400">Thermostats</span>
+                                </div>
+                                <div className="flex-1 bg-gray-200 dark:bg-gray-700 rounded-full h-2 mx-3">
+                                    <div
+                                        className="bg-red-600 h-2 rounded-full"
+                                        style={{
+                                            width: `${stats.consommationTotale ? 
+                                                Math.min((stats.consommationParType.thermostat / stats.consommationTotale) * 100, 100) : 0}%`
+                                        }}
+                                    ></div>
+                                </div>
+                                <div className="w-24 text-right">
+                                    <span className="text-xs font-medium text-gray-700 dark:text-gray-300">{stats.consommationParType.thermostat.toFixed(0)} W</span>
+                                </div>
+                            </div>
+
+                            {/* Ventilation */}
+                            <div className="flex items-center">
+                                <div className="w-28 flex items-center">
+                                    <Wind className="h-4 w-4 text-green-600 dark:text-green-400 mr-2" />
+                                    <span className="text-xs text-gray-600 dark:text-gray-400">Ventilation</span>
+                                </div>
+                                <div className="flex-1 bg-gray-200 dark:bg-gray-700 rounded-full h-2 mx-3">
+                                    <div
+                                        className="bg-green-600 h-2 rounded-full"
+                                        style={{
+                                            width: `${stats.consommationTotale ? 
+                                                Math.min((stats.consommationParType.ventilation / stats.consommationTotale) * 100, 100) : 0}%`
+                                        }}
+                                    ></div>
+                                </div>
+                                <div className="w-24 text-right">
+                                    <span className="text-xs font-medium text-gray-700 dark:text-gray-300">{stats.consommationParType.ventilation.toFixed(0)} W</span>
+                                </div>
+                            </div>
+
+                            {/* Panneaux */}
+                            <div className="flex items-center">
+                                <div className="w-28 flex items-center">
+                                    <MonitorPlay className="h-4 w-4 text-indigo-600 dark:text-indigo-400 mr-2" />
+                                    <span className="text-xs text-gray-600 dark:text-gray-400">Panneaux</span>
+                                </div>
+                                <div className="flex-1 bg-gray-200 dark:bg-gray-700 rounded-full h-2 mx-3">
+                                    <div
+                                        className="bg-indigo-600 h-2 rounded-full"
+                                        style={{
+                                            width: `${stats.consommationTotale ? 
+                                                Math.min((stats.consommationParType.paneauAffichage / stats.consommationTotale) * 100, 100) : 0}%`
+                                        }}
+                                    ></div>
+                                </div>
+                                <div className="w-24 text-right">
+                                    <span className="text-xs font-medium text-gray-700 dark:text-gray-300">{stats.consommationParType.paneauAffichage.toFixed(0)} W</span>
+                                </div>
+                            </div>
                         </div>
                     </div>
-                    
-                    {/* Ventilation */}
-                    <div className="flex items-center">
-                        <div className="w-32 flex items-center">
-                            <Wind className="h-4 w-4 text-green-600 dark:text-green-400 mr-2" />
-                            <span className="text-sm text-gray-600 dark:text-gray-300">Ventilation</span>
-                        </div>
-                        <div className="flex-1 bg-gray-200 dark:bg-gray-700 rounded-full h-2 mx-3">
-                            <div
-                                className="bg-green-600 h-2 rounded-full"
-                                style={{ width: `${stats.total ? (stats.byType.ventilation / stats.total) * 100 : 0}%` }}
-                            ></div>
-                        </div>
-                        <div className="w-10 text-right">
-                            <span className="text-sm font-medium text-gray-700 dark:text-gray-200">{stats.byType.ventilation}</span>
-                        </div>
-                    </div>
-                    
-                    {/* Panneau */}
-                    <div className="flex items-center">
-                        <div className="w-32 flex items-center">
-                            <MonitorPlay className="h-4 w-4 text-indigo-600 dark:text-indigo-400 mr-2" />
-                            <span className="text-sm text-gray-600 dark:text-gray-300">Panneaux</span>
-                        </div>
-                        <div className="flex-1 bg-gray-200 dark:bg-gray-700 rounded-full h-2 mx-3">
-                            <div
-                                className="bg-indigo-600 h-2 rounded-full"
-                                style={{ width: `${stats.total ? (stats.byType.paneauAffichage / stats.total) * 100 : 0}%` }}
-                            ></div>
-                        </div>
-                        <div className="w-10 text-right">
-                            <span className="text-sm font-medium text-gray-700 dark:text-gray-200">{stats.byType.paneauAffichage}</span>
-                        </div>
-                    </div>
-                </div>
+                </>
+                )}
             </div>
-
 
         </div>
     );
