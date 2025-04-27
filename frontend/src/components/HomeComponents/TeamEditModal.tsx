@@ -150,17 +150,17 @@ const TeamEditModal: React.FC<TeamEditModalProps> = ({ isOpen, onClose, member, 
 
   return (
     <div className="fixed inset-0 z-50 flex items-center justify-center" style={{ backgroundColor: 'rgba(0, 0, 0, 0.75)' }}>
-      <div className="bg-white rounded-lg p-6 w-full max-w-4xl max-h-[90vh] overflow-y-auto">
-        <h2 className="text-xl font-semibold text-gray-800 mb-4">Modifier les informations de l'employé</h2>
+      <div className="bg-white dark:bg-gray-800 rounded-lg p-6 w-full max-w-4xl max-h-[90vh] overflow-y-auto">
+        <h2 className="text-xl font-semibold text-gray-800 dark:text-white mb-4">Modifier les informations de l'employé</h2>
         
         {success && (
-          <div className="mb-4 p-3 bg-green-100 text-green-800 rounded">
+          <div className="mb-4 p-3 bg-green-100 dark:bg-green-900 text-green-800 dark:text-green-200 rounded">
             {success}
           </div>
         )}
         
         {error && (
-          <div className="mb-4 p-3 bg-red-100 text-red-800 rounded">
+          <div className="mb-4 p-3 bg-red-100 dark:bg-red-900 text-red-800 dark:text-red-200 rounded">
             {error}
           </div>
         )}
@@ -168,7 +168,7 @@ const TeamEditModal: React.FC<TeamEditModalProps> = ({ isOpen, onClose, member, 
         <form onSubmit={handleSubmit} className="space-y-4">
           {/* Nom d'utilisateur */}
           <div>
-            <label htmlFor="username" className="block text-sm font-medium text-gray-700 mb-1">
+            <label htmlFor="username" className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
               Nom d'utilisateur
             </label>
             <input
@@ -177,14 +177,14 @@ const TeamEditModal: React.FC<TeamEditModalProps> = ({ isOpen, onClose, member, 
               type="text"
               value={memberData.username}
               onChange={handleChange}
-              className="w-full p-2 border rounded"
+              className="w-full p-2 border rounded dark:bg-gray-700 dark:border-gray-600 dark:text-gray-200"
               required
             />
           </div>
           
           {/* Email */}
           <div>
-            <label htmlFor="email" className="block text-sm font-medium text-gray-700 mb-1">
+            <label htmlFor="email" className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
               Email
             </label>
             <input
@@ -193,7 +193,7 @@ const TeamEditModal: React.FC<TeamEditModalProps> = ({ isOpen, onClose, member, 
               type="email"
               value={memberData.email}
               onChange={handleChange}
-              className="w-full p-2 border rounded"
+              className="w-full p-2 border rounded dark:bg-gray-700 dark:border-gray-600 dark:text-gray-200"
               required
             />
           </div>
@@ -201,7 +201,7 @@ const TeamEditModal: React.FC<TeamEditModalProps> = ({ isOpen, onClose, member, 
           {/* Prénom et Nom */}
           <div className="grid grid-cols-2 gap-4">
             <div>
-              <label htmlFor="first_name" className="block text-sm font-medium text-gray-700 mb-1">
+              <label htmlFor="first_name" className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
                 Prénom
               </label>
               <input
@@ -210,12 +210,12 @@ const TeamEditModal: React.FC<TeamEditModalProps> = ({ isOpen, onClose, member, 
                 type="text"
                 value={memberData.first_name}
                 onChange={handleChange}
-                className="w-full p-2 border rounded"
+                className="w-full p-2 border rounded dark:bg-gray-700 dark:border-gray-600 dark:text-gray-200"
               />
             </div>
             
             <div>
-              <label htmlFor="last_name" className="block text-sm font-medium text-gray-700 mb-1">
+              <label htmlFor="last_name" className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
                 Nom
               </label>
               <input
@@ -224,14 +224,14 @@ const TeamEditModal: React.FC<TeamEditModalProps> = ({ isOpen, onClose, member, 
                 type="text"
                 value={memberData.last_name}
                 onChange={handleChange}
-                className="w-full p-2 border rounded"
+                className="w-full p-2 border rounded dark:bg-gray-700 dark:border-gray-600 dark:text-gray-200"
               />
             </div>
           </div>
           
           {/* Sexe */}
           <div>
-            <label htmlFor="sexe" className="block text-sm font-medium text-gray-700 mb-1">
+            <label htmlFor="sexe" className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
               Sexe
             </label>
             <select
@@ -239,7 +239,7 @@ const TeamEditModal: React.FC<TeamEditModalProps> = ({ isOpen, onClose, member, 
               name="sexe"
               value={memberData.sexe}
               onChange={handleChange}
-              className="w-full p-2 border rounded"
+              className="w-full p-2 border rounded dark:bg-gray-700 dark:border-gray-600 dark:text-gray-200"
             >
               <option value="M">Masculin</option>
               <option value="F">Féminin</option>
@@ -250,7 +250,7 @@ const TeamEditModal: React.FC<TeamEditModalProps> = ({ isOpen, onClose, member, 
           
           {/* Points */}
           <div>
-            <label htmlFor="points" className="block text-sm font-medium text-gray-700 mb-1">
+            <label htmlFor="points" className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
               Points
             </label>
             <input
@@ -260,14 +260,14 @@ const TeamEditModal: React.FC<TeamEditModalProps> = ({ isOpen, onClose, member, 
               min="0"
               value={memberData.points}
               onChange={handleChange}
-              className="w-full p-2 border rounded"
+              className="w-full p-2 border rounded dark:bg-gray-700 dark:border-gray-600 dark:text-gray-200"
             />
           </div>
           
           {/* Rôle et Section */}
           <div className="grid grid-cols-2 gap-4">
             <div>
-              <label htmlFor="role" className="block text-sm font-medium text-gray-700 mb-1">
+              <label htmlFor="role" className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
                 Rôle
               </label>
               <select
@@ -275,7 +275,7 @@ const TeamEditModal: React.FC<TeamEditModalProps> = ({ isOpen, onClose, member, 
                 name="role"
                 value={memberData.role}
                 onChange={handleChange}
-                className="w-full p-2 border rounded"
+                className="w-full p-2 border rounded dark:bg-gray-700 dark:border-gray-600 dark:text-gray-200"
               >
                 <option value="employe">Employé</option>
                 <option value="gestionnaire">Gestionnaire</option>
@@ -285,7 +285,7 @@ const TeamEditModal: React.FC<TeamEditModalProps> = ({ isOpen, onClose, member, 
             </div>
             
             <div>
-              <label htmlFor="section" className="block text-sm font-medium text-gray-700 mb-1">
+              <label htmlFor="section" className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
                 Section
               </label>
               <select
@@ -293,7 +293,7 @@ const TeamEditModal: React.FC<TeamEditModalProps> = ({ isOpen, onClose, member, 
                 name="section"
                 value={memberData.section}
                 onChange={handleChange}
-                className="w-full p-2 border rounded"
+                className="w-full p-2 border rounded dark:bg-gray-700 dark:border-gray-600 dark:text-gray-200"
               >
                 <option value="a">Section A</option>
                 <option value="b">Section B</option>
@@ -307,14 +307,14 @@ const TeamEditModal: React.FC<TeamEditModalProps> = ({ isOpen, onClose, member, 
             <button
               type="button"
               onClick={onClose}
-              className="px-4 py-2 text-gray-700 bg-gray-200 rounded hover:bg-gray-300"
+              className="px-4 py-2 text-gray-700 dark:text-gray-300 bg-gray-200 dark:bg-gray-700 rounded hover:bg-gray-300 dark:hover:bg-gray-600"
               disabled={loading}
             >
               Annuler
             </button>
             <button
               type="submit"
-              className="px-4 py-2 text-white bg-blue-600 rounded hover:bg-blue-700"
+              className="px-4 py-2 text-white bg-blue-600 rounded hover:bg-blue-700 dark:bg-blue-700 dark:hover:bg-blue-800"
               disabled={loading}
             >
               {loading ? 'Enregistrement...' : 'Enregistrer'}

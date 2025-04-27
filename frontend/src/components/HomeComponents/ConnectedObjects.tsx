@@ -172,7 +172,7 @@ const ConnectedObjects: React.FC<ConnectedObjectsProps> = ({ prisonId, addPoints
                 coord_y: newObjectY,
                 Prison_id: prisonId, // Utiliser une variable explicite
                 // Champs requis par le modèle backend
-                consommation: newConsumption, // Use the value from the form
+                consomation: newConsumption, // Consumption in watts
                 valeur_actuelle: initialValue,
                 valeur_cible: addingObjectType === 'thermostat' ? newTargetValue : 0, // Use target value for thermostat
                 durabilité: cappedDurability, // Use the capped durability value
@@ -429,13 +429,6 @@ const ConnectedObjects: React.FC<ConnectedObjectsProps> = ({ prisonId, addPoints
                         <Activity className="h-4 w-4 mr-1 text-green-500" />
                         {loading ? 'Chargement...' : `${objects.length} objets connectés`}
                     </span>
-                    <button
-                        onClick={fetchObjects}
-                        className="p-2 bg-gray-100 rounded-full hover:bg-gray-200 dark:bg-gray-700 dark:hover:bg-gray-600 transition-colors"
-                        disabled={refreshing}
-                    >
-                        <RefreshCw className={`h-4 w-4 text-gray-600 dark:text-gray-300 ${refreshing ? 'animate-spin' : ''}`} />
-                    </button>
                 </div>
             </div>
 

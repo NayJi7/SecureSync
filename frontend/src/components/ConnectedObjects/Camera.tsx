@@ -1,6 +1,6 @@
 import React, { useState, useEffect, useRef } from 'react';
 import { ObjectType } from './types';
-import { Camera as CameraIcon, Plus, ToggleLeft, MoreVertical, Pencil, Trash2, X, Info, Save, Wrench, AlertTriangle } from 'lucide-react';
+import { Video, VideoOff, Plus, ToggleLeft, MoreVertical, Pencil, Trash2, X, Info, Save, Wrench, AlertTriangle } from 'lucide-react';
 import { toggleObjectState, updateObject, deleteObject, repairObject } from '../../services/objectService';
 import { DotLottieReact } from '@lottiefiles/dotlottie-react';
 
@@ -195,7 +195,7 @@ const Camera: React.FC<CameraProps> = ({ objects, onAddObject, onStatusChange, a
         setNewName(object.nom);
         setNewX(object.coord_x);
         setNewY(object.coord_y);
-        setNewConsumption(object.consommation || 0);
+        setNewConsumption(object.consomation || 0);
         setNewConnection(object.connection as 'wifi' | 'filaire' || 'wifi');
         // Close any open menus
         setActiveMenu(null);
@@ -226,7 +226,7 @@ const Camera: React.FC<CameraProps> = ({ objects, onAddObject, onStatusChange, a
                 nom: newName,
                 coord_x: newX,
                 coord_y: newY,
-                consommation: newConsumption,
+                consomation: newConsumption, // Utilisation du nom correct pour le backend
                 connection: newConnection
             });
 
@@ -279,7 +279,7 @@ const Camera: React.FC<CameraProps> = ({ objects, onAddObject, onStatusChange, a
             <div className="flex justify-between items-center mb-4">
                 <div className="flex items-center">
                     <div className="bg-purple-100 dark:bg-purple-900/30 p-2 rounded-lg mr-3">
-                        <CameraIcon className="h-5 w-5 text-purple-600 dark:text-purple-400" />
+                        <Video className="h-5 w-5 text-purple-600 dark:text-purple-400" />
                     </div>
                     <h3 className="text-lg font-semibold text-gray-900 dark:text-white">Caméras</h3>
                 </div>
@@ -300,7 +300,7 @@ const Camera: React.FC<CameraProps> = ({ objects, onAddObject, onStatusChange, a
 
             {isEmpty ? (
                 <div className="py-8 flex flex-col items-center justify-center text-center border-2 border-dashed border-gray-200 dark:border-gray-700 rounded-lg">
-                    <CameraIcon className="h-10 w-10 text-gray-300 dark:text-gray-600 mb-2" />
+                    <Video className="h-10 w-10 text-gray-300 dark:text-gray-600 mb-2" />
                     <p className="text-gray-500 dark:text-gray-400 mb-2">Aucune caméra connectée</p>
                     <button
                         className="mt-2 text-sm font-medium text-purple-600 dark:text-purple-400 hover:underline flex items-center"
@@ -419,7 +419,10 @@ const Camera: React.FC<CameraProps> = ({ objects, onAddObject, onStatusChange, a
                                     <div className="flex justify-between items-center p-3">
                                         <div className="flex items-center">
                                             <div className={`p-1.5 rounded-full mr-2 ${camera.etat === 'on' ? 'bg-purple-100 dark:bg-purple-900/30' : 'bg-gray-100 dark:bg-gray-800/60'}`}>
-                                                <CameraIcon className={`h-4 w-4 ${camera.etat === 'on' ? 'text-purple-600 dark:text-purple-400' : 'text-gray-500 dark:text-gray-400'}`} />
+                                                {camera.etat === 'on' 
+                                                    ? <Video className="h-4 w-4 text-purple-600 dark:text-purple-400" />
+                                                    : <VideoOff className="h-4 w-4 text-gray-500 dark:text-gray-400" />
+                                                }
                                             </div>
                                             <div>
                                                 <p className="font-medium text-gray-800 dark:text-white text-sm">{camera.nom}</p>
@@ -449,7 +452,7 @@ const Camera: React.FC<CameraProps> = ({ objects, onAddObject, onStatusChange, a
                                                 {toggleLoading === camera.id ? (
                                                     <div className="h-4 w-4 border-2 border-gray-500 border-t-transparent rounded-full animate-spin"></div>
                                                 ) : (
-                                                    <ToggleLeft className={`h-4 w-4 ${camera.etat === 'on' ? 'transform rotate-180' : ''}`} />
+                                                    <ToggleLeft className={`h-4 w-4 ${camera.etat === 'on' ? 'transform rotate-180' : ''} text-purple-600 dark:text-purple-400`} />
                                                 )}
                                             </button>
                                             <button
@@ -506,7 +509,7 @@ const Camera: React.FC<CameraProps> = ({ objects, onAddObject, onStatusChange, a
                                                 </div>
                                                 <div className="space-y-1">
                                                     <p className="text-xs text-gray-500 dark:text-gray-400">Consommation</p>
-                                                    <p className="font-medium text-gray-700 dark:text-gray-300">{camera.consommation || 0} W</p>
+                                                    <p className="font-medium text-gray-700 dark:text-gray-300">{camera.consomation || 0} W</p>
                                                 </div>
                                                 <div className="space-y-1">
                                                     <p className="text-xs text-gray-500 dark:text-gray-400">Maintenance</p>

@@ -1,5 +1,5 @@
 import React, { useState, useRef, useEffect } from 'react';
-import { Info, MoreVertical, Pencil, Save, Trash2, ToggleLeft, X, MonitorPlay, Plus, MessageSquare, Wrench, AlertTriangle } from 'lucide-react';
+import { Info, MoreVertical, Pencil, Save, Trash2, ToggleLeft, X, MonitorPlay, Plus, MessageSquare, Wrench, AlertTriangle, MonitorOff } from 'lucide-react';
 import { ObjectType } from './types';
 import { toggleObjectState, updateObject, deleteObject, repairObject } from '../../services/objectService';
 import { DotLottieReact } from '@lottiefiles/dotlottie-react';
@@ -108,7 +108,7 @@ const PanneauAffichage: React.FC<PanneauAffichageProps> = ({ objects, onStatusCh
         setNewName(object.nom);
         setNewX(object.coord_x);
         setNewY(object.coord_y);
-        setNewConsumption(object.consommation || 0);
+        setNewConsumption(object.consomation || 0);
         setNewConnection(object.connection as 'wifi' | 'filaire' || 'wifi');
         setActiveMenu(null);
     };
@@ -171,7 +171,7 @@ const PanneauAffichage: React.FC<PanneauAffichageProps> = ({ objects, onStatusCh
                 nom: newName,
                 coord_x: newX,
                 coord_y: newY,
-                consommation: newConsumption,
+                consomation: newConsumption,
                 connection: newConnection
             });
 
@@ -301,8 +301,12 @@ const PanneauAffichage: React.FC<PanneauAffichageProps> = ({ objects, onStatusCh
         }
     };
 
-    const getDisplayPanelIcon = (message: string | number | null | undefined) => {
-        return <MonitorPlay className="h-4 w-4 text-indigo-600 dark:text-indigo-400" />;
+    const getDisplayPanelIcon = (message: string | number | null | undefined, etat: string) => {
+        if (etat === 'on') {
+            return <MonitorPlay className="h-4 w-4 text-indigo-600 dark:text-indigo-400" />;
+        } else {
+            return <MonitorOff className="h-4 w-4 text-gray-500 dark:text-gray-400" />;
+        }
     };
 
     return (
@@ -355,7 +359,7 @@ const PanneauAffichage: React.FC<PanneauAffichageProps> = ({ objects, onStatusCh
                             <div className="flex justify-between items-center p-3">
                                 <div className="flex items-center">
                                     <div className={`p-1.5 rounded-full mr-2 ${panneau.etat === 'on' ? 'bg-indigo-100 dark:bg-indigo-900/30' : 'bg-gray-200 dark:bg-gray-700'}`}>
-                                        {getDisplayPanelIcon(panneau.valeur_actuelle)}
+                                        {getDisplayPanelIcon(panneau.valeur_actuelle, panneau.etat)}
                                     </div>
                                     <div>
                                         <p className="font-medium text-gray-800 dark:text-white text-sm">{panneau.nom}</p>
@@ -568,7 +572,7 @@ const PanneauAffichage: React.FC<PanneauAffichageProps> = ({ objects, onStatusCh
                                         </div>
                                         <div className="space-y-1">
                                             <p className="text-xs text-gray-500 dark:text-gray-400">Consommation</p>
-                                            <p className="font-medium text-gray-700 dark:text-gray-300">{panneau.consommation || 0} W</p>
+                                            <p className="font-medium text-gray-700 dark:text-gray-300">{panneau.consomation || 0} W</p>
                                         </div>
                                         <div className="space-y-1">
                                             <p className="text-xs text-gray-500 dark:text-gray-400">Maintenance</p>

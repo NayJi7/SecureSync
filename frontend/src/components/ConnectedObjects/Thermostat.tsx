@@ -135,7 +135,7 @@ const Thermostat: React.FC<ThermostatProps> = ({ objects, onAddObject, onStatusC
         setNewName(object.nom);
         setNewX(object.coord_x);
         setNewY(object.coord_y);
-        setNewConsumption(object.consommation || 0);
+        setNewConsumption(object.consomation || 0);
         setNewConnection(object.connection as 'wifi' | 'filaire' || 'wifi');
         setNewTargetTemp(Number(object.valeur_cible) || 22);
         setActiveMenu(null);
@@ -171,7 +171,7 @@ const Thermostat: React.FC<ThermostatProps> = ({ objects, onAddObject, onStatusC
                 nom: newName,
                 coord_x: newX,
                 coord_y: newY,
-                consommation: newConsumption,
+                consomation: newConsumption,
                 connection: newConnection,
                 valeur_cible: newTargetTemp
             });
@@ -666,7 +666,7 @@ const Thermostat: React.FC<ThermostatProps> = ({ objects, onAddObject, onStatusC
                                                 </div>
                                                 <div className="space-y-1">
                                                     <p className="text-xs text-gray-500 dark:text-gray-400">Consommation</p>
-                                                    <p className="font-medium text-gray-700 dark:text-gray-300">{thermostat.consommation || 0} W</p>
+                                                    <p className="font-medium text-gray-700 dark:text-gray-300">{thermostat.consomation || 0} W</p>
                                                 </div>
                                                 <div className="space-y-1">
                                                     <p className="text-xs text-gray-500 dark:text-gray-400">Maintenance</p>

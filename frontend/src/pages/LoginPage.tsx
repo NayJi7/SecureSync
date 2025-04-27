@@ -536,7 +536,7 @@ const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
           {transitions((styles) => (
             <AnimatedDiv style={{ ...styles, position: 'absolute', width: '100%', display: 'flex', justifyContent: 'center' }}>
               {authStep === 'login' ? (
-                <SpotlightCard className='w-[85%] max-w-4xl mx-auto flex flex-col justify-evenly pointer-events-auto' spotlightColor="rgba(0, 229, 255, 0.2)">
+                <SpotlightCard className='w-[85%] max-w-4xl mx-auto flex flex-col justify-evenly pointer-events-auto' spotlightColor="rgba(45, 161, 51, 0.2)">
                   <motion.form 
                     className="flex flex-col gap-4 w-[80%] mx-auto" 
                     onSubmit={handleSubmit}
@@ -620,6 +620,7 @@ const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
                           type="button"
                           className="absolute inset-y-0 right-0 flex items-center pr-3 text-gray-400 hover:text-gray-600 cursor-pointer"
                           onClick={() => setShowPassword(!showPassword)}
+                          tabIndex={-1} // Empêche la navigation par tabulation sur ce bouton
                         >
                           {showPassword ? <LuEye className="pointer-events-none" size={20} /> : <LuEyeClosed className="pointer-events-none" size={20} />}
                         </button>
@@ -647,6 +648,7 @@ const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
                           type="button"
                           className="absolute inset-y-0 right-0 flex items-center pr-3 text-gray-400 hover:text-gray-600 cursor-pointer"
                           onClick={() => setShowRepeatPassword(!showRepeatPassword)}
+                          tabIndex={-1} // Empêche la navigation par tabulation sur ce bouton
                         >
                           {showRepeatPassword ? <LuEye className="pointer-events-none" size={20} /> : <LuEyeClosed className="pointer-events-none" size={20} />}
                         </button>
@@ -661,13 +663,20 @@ const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
                           <Check className="w-4 h-4 text-green-500" />
                         ) : (
                           <X className="w-4 h-4 text-red-500" />
-                        )}
-                        <a 
+                        )}                          <a 
                           href="#" 
-                          className="text-sm text-blue-400 hover:text-blue-300 hover:underline"
+                          className="text-sm text-green-400 hover:text-green-300 hover:underline"
                           onClick={(e) => {
                             e.preventDefault();
                             setOpenModal(true);
+                          }}
+                          role="button"
+                          tabIndex={0} // Assure que cet élément est tabulable
+                          onKeyDown={(e) => {
+                            if (e.key === 'Enter' || e.key === ' ') {
+                              e.preventDefault();
+                              setOpenModal(true);
+                            }
                           }}
                         >
                           Conditions d'utilisation
@@ -692,18 +701,18 @@ const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
                             <li>L'accès peut être révoqué en cas de non-respect de ces conditions.</li>
                           </ul>
                           <p className="text-base leading-relaxed text-gray-500 dark:text-gray-400 mt-4">
-                            Pour toute question, contactez <a href="mailto:email@securesync.com" className="text-blue-500 hover:text-blue-600">email@securesync.com</a>
+                            Pour toute question, contactez <a href="mailto:email@securesync.com" className="text-green-500 hover:text-green-600">email@securesync.com</a>
                             <br />
                             En date du : {new Date().toLocaleDateString('fr-FR')}
                           </p>
                         </div>
                       </ModalBody>
                       <ModalFooter>
-                        <Button className='cursor-pointer' onClick={() => {
+                        <Button className='bg-green-600 hover:bg-green-700 text-black font-semibold cursor-pointer' onClick={() => {
                           setAcceptedTerms(true);
                           setOpenModal(false);
                         }}>J'accepte</Button>
-                        <Button className='cursor-pointer' color="gray" onClick={() => {
+                        <Button className='cursor-pointer border-green-500 hover:bg-green-900/30 hover:text-white' variant="outline" onClick={() => {
                           setAcceptedTerms(false);
                           setOpenModal(false);
                         }}>
@@ -712,7 +721,7 @@ const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
                       </ModalFooter>
                     </Modal>
                     <Button 
-                      className={`bg-black hover:bg-gray-900 cursor-pointer pointer-events-auto ${(!acceptedTerms || !username|| !password || !repeatPassword || !email || isLoading) ? 'opacity-50' : ''}`} 
+                      className={`bg-green-600 hover:bg-green-700 text-white font-semibold cursor-pointer pointer-events-auto ${(!acceptedTerms || !username|| !password || !repeatPassword || !email || isLoading) ? 'opacity-50' : ''}`} 
                       type="submit" 
                       disabled={!acceptedTerms || !username || !password || !repeatPassword || !email || isLoading}
                     >
@@ -733,10 +742,15 @@ const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
                   </motion.form>
                 </SpotlightCard>
               ) : (
-                <SpotlightCard className='w-[85%] max-w-4xl mx-auto flex flex-col justify-evenly pointer-events-auto' spotlightColor="rgba(0, 229, 255, 0.2)">
+                <SpotlightCard className='w-[85%] max-w-4xl mx-auto flex flex-col justify-evenly pointer-events-auto' spotlightColor="rgba(45, 161, 51, 0.2)">
                   <motion.form 
                     className="flex flex-col gap-4 w-[80%] mx-auto" 
-                    onSubmit={(e) => e.preventDefault()}
+                    onSubmit={(e) => {
+                      e.preventDefault();
+                      if (otpCode.length === 6 && !isLoading) {
+                        handleVerifyOTP();
+                      }
+                    }}
                     initial="hidden"
                     animate="visible"
                     variants={formVariants}
@@ -764,6 +778,12 @@ const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
                         className="gap-2"
                         value={otpCode}
                         onChange={handleOTPChange}
+                        onKeyDown={(e) => {
+                          if (e.key === 'Enter' && otpCode.length === 6 && !isLoading) {
+                            e.preventDefault();
+                            handleVerifyOTP();
+                          }
+                        }}
                       >
                         <InputOTPGroup>
                           <InputOTPSlot index={0} />
@@ -780,20 +800,20 @@ const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
                     </div>
                     <div className="flex flex-col items-center gap-4">
                       <button 
-                        className={`text-blue-400 text-sm ${resendDisabled ? 'opacity-50 cursor-not-allowed' : 'cursor-pointer hover:underline hover:text-blue-300'}`}
+                        className={`text-green-400 text-sm ${resendDisabled ? 'opacity-50 cursor-not-allowed' : 'cursor-pointer hover:underline hover:text-green-300'}`}
                         onClick={handleResendCode}
                         disabled={resendDisabled}
                       >
                         {resendDisabled ? `Veuillez patienter avant de réessayer (${countdown}s)` : 'Renvoyer le code'}
-                      </button>
-                      <Button 
-                        className={`bg-black hover:bg-gray-900 cursor-pointer pointer-events-auto ${(otpCode.length !== 6 || isLoading) ? 'opacity-50' : ''}`}
-                        onClick={handleVerifyOTP}
-                        disabled={otpCode.length !== 6 || isLoading}
-                      >
+                      </button>                    <Button 
+                      className={`bg-green-600 hover:bg-green-700 text-black font-semibold cursor-pointer pointer-events-auto ${(otpCode.length !== 6 || isLoading) ? 'opacity-50' : ''}`}
+                      onClick={handleVerifyOTP}
+                      disabled={otpCode.length !== 6 || isLoading}
+                      type="submit"
+                    >
                         {isLoading ? (
                           <span className="flex items-center">
-                            <svg className="animate-spin -ml-1 mr-3 h-5 w-5 text-white" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
+                            <svg className="animate-spin -ml-1 mr-3 h-5 w-5 text-black" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
                               <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4"></circle>
                               <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
                             </svg>
@@ -801,7 +821,7 @@ const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
                           </span>
                         ) : (
                           <>
-                            <ArrowRight className="mr-2" /> Vérifier
+                            <ArrowRight className="mr-2 text-white" /> <p className='text-white'>Vérifier</p>
                           </>
                         )}
                       </Button>

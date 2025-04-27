@@ -78,22 +78,20 @@ const UserLevelProgressBar: React.FC<ProgressBarProps> = ({ points }) => {
             alt={`Badge ${currentLevel.name}`} 
             className="w-full h-full object-contain"
           />
-        </div>
-        <div className="flex-grow">
-          <div className="flex justify-between">
-            <span className="font-semibold">{currentLevel.name}</span>
-            <span className="text-sm text-gray-500">{points} points</span>
+        </div>          <div className="flex-grow">
+            <div className="flex justify-between">
+              <span className="font-semibold text-gray-800 dark:text-gray-200">{currentLevel.name}</span>
+              <span className="text-sm text-gray-500 dark:text-gray-400">{points} points</span>
+            </div>
+            <div className="w-full bg-gray-200 rounded-full h-2.5 dark:bg-gray-700 mt-2">
+              <div
+                className={`h-2.5 rounded-full ${currentLevel.color}`}
+                style={{ width: `${percentage}%` }}              ></div>
+            </div>
+            <p className="text-xs text-gray-500 dark:text-gray-400 mt-1">{nextLevelInfo}</p>
           </div>
-          <div className="w-full bg-gray-200 rounded-full h-2.5 dark:bg-gray-700 mt-2">
-            <div
-              className={`h-2.5 rounded-full ${currentLevel.color}`}
-              style={{ width: `${percentage}%` }}
-            ></div>
-          </div>
-          <p className="text-xs text-gray-500 mt-1">{nextLevelInfo}</p>
         </div>
       </div>
-    </div>
   );
 };
 
@@ -383,7 +381,7 @@ const ProfileModal: React.FC<ProfileModalProps> = ({
               <div className="space-y-4 flex-col justify-center ">
                 <div className="flex flex-col md:flex-row gap-8 items-center">
                     <div className="w-22 h-22 flex-shrink-0 align-">
-                        <div className="w-22 h-22 rounded-full bg-blue-100 flex items-center justify-center text-blue-600 font-bold text-4xl border-2 border-gray-200">
+                        <div className="w-22 h-22 rounded-full bg-blue-100 flex items-center justify-center text-blue-600 font-bold text-4xl border-2 border-gray-200 dark:border-gray-700">
                             {profile && (profile.first_name || profile.last_name) ? 
                             `${profile.first_name?.charAt(0).toUpperCase() || ''}${profile.last_name?.charAt(0).toUpperCase() || ''}` : 
                             profile?.username?.charAt(0).toUpperCase() || '?'}
@@ -392,35 +390,35 @@ const ProfileModal: React.FC<ProfileModalProps> = ({
                   
                   <div className="flex-grow grid grid-cols-1 md:grid-cols-2 gap-6">
                     <div>
-                      <h3 className="text-gray-500">Nom d'utilisateur</h3>
-                      <p className="font-medium">{profile.username}</p>
+                      <h3 className="text-gray-500 dark:text-gray-400">Nom d'utilisateur</h3>
+                      <p className="font-medium dark:text-white">{profile.username}</p>
                     </div>
                     
                     <div>
-                      <h3 className="text-gray-500">Email</h3>
-                      <p className="font-medium truncate" title={profile.email}>
+                      <h3 className="text-gray-500 dark:text-gray-400">Email</h3>
+                      <p className="font-medium truncate dark:text-white" title={profile.email}>
                         {profile.email}
                       </p>
                     </div>
                     
                     <div>
-                      <h3 className="text-gray-500">Prénom</h3>
-                      <p className="font-medium">{profile.first_name || '-'}</p>
+                      <h3 className="text-gray-500 dark:text-gray-400">Prénom</h3>
+                      <p className="font-medium dark:text-white">{profile.first_name || '-'}</p>
                     </div>
                     
                     <div>
-                      <h3 className="text-gray-500">Nom</h3>
-                      <p className="font-medium">{profile.last_name || '-'}</p>
+                      <h3 className="text-gray-500 dark:text-gray-400">Nom</h3>
+                      <p className="font-medium dark:text-white">{profile.last_name || '-'}</p>
                     </div>
                     
                     <div>
-                      <h3 className="text-gray-500">Date de naissance</h3>
-                      <p className="font-medium">{profile.date_naissance || '-'}</p>
+                      <h3 className="text-gray-500 dark:text-gray-400">Date de naissance</h3>
+                      <p className="font-medium dark:text-white">{profile.date_naissance || '-'}</p>
                     </div>
                     
                     <div>
-                      <h3 className="text-gray-500">Sexe</h3>
-                      <p className="font-medium">{
+                      <h3 className="text-gray-500 dark:text-gray-400">Sexe</h3>
+                      <p className="font-medium dark:text-white">{
                         profile.sexe === 'M' ? 'Masculin' : 
                         profile.sexe === 'F' ? 'Féminin' : 
                         profile.sexe === 'A' ? 'Autre' : '-'
@@ -445,12 +443,12 @@ const ProfileModal: React.FC<ProfileModalProps> = ({
               </div>
             ) : showPasswordPrompt ? (
               <div className="space-y-6">
-                <p className="text-gray-700">
+                <p className="text-gray-700 dark:text-gray-300">
                   Veuillez entrer votre mot de passe actuel pour confirmer votre identité avant de modifier votre profil.
                 </p>
                 
                 <div>
-                  <label className="block text-gray-700 mb-2" htmlFor="authPassword">
+                  <label className="block text-gray-700 dark:text-gray-300 mb-2" htmlFor="authPassword">
                     Mot de passe actuel
                   </label>
                   <input
@@ -464,7 +462,7 @@ const ProfileModal: React.FC<ProfileModalProps> = ({
                         verifyPassword();
                       }
                     }}
-                    className={`w-full p-2 border rounded ${authPasswordError ? 'border-red-500' : ''}`}
+                    className={`w-full p-2 border rounded dark:bg-gray-700 dark:text-gray-300 dark:border-gray-600 ${authPasswordError ? 'border-red-500' : ''}`}
                   />
                   {authPasswordError && (
                     <p className="text-red-500 text-sm mt-1">{authPasswordError}</p>
@@ -506,7 +504,7 @@ const ProfileModal: React.FC<ProfileModalProps> = ({
                     
                     <div className="flex-grow grid grid-cols-1 md:grid-cols-2 gap-6">
                       <div>
-                        <label className="block text-gray-700 mb-2" htmlFor="username">
+                        <label className="block text-gray-700 dark:text-gray-300 mb-2" htmlFor="username">
                           Nom d'utilisateur
                         </label>
                         <input
@@ -514,16 +512,16 @@ const ProfileModal: React.FC<ProfileModalProps> = ({
                           id="username"
                           name="username"
                           value={editedProfile.username}
-                          className="w-full p-2 border rounded bg-gray-100"
+                          className="w-full p-2 border rounded bg-gray-100 dark:bg-gray-700 dark:text-gray-300"
                           disabled
                         />
-                        <p className="text-sm text-gray-500 mt-1">
+                        <p className="text-sm text-gray-500 dark:text-gray-400 mt-1">
                           Non modifiable
                         </p>
                       </div>
                       
                       <div>
-                        <label className="block text-gray-700 mb-2" htmlFor="email">
+                        <label className="block text-gray-700 dark:text-gray-300 mb-2" htmlFor="email">
                           Email
                         </label>
                         <input
@@ -532,12 +530,12 @@ const ProfileModal: React.FC<ProfileModalProps> = ({
                           name="email"
                           value={editedProfile.email}
                           onChange={handleChange}
-                          className="w-full p-2 border rounded"
+                          className="w-full p-2 border rounded dark:bg-gray-700 dark:text-gray-300 dark:border-gray-600"
                         />
                       </div>
                       
                       <div>
-                        <label className="block text-gray-700 mb-2" htmlFor="first_name">
+                        <label className="block text-gray-700 dark:text-gray-300 mb-2" htmlFor="first_name">
                           Prénom
                         </label>
                         <input
@@ -546,12 +544,12 @@ const ProfileModal: React.FC<ProfileModalProps> = ({
                           name="first_name"
                           value={editedProfile.first_name}
                           onChange={handleChange}
-                          className="w-full p-2 border rounded"
+                          className="w-full p-2 border rounded dark:bg-gray-700 dark:text-gray-300 dark:border-gray-600"
                         />
                       </div>
                       
                       <div>
-                        <label className="block text-gray-700 mb-2" htmlFor="last_name">
+                        <label className="block text-gray-700 dark:text-gray-300 mb-2" htmlFor="last_name">
                           Nom
                         </label>
                         <input
@@ -560,12 +558,12 @@ const ProfileModal: React.FC<ProfileModalProps> = ({
                           name="last_name"
                           value={editedProfile.last_name}
                           onChange={handleChange}
-                          className="w-full p-2 border rounded"
+                          className="w-full p-2 border rounded dark:bg-gray-700 dark:text-gray-300 dark:border-gray-600"
                         />
                       </div>
                       
                       <div>
-                        <label className="block text-gray-700 mb-2" htmlFor="date_naissance">
+                        <label className="block text-gray-700 dark:text-gray-300 mb-2" htmlFor="date_naissance">
                           Date de naissance
                         </label>
                         <input
@@ -574,12 +572,12 @@ const ProfileModal: React.FC<ProfileModalProps> = ({
                           name="date_naissance"
                           value={editedProfile.date_naissance}
                           onChange={handleChange}
-                          className="w-full p-2 border rounded"
+                          className="w-full p-2 border rounded dark:bg-gray-700 dark:text-gray-300 dark:border-gray-600 [&::-webkit-calendar-picker-indicator]:dark:invert"
                         />
                       </div>
                       
                       <div>
-                        <label className="block text-gray-700 mb-2" htmlFor="sexe">
+                        <label className="block text-gray-700 dark:text-gray-300 mb-2" htmlFor="sexe">
                           Sexe
                         </label>
                         <select
@@ -587,22 +585,22 @@ const ProfileModal: React.FC<ProfileModalProps> = ({
                           name="sexe"
                           value={editedProfile.sexe}
                           onChange={handleChange}
-                          className="w-full p-2 border rounded"
+                          className="w-full p-2 border rounded dark:bg-gray-700 dark:text-gray-300 dark:border-gray-600"
                         >
-                          <option value="M">Masculin</option>
-                          <option value="F">Féminin</option>
-                          <option value="A">Autre</option>
+                          <option value="M" className="dark:bg-gray-700 dark:text-white">Masculin</option>
+                          <option value="F" className="dark:bg-gray-700 dark:text-white">Féminin</option>
+                          <option value="A" className="dark:bg-gray-700 dark:text-white">Autre</option>
                         </select>
                       </div>
                     </div>
                   </div>
                   
-                  <div className="border-t border-gray-200 pt-4 mt-4">
-                    <h4 className="font-medium text-gray-700 mb-3">Changer le mot de passe (optionnel)</h4>
+                  <div className="border-t border-gray-200 dark:border-gray-700 pt-4 mt-4">
+                    <h4 className="font-medium text-gray-700 dark:text-gray-300 mb-3">Changer le mot de passe (optionnel)</h4>
                     
                     <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                       <div>
-                        <label className="block text-gray-700 mb-2" htmlFor="newPassword">
+                        <label className="block text-gray-700 dark:text-gray-300 mb-2" htmlFor="newPassword">
                           Nouveau mot de passe
                         </label>
                         <input
@@ -613,12 +611,12 @@ const ProfileModal: React.FC<ProfileModalProps> = ({
                             setNewPassword(e.target.value);
                             setPasswordMatch(e.target.value === confirmPassword || !e.target.value);
                           }}
-                          className="w-full p-2 border rounded"
+                          className="w-full p-2 border rounded dark:bg-gray-700 dark:text-gray-300 dark:border-gray-600"
                         />
                       </div>
                       
                       <div>
-                        <label className="block text-gray-700 mb-2" htmlFor="confirmPassword">
+                        <label className="block text-gray-700 dark:text-gray-300 mb-2" htmlFor="confirmPassword">
                           Confirmer le mot de passe
                         </label>
                         <input
@@ -629,7 +627,7 @@ const ProfileModal: React.FC<ProfileModalProps> = ({
                             setConfirmPassword(e.target.value);
                             setPasswordMatch(newPassword === e.target.value || !newPassword);
                           }}
-                          className={`w-full p-2 border rounded ${!passwordMatch ? 'border-red-500' : ''}`}
+                          className={`w-full p-2 border rounded dark:bg-gray-700 dark:text-gray-300 dark:border-gray-600 ${!passwordMatch ? 'border-red-500' : ''}`}
                           disabled={!newPassword}
                         />
                         {!passwordMatch && (
@@ -637,12 +635,10 @@ const ProfileModal: React.FC<ProfileModalProps> = ({
                         )}
                       </div>
                     </div>
-                    <p className="text-sm text-gray-500 mt-3">
+                    <p className="text-sm text-gray-500 dark:text-gray-400 mt-3">
                         Laissez vide pour ne pas modifier le mot de passe
                     </p>
-                  </div>
-                  
-                  <div className="flex space-x-4 justify-center">
+                  </div>                    <div className="flex space-x-4 justify-center">
                     <button
                       type="submit"
                       className="px-4 py-2 bg-green-600 text-white rounded hover:bg-green-700"
@@ -653,7 +649,7 @@ const ProfileModal: React.FC<ProfileModalProps> = ({
                     <button
                       type="button"
                       onClick={handleCancelClick}
-                      className="px-4 py-2 bg-gray-300 text-gray-800 rounded hover:bg-gray-400"
+                      className="px-4 py-2 bg-gray-300 text-gray-800 dark:bg-gray-600 dark:text-white rounded hover:bg-gray-400 dark:hover:bg-gray-700"
                       disabled={loading}
                     >
                       Annuler

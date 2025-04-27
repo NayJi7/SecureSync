@@ -340,9 +340,9 @@ const StaffModal: React.FC<StaffModalProps> = ({ isOpen, onClose, prisonId }) =>
     // Affichage en cas d'erreur
     if (error) {
       return (
-        <div className="bg-white p-8 rounded-lg shadow-md w-full">
-          <h1 className="text-2xl font-bold text-red-600 mb-4">Erreur</h1>
-          <p className="text-gray-700">{error}</p>
+        <div className="bg-white dark:bg-gray-800 p-8 rounded-lg shadow-md w-full">
+          <h1 className="text-2xl font-bold text-red-600 dark:text-red-400 mb-4">Erreur</h1>
+          <p className="text-gray-700 dark:text-gray-300">{error}</p>
           <button 
             onClick={fetchStaffData}
             className="mt-4 px-4 py-2 bg-blue-500 text-white rounded hover:bg-blue-600 transition"
@@ -422,12 +422,12 @@ const StaffModal: React.FC<StaffModalProps> = ({ isOpen, onClose, prisonId }) =>
 
     if (staffList.length === 0) {
       return (
-        <div className="bg-white p-8 rounded-lg text-center">
-          <svg xmlns="http://www.w3.org/2000/svg" className="h-16 w-16 text-gray-400 mx-auto mb-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+        <div className="bg-white dark:bg-gray-800 p-8 rounded-lg text-center">
+          <svg xmlns="http://www.w3.org/2000/svg" className="h-16 w-16 text-gray-400 dark:text-gray-500 mx-auto mb-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
             <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 4.354a4 4 0 110 5.292M15 21H3v-1a6 6 0 0112 0v1zm0 0h6v-1a6 6 0 00-9-5.197M13 7a4 4 0 11-8 0 4 4 0 018 0z" />
           </svg>
-          <h2 className="text-xl font-semibold text-gray-700 mb-2">Aucun employé trouvé</h2>
-          <p className="text-gray-500">Il n'y a actuellement aucun membre du personnel enregistré dans le système.</p>
+          <h2 className="text-xl font-semibold text-gray-700 dark:text-gray-300 mb-2">Aucun employé trouvé</h2>
+          <p className="text-gray-500 dark:text-gray-400">Il n'y a actuellement aucun membre du personnel enregistré dans le système.</p>
         </div>
       );
     }
@@ -437,19 +437,19 @@ const StaffModal: React.FC<StaffModalProps> = ({ isOpen, onClose, prisonId }) =>
         
         {/* Statistiques */}
         <div className="flex justify-around gap-2 mb-6">
-          <div className="bg-white p-2 rounded-lg shadow flex-1 text-center">
-        <h2 className="text-sm font-semibold text-gray-700">Employés</h2>
-        <p className="text-xl font-bold text-blue-600">{staffList.length}</p>
+          <div className="bg-white dark:bg-gray-800 p-2 rounded-lg shadow dark:shadow-gray-700 flex-1 text-center">
+        <h2 className="text-sm font-semibold text-gray-700 dark:text-gray-300">Employés</h2>
+        <p className="text-xl font-bold text-blue-600 dark:text-blue-400">{staffList.length}</p>
           </div>
-          <div className="bg-white p-2 rounded-lg shadow flex-1 text-center">
-        <h2 className="text-sm font-semibold text-gray-700">Sections</h2>
-        <p className="text-xl font-bold text-green-600">
+          <div className="bg-white dark:bg-gray-800 p-2 rounded-lg shadow dark:shadow-gray-700 flex-1 text-center">
+        <h2 className="text-sm font-semibold text-gray-700 dark:text-gray-300">Sections</h2>
+        <p className="text-xl font-bold text-green-600 dark:text-green-400">
           {uniqueSections}
         </p>
           </div>
-          <div className="bg-white p-2 rounded-lg shadow flex-1 text-center">
-        <h2 className="text-sm font-semibold text-gray-700">Postes</h2>
-        <p className="text-xl font-bold text-purple-600">
+          <div className="bg-white dark:bg-gray-800 p-2 rounded-lg shadow dark:shadow-gray-700 flex-1 text-center">
+        <h2 className="text-sm font-semibold text-gray-700 dark:text-gray-300">Postes</h2>
+        <p className="text-xl font-bold text-purple-600 dark:text-purple-400">
           {uniqueRoles}
         </p>
           </div>
@@ -460,11 +460,11 @@ const StaffModal: React.FC<StaffModalProps> = ({ isOpen, onClose, prisonId }) =>
           <div className={`flex items-center mb-4`}>
         {!showAddMemberForm && (
           <div className="flex items-center">
-            <span className="mr-2 text-sm font-medium text-gray-700">Trier par :</span>
+            <span className="mr-2 text-sm font-medium text-gray-700 dark:text-gray-300">Trier par :</span>
             <select
           value={sortCriteria}
           onChange={(e) => setSortCriteria(e.target.value)}
-          className="p-2 text-sm bg-gray-100 border border-gray-300 rounded-lg focus:ring-blue-500 focus:border-blue-500"
+          className="p-2 text-sm bg-gray-100 dark:bg-gray-700 border border-gray-300 dark:border-gray-600 rounded-lg focus:ring-blue-500 focus:border-blue-500 text-gray-800 dark:text-gray-200"
             >
           <option value="role">Poste</option>
           <option value="section">Section</option>
@@ -478,19 +478,19 @@ const StaffModal: React.FC<StaffModalProps> = ({ isOpen, onClose, prisonId }) =>
         {/* Liste du personnel */}
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
           {staffList.map((member) => (
-        <div key={member.username} className="bg-white rounded-lg shadow-md overflow-hidden">
+        <div key={member.username} className="bg-white dark:bg-gray-800 rounded-lg shadow-md overflow-hidden border border-gray-200 dark:border-gray-700">
           <div className="p-4">
             <div className="flex items-center mb-4">
-          <div className="w-12 h-12 rounded-full bg-blue-100 flex items-center justify-center text-blue-600 font-bold text-lg border-2 border-gray-200 overflow-hidden">
+          <div className="w-12 h-12 rounded-full bg-blue-100 dark:bg-blue-900 flex items-center justify-center text-blue-600 dark:text-blue-300 font-bold text-lg border-2 border-gray-200 dark:border-gray-700 overflow-hidden">
             {(member.first_name || member.last_name) ? 
               `${member.first_name?.charAt(0).toUpperCase() || ''}${member.last_name?.charAt(0).toUpperCase() || ''}` : 
               member.username?.charAt(0).toUpperCase() || '?'}
           </div>
           <div className="ml-3">
-            <h3 className="text-xl font-semibold text-gray-800">
+            <h3 className="text-xl font-semibold text-gray-800 dark:text-gray-100">
               {member.first_name} {member.last_name}
             </h3>
-            <p className="text-sm text-gray-500">@{member.username}</p>
+            <p className="text-sm text-gray-500 dark:text-gray-400">@{member.username}</p>
           </div>
             
           <div className="flex-grow flex justify-end items-center space-x-2">
@@ -532,27 +532,27 @@ const StaffModal: React.FC<StaffModalProps> = ({ isOpen, onClose, prisonId }) =>
                 
                 </div>
                 
-                <div className="border-t border-gray-200 pt-3">
+                <div className="border-t border-gray-200 dark:border-gray-700 pt-3">
                   <div className="grid grid-cols-2 gap-2">
                     <div>
-                      <p className="text-sm font-medium text-gray-500">Poste</p>
-                      <p className="text-sm text-gray-900">{roleDictionary[member.role] || member.role || 'Non spécifié'}</p>
+                      <p className="text-sm font-medium text-gray-500 dark:text-gray-400">Poste</p>
+                      <p className="text-sm text-gray-900 dark:text-gray-200">{roleDictionary[member.role] || member.role || 'Non spécifié'}</p>
                     </div>
                     <div>
-                      <p className="text-sm font-medium text-gray-500">Section</p>
-                      <p className="text-sm text-gray-900">{member.section ? member.section.charAt(0).toUpperCase() + member.section.slice(1) : 'Non spécifié'}</p>
+                      <p className="text-sm font-medium text-gray-500 dark:text-gray-400">Section</p>
+                      <p className="text-sm text-gray-900 dark:text-gray-200">{member.section ? member.section.charAt(0).toUpperCase() + member.section.slice(1) : 'Non spécifié'}</p>
                     </div>
                     <div>
-                      <p className="text-sm font-medium text-gray-500">Date d'embauche</p>
-                      <p className="text-sm text-gray-900">
+                      <p className="text-sm font-medium text-gray-500 dark:text-gray-400">Date d'embauche</p>
+                      <p className="text-sm text-gray-900 dark:text-gray-200">
                         {member.date_joined ? formatDate(member.date_joined) : 
                          (member as any).date_joined ? formatDate((member as any).date_joined) : 
                          formatDate((member as any)?.dateJoined || new Date().toISOString())}
                       </p>
                     </div>
                     <div>
-                      <p className="text-sm font-medium text-gray-500">Âge</p>
-                      <p className="text-sm text-gray-900">
+                      <p className="text-sm font-medium text-gray-500 dark:text-gray-400">Âge</p>
+                      <p className="text-sm text-gray-900 dark:text-gray-200">
                         {member.date_naissance ? `${calculateAge(member.date_naissance)} ans` : 'Non spécifié'}
                       </p>
                     </div>
@@ -574,10 +574,10 @@ const StaffModal: React.FC<StaffModalProps> = ({ isOpen, onClose, prisonId }) =>
       size="6xl"
       position="center"
     >
-      <ModalHeader className="border-b border-gray-200">
+      <ModalHeader className="border-b border-gray-200 dark:border-gray-700">
         <div className={`${isMobile ? 'flex-col' : 'flex'} justify-between items-center w-full`}>
           <div className={`${isMobile ? 'flex-col' : 'flex'} items-center`}>
-            <div className="text-xl font-bold text-gray-900 mr-4">Gestion de l'équipe</div>
+            <div className="text-xl font-bold text-gray-900 dark:text-gray-100 mr-4">Gestion de l'équipe</div>
             {(currentUser?.role === 'admin' || currentUser?.role === 'gerant' || currentUser?.role === 'gestionnaire') && !showAddMemberForm && (
               <button 
                 onClick={() => setShowAddMemberForm(true)}
@@ -593,11 +593,11 @@ const StaffModal: React.FC<StaffModalProps> = ({ isOpen, onClose, prisonId }) =>
             <div className={`justify-end w-140 flex items-center`}>
             {!showAddMemberForm && (
               <div className="flex items-center">
-                <span className="mr-2 text-sm font-medium text-gray-700">Trier par :</span>
+                <span className="mr-2 text-sm font-medium text-gray-700 dark:text-gray-300">Trier par :</span>
                 <select
                   value={sortCriteria}
                   onChange={(e) => setSortCriteria(e.target.value)}
-                  className="p-2 text-sm bg-gray-100 border border-gray-300 rounded-lg focus:ring-blue-500 focus:border-blue-500"
+                  className="p-2 text-sm bg-gray-100 dark:bg-gray-700 border border-gray-300 dark:border-gray-600 rounded-lg focus:ring-blue-500 focus:border-blue-500 text-gray-800 dark:text-gray-200"
                 >
                   <option value="role">Poste</option>
                   <option value="section">Section</option>
@@ -609,19 +609,19 @@ const StaffModal: React.FC<StaffModalProps> = ({ isOpen, onClose, prisonId }) =>
           )}
         </div>
       </ModalHeader>
-      <ModalBody className="max-h-[80vh] overflow-y-auto">
+      <ModalBody className="max-h-[80vh] overflow-y-auto dark:bg-gray-800">
         {showAddMemberForm ? (
-          <div className="p-4 bg-white rounded-lg">
-            <h2 className="text-xl font-bold text-gray-900 mb-4">Ajouter un nouvel employé</h2>
+          <div className="p-4 bg-white dark:bg-gray-800 rounded-lg">
+            <h2 className="text-xl font-bold text-gray-900 dark:text-gray-100 mb-4">Ajouter un nouvel employé</h2>
             
             {formSuccess && (
-              <div className="p-4 mb-4 text-sm text-green-700 bg-green-100 rounded-lg">
+              <div className="p-4 mb-4 text-sm text-green-700 dark:text-green-300 bg-green-100 dark:bg-green-900/30 rounded-lg">
                 {formSuccess}
               </div>
             )}
             
             {formError && (
-              <div className="p-4 mb-4 text-sm text-red-700 bg-red-100 rounded-lg">
+              <div className="p-4 mb-4 text-sm text-red-700 dark:text-red-300 bg-red-100 dark:bg-red-900/30 rounded-lg">
                 {formError}
               </div>
             )}
@@ -630,7 +630,7 @@ const StaffModal: React.FC<StaffModalProps> = ({ isOpen, onClose, prisonId }) =>
               <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                 {/* Informations de base */}
                 <div>
-                  <label htmlFor="username" className="block text-sm font-medium text-gray-700 mb-1">
+                  <label htmlFor="username" className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
                     Nom d'utilisateur *
                   </label>
                   <input
@@ -639,13 +639,13 @@ const StaffModal: React.FC<StaffModalProps> = ({ isOpen, onClose, prisonId }) =>
                     name="username"
                     value={formData.username}
                     onChange={handleInputChange}
-                    className="w-full p-2.5 text-sm text-gray-900 bg-gray-50 rounded-lg border border-gray-300 focus:ring-blue-500 focus:border-blue-500"
+                    className="w-full p-2.5 text-sm text-gray-900 dark:text-gray-200 bg-gray-50 dark:bg-gray-700 rounded-lg border border-gray-300 dark:border-gray-600 focus:ring-blue-500 focus:border-blue-500"
                     required
                   />
                 </div>
                 
                 <div>
-                  <label htmlFor="email" className="block text-sm font-medium text-gray-700 mb-1">
+                  <label htmlFor="email" className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
                     Email *
                   </label>
                   <input
@@ -654,13 +654,13 @@ const StaffModal: React.FC<StaffModalProps> = ({ isOpen, onClose, prisonId }) =>
                     name="email"
                     value={formData.email}
                     onChange={handleInputChange}
-                    className="w-full p-2.5 text-sm text-gray-900 bg-gray-50 rounded-lg border border-gray-300 focus:ring-blue-500 focus:border-blue-500"
+                    className="w-full p-2.5 text-sm text-gray-900 dark:text-gray-200 bg-gray-50 dark:bg-gray-700 rounded-lg border border-gray-300 dark:border-gray-600 focus:ring-blue-500 focus:border-blue-500"
                     required
                   />
                 </div>
                 
                 <div>
-                  <label htmlFor="prenom" className="block text-sm font-medium text-gray-700 mb-1">
+                  <label htmlFor="prenom" className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
                     Prénom *
                   </label>
                   <input
@@ -669,13 +669,13 @@ const StaffModal: React.FC<StaffModalProps> = ({ isOpen, onClose, prisonId }) =>
                     name="prenom"
                     value={formData.prenom}
                     onChange={handleInputChange}
-                    className="w-full p-2.5 text-sm text-gray-900 bg-gray-50 rounded-lg border border-gray-300 focus:ring-blue-500 focus:border-blue-500"
+                    className="w-full p-2.5 text-sm text-gray-900 dark:text-gray-200 bg-gray-50 dark:bg-gray-700 rounded-lg border border-gray-300 dark:border-gray-600 focus:ring-blue-500 focus:border-blue-500"
                     required
                   />
                 </div>
                 
                 <div>
-                  <label htmlFor="nom" className="block text-sm font-medium text-gray-700 mb-1">
+                  <label htmlFor="nom" className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
                     Nom *
                   </label>
                   <input
@@ -684,14 +684,14 @@ const StaffModal: React.FC<StaffModalProps> = ({ isOpen, onClose, prisonId }) =>
                     name="nom"
                     value={formData.nom}
                     onChange={handleInputChange}
-                    className="w-full p-2.5 text-sm text-gray-900 bg-gray-50 rounded-lg border border-gray-300 focus:ring-blue-500 focus:border-blue-500"
+                    className="w-full p-2.5 text-sm text-gray-900 dark:text-gray-200 bg-gray-50 dark:bg-gray-700 rounded-lg border border-gray-300 dark:border-gray-600 focus:ring-blue-500 focus:border-blue-500"
                     required
                   />
                 </div>
                 
                 {/* Mots de passe */}
                 <div>
-                  <label htmlFor="password1" className="block text-sm font-medium text-gray-700 mb-1">
+                  <label htmlFor="password1" className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
                     Mot de passe *
                   </label>
                   <div className="relative">
@@ -701,13 +701,13 @@ const StaffModal: React.FC<StaffModalProps> = ({ isOpen, onClose, prisonId }) =>
                       name="password1"
                       value={formData.password1}
                       onChange={handleInputChange}
-                      className="w-full p-2.5 text-sm text-gray-900 bg-gray-50 rounded-lg border border-gray-300 focus:ring-blue-500 focus:border-blue-500"
+                      className="w-full p-2.5 text-sm text-gray-900 dark:text-gray-200 bg-gray-50 dark:bg-gray-700 rounded-lg border border-gray-300 dark:border-gray-600 focus:ring-blue-500 focus:border-blue-500"
                       required
                       minLength={8}
                     />
                     <button 
                       type="button"
-                      className="absolute inset-y-0 right-0 pr-3 flex items-center text-gray-500 hover:text-gray-700"
+                      className="absolute inset-y-0 right-0 pr-3 flex items-center text-gray-500 dark:text-gray-400 hover:text-gray-700 dark:hover:text-gray-300"
                       onClick={() => setShowPassword1(!showPassword1)}
                     >
                       {showPassword1 ? (
@@ -725,7 +725,7 @@ const StaffModal: React.FC<StaffModalProps> = ({ isOpen, onClose, prisonId }) =>
                 </div>
                 
                 <div>
-                  <label htmlFor="password2" className="block text-sm font-medium text-gray-700 mb-1">
+                  <label htmlFor="password2" className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
                     Confirmer le mot de passe *
                   </label>
                   <div className="relative">
@@ -735,13 +735,13 @@ const StaffModal: React.FC<StaffModalProps> = ({ isOpen, onClose, prisonId }) =>
                       name="password2"
                       value={formData.password2}
                       onChange={handleInputChange}
-                      className="w-full p-2.5 text-sm text-gray-900 bg-gray-50 rounded-lg border border-gray-300 focus:ring-blue-500 focus:border-blue-500"
+                      className="w-full p-2.5 text-sm text-gray-900 dark:text-gray-200 bg-gray-50 dark:bg-gray-700 rounded-lg border border-gray-300 dark:border-gray-600 focus:ring-blue-500 focus:border-blue-500"
                       required
                       minLength={8}
                     />
                     <button 
                       type="button"
-                      className="absolute inset-y-0 right-0 pr-3 flex items-center text-gray-500 hover:text-gray-700"
+                      className="absolute inset-y-0 right-0 pr-3 flex items-center text-gray-500 dark:text-gray-400 hover:text-gray-700 dark:hover:text-gray-300"
                       onClick={() => setShowPassword2(!showPassword2)}
                     >
                       {showPassword2 ? (
@@ -760,7 +760,7 @@ const StaffModal: React.FC<StaffModalProps> = ({ isOpen, onClose, prisonId }) =>
                 
                 {/* Informations supplémentaires */}
                 <div>
-                  <label htmlFor="sexe" className="block text-sm font-medium text-gray-700 mb-1">
+                  <label htmlFor="sexe" className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
                     Sexe
                   </label>
                   <select
@@ -768,7 +768,7 @@ const StaffModal: React.FC<StaffModalProps> = ({ isOpen, onClose, prisonId }) =>
                     name="sexe"
                     value={formData.sexe}
                     onChange={handleInputChange}
-                    className="w-full p-2.5 text-sm text-gray-900 bg-gray-50 rounded-lg border border-gray-300 focus:ring-blue-500 focus:border-blue-500"
+                    className="w-full p-2.5 text-sm text-gray-900 dark:text-gray-200 bg-gray-50 dark:bg-gray-700 rounded-lg border border-gray-300 dark:border-gray-600 focus:ring-blue-500 focus:border-blue-500"
                   >
                     <option value="M">Masculin</option>
                     <option value="F">Féminin</option>
@@ -778,7 +778,7 @@ const StaffModal: React.FC<StaffModalProps> = ({ isOpen, onClose, prisonId }) =>
                 </div>
                 
                 <div>
-                  <label htmlFor="date_naissance" className="block text-sm font-medium text-gray-700 mb-1">
+                  <label htmlFor="date_naissance" className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
                     Date de naissance
                   </label>
                   <input
@@ -787,19 +787,20 @@ const StaffModal: React.FC<StaffModalProps> = ({ isOpen, onClose, prisonId }) =>
                     name="date_naissance"
                     value={formData.date_naissance}
                     onChange={handleInputChange}
-                    className="w-full p-2.5 text-sm text-gray-900 bg-gray-50 rounded-lg border border-gray-300 focus:ring-blue-500 focus:border-blue-500"
+                    className="w-full p-2.5 text-sm text-gray-900 dark:text-gray-200 bg-gray-50 dark:bg-gray-700 rounded-lg border border-gray-300 dark:border-gray-600 focus:ring-blue-500 focus:border-blue-500 [&::-webkit-calendar-picker-indicator]:dark:invert"
                   />
                 </div>
                 
                 <div>
-                  <label htmlFor="role" className="block text-sm font-medium text-gray-700 mb-1">
+                  <label htmlFor="role" className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
                     Poste
-                  </label>                    <select
+                  </label>
+                  <select
                     id="role"
                     name="role"
                     value={formData.role}
                     onChange={handleInputChange}
-                    className="w-full p-2.5 text-sm text-gray-900 bg-gray-50 rounded-lg border border-gray-300 focus:ring-blue-500 focus:border-blue-500"
+                    className="w-full p-2.5 text-sm text-gray-900 dark:text-gray-200 bg-gray-50 dark:bg-gray-700 rounded-lg border border-gray-300 dark:border-gray-600 focus:ring-blue-500 focus:border-blue-500"
                   >
                     <option value="employe">Employé</option>
                     {(currentUser?.role === 'admin' || currentUser?.role === 'gerant') && (
@@ -817,7 +818,7 @@ const StaffModal: React.FC<StaffModalProps> = ({ isOpen, onClose, prisonId }) =>
                 </div>
                 
                 <div>
-                  <label htmlFor="section" className="block text-sm font-medium text-gray-700 mb-1">
+                  <label htmlFor="section" className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
                     Section
                   </label>
                   <select
@@ -825,7 +826,7 @@ const StaffModal: React.FC<StaffModalProps> = ({ isOpen, onClose, prisonId }) =>
                     name="section"
                     value={formData.section}
                     onChange={handleInputChange}
-                    className="w-full p-2.5 text-sm text-gray-900 bg-gray-50 rounded-lg border border-gray-300 focus:ring-blue-500 focus:border-blue-500"
+                    className="w-full p-2.5 text-sm text-gray-900 dark:text-gray-200 bg-gray-50 dark:bg-gray-700 rounded-lg border border-gray-300 dark:border-gray-600 focus:ring-blue-500 focus:border-blue-500"
                   >
                     <option value="a">Section A</option>
                     <option value="b">Section B</option>
@@ -841,13 +842,13 @@ const StaffModal: React.FC<StaffModalProps> = ({ isOpen, onClose, prisonId }) =>
                 <button
                   type="button"
                   onClick={handleCancelAdd}
-                  className="px-4 py-2 bg-gray-200 text-gray-800 rounded-lg hover:bg-gray-300 transition-colors"
+                  className="px-4 py-2 bg-gray-200 dark:bg-gray-700 text-gray-800 dark:text-gray-200 rounded-lg hover:bg-gray-300 dark:hover:bg-gray-600 transition-colors"
                 >
                   Annuler
                 </button>
                 <button
                   type="submit"
-                  className="px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors"
+                  className="px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 dark:bg-blue-700 dark:hover:bg-blue-800 transition-colors"
                 >
                   Ajouter
                 </button>
@@ -862,16 +863,16 @@ const StaffModal: React.FC<StaffModalProps> = ({ isOpen, onClose, prisonId }) =>
       {/* Modal de suppression - Intégré directement */}
       {deleteModal.isOpen && (
         <div className="fixed inset-0 z-50 flex items-center justify-center" style={{ backgroundColor: 'rgba(0, 0, 0, 0.75)' }}>
-          <div className="bg-white rounded-lg p-6 w-full max-w-md">
-            <h2 className="text-xl font-semibold text-gray-800 mb-4">Confirmer la suppression</h2>
-            <p className="text-gray-600 mb-6">
+          <div className="bg-white dark:bg-gray-800 rounded-lg p-6 w-full max-w-md">
+            <h2 className="text-xl font-semibold text-gray-800 dark:text-gray-100 mb-4">Confirmer la suppression</h2>
+            <p className="text-gray-600 dark:text-gray-300 mb-6">
               Êtes-vous sûr de vouloir supprimer l'utilisateur <strong>{deleteModal.username}</strong> ? 
               Cette action est irréversible.
             </p>
             <div className="flex justify-end space-x-3">
               <button
                 onClick={handleCloseDeleteModal}
-                className="px-4 py-2 text-gray-700 bg-gray-200 rounded hover:bg-gray-300"
+                className="px-4 py-2 text-gray-700 dark:text-gray-300 bg-gray-200 dark:bg-gray-700 rounded hover:bg-gray-300 dark:hover:bg-gray-600"
               >
                 Annuler
               </button>

@@ -1,17 +1,14 @@
 import React, { useEffect, useState } from 'react';
-import { useNavigate, useParams } from "react-router-dom";
+import { useNavigate } from "react-router-dom";
 import axios from 'axios';
 import { createRoot } from 'react-dom/client';
-import { Settings, Save, RefreshCw, AlertCircle, Moon, Globe, Bell, Shield, Lock } from 'lucide-react';
+import { Settings, Save, RefreshCw, AlertCircle, Moon, Bell, Shield, Lock, BarChart2 } from 'lucide-react';
 import { toast } from "sonner";
 import { Button } from "@/components/ui/button";
 import { Switch } from "@/components/ui/switch";
 import { Label } from "@/components/ui/label";
 import { Card } from "@/components/ui/card";
-import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Slider } from "@/components/ui/slider";
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
-import { useDevice } from "@/hooks/use-device";
 
 interface UserProfile {
   id: number;
@@ -40,14 +37,37 @@ interface UserSettings {
 
 const SettingsPanel: React.FC = () => {
   const navigate = useNavigate();
-  const { prisonId } = useParams<{ prisonId?: string }>();
   const [loading, setLoading] = useState<boolean>(true);
   const [saving, setSaving] = useState<boolean>(false);
   const [error, setError] = useState<string | null>(null);
-  const [success, setSuccess] = useState<string | null>(null);
   const [profile, setProfile] = useState<UserProfile | null>(null);
   const [activeSideTab, setActiveSideTab] = useState<string>("appearance");
-  const currentPrisonId = prisonId || localStorage.getItem('userPrison') || localStorage.getItem('selectedPrison');
+
+  // Options de fréquence d'envoi des statistiques (en millisecondes)
+  const frequencyOptions = [
+    { label: "Toutes les 5 minutes", value: 5 * 60 * 1000 },
+    { label: "Toutes les 15 minutes", value: 15 * 60 * 1000 },
+    { label: "Toutes les 30 minutes", value: 30 * 60 * 1000 },
+    { label: "Toutes les heures", value: 60 * 60 * 1000 },
+    { label: "Toutes les 6 heures", value: 6 * 60 * 60 * 1000 },
+    { label: "Une fois par jour", value: 24 * 60 * 60 * 1000 },
+  ];
+
+  // Récupérer la valeur initiale depuis localStorage (par défaut: 1 heure)
+  const [currentFrequency, setCurrentFrequency] = useState<number>(
+    parseInt(localStorage.getItem('statsFrequency') || '3600000')
+  );
+
+  // Activation/désactivation de la collecte de statistiques
+  const [statsEnabled, setStatsEnabled] = useState<boolean>(
+    localStorage.getItem('statsEnabled') !== 'false'
+  );
+
+  // Modifier uniquement l'état local lorsque la fréquence change
+  const handleFrequencyChange = (e: React.ChangeEvent<HTMLSelectElement>) => {
+    const newFrequency = parseInt(e.target.value);
+    setCurrentFrequency(newFrequency);
+  };
 
   // États pour les paramètres utilisateur
   const [settings, setSettings] = useState<UserSettings>({
@@ -133,6 +153,32 @@ const SettingsPanel: React.FC = () => {
       localStorage.setItem("securityLevel", settings.security_level);
       localStorage.setItem("theme", settings.dark_mode ? "dark" : "light");
       
+      // Sauvegarde des préférences de statistiques
+      localStorage.setItem("statsEnabled", statsEnabled.toString());
+      localStorage.setItem("statsFrequency", currentFrequency.toString());
+      
+      // Afficher un log sur la fréquence d'envoi sauvegardée
+      const selectedOption = frequencyOptions.find(option => option.value === currentFrequency);
+      console.log(`Fréquence d'envoi des statistiques sauvegardée: ${selectedOption?.label || currentFrequency + 'ms'}`);
+      
+      // Notifier l'utilisateur des changements de fréquence
+      if (parseInt(localStorage.getItem('statsFrequency') || '0') !== currentFrequency) {
+        toast.success("Fréquence modifiée", {
+          description: `Fréquence d'envoi: ${selectedOption?.label || `${currentFrequency}ms`}`
+        });
+      }
+      
+      // Déclencher des événements pour notifier les autres composants
+      window.dispatchEvent(new StorageEvent('storage', {
+        key: 'statsEnabled',
+        newValue: statsEnabled.toString()
+      }));
+      
+      window.dispatchEvent(new StorageEvent('storage', {
+        key: 'statsFrequency',
+        newValue: currentFrequency.toString()
+      }));
+      
       // Sauvegarde des préférences de notifications
       localStorage.setItem("displayNotifications", settings.display_notifications.toString());
       localStorage.setItem("systemAlerts", settings.system_alerts.toString());
@@ -184,6 +230,7 @@ const SettingsPanel: React.FC = () => {
 
   // Fonction pour réinitialiser les paramètres
   const resetSettings = () => {
+    // Réinitialiser les paramètres principaux
     setSettings({
       language: "fr",
       notifications_enabled: true,
@@ -197,6 +244,25 @@ const SettingsPanel: React.FC = () => {
       activity_alerts: true,
       maintenance_alerts: true
     });
+    
+    // Réinitialiser les paramètres de statistiques
+    setStatsEnabled(true);
+    setCurrentFrequency(3600000); // 1 heure par défaut
+    
+    // Enregistrer dans le localStorage
+    localStorage.setItem("statsEnabled", "true");
+    localStorage.setItem("statsFrequency", "3600000");
+    
+    // Envoyer les événements pour informer les autres composants
+    window.dispatchEvent(new StorageEvent('storage', {
+      key: 'statsEnabled',
+      newValue: "true"
+    }));
+    
+    window.dispatchEvent(new StorageEvent('storage', {
+      key: 'statsFrequency',
+      newValue: "3600000"
+    }));
 
     toast.info("Paramètres réinitialisés", {
       description: "Vos paramètres ont été restaurés aux valeurs par défaut"
@@ -215,6 +281,7 @@ const SettingsPanel: React.FC = () => {
   const paramCategories = [
     { id: "appearance", label: "Apparence", icon: <Moon className="h-5 w-5" /> },
     { id: "notifications", label: "Notifications", icon: <Bell className="h-5 w-5" /> },
+    { id: "statistics", label: "Statistiques", icon: <BarChart2 className="h-5 w-5" /> },
     { id: "security", label: "Sécurité", icon: <Shield className="h-5 w-5" /> },
     { id: "privacy", label: "Confidentialité", icon: <Lock className="h-5 w-5" /> }
   ];
@@ -274,20 +341,24 @@ const SettingsPanel: React.FC = () => {
                   <div className="space-y-4">
                   <Card className="p-4">
                     <div className="flex items-center justify-between">
-                    <div>
-                      <Label htmlFor="dark-mode" className="flex items-center gap-2">
-                      <Moon className="h-5 w-5" />
-                      Mode sombre
+                    <div className='w-full'>
+                      <Label htmlFor="dark-mode" className="flex items-center justify-between mr-2 gap-2">
+                        <div className="flex items-center gap-2">
+                          <Moon className="h-5 w-5" />
+                          Mode sombre
+                        </div>
+                        <Switch
+                        id="dark-mode"
+                        checked={settings.dark_mode}
+                        onCheckedChange={(checked) => handleChange("dark_mode", checked)}
+                        />
                       </Label>
-                      <p className="text-sm text-gray-600 dark:text-gray-400 mt-2">
-                      Adapte l'interface avec des couleurs sombres pour réduire la fatigue visuelle et économiser la batterie.
-                      </p>
+                      <div className="mt-2 text-xs text-gray-500 dark:text-gray-400 bg-blue-50 dark:bg-blue-900/20 p-3 rounded-md">
+                        <p>
+                        Adapte l'interface avec des couleurs sombres pour réduire la fatigue visuelle et économiser la batterie.
+                        </p>
+                      </div>
                     </div>
-                    <Switch
-                      id="dark-mode"
-                      checked={settings.dark_mode}
-                      onCheckedChange={(checked) => handleChange("dark_mode", checked)}
-                    />
                     </div>
                   </Card>
                   </div>
@@ -300,21 +371,25 @@ const SettingsPanel: React.FC = () => {
                   <h3 className="text-xl font-semibold text-gray-800 dark:text-white mb-4">Notifications</h3>
                   <div className="space-y-4">
                   <Card className="p-4">
-                    <div className="flex items-center justify-between mb-2">
-                    <div>
-                      <Label htmlFor="notifications-toggle" className="flex items-center gap-2">
-                        <Bell className="h-5 w-5" />
-                        Activer les notifications
+                    <div className="flex items-center justify-between">
+                    <div className='w-full'>
+                      <Label htmlFor="notifications-toggle" className="flex items-center justify-between mr-2 gap-2">
+                        <div className='flex items-center gap-2'>
+                          <Bell className="h-5 w-5" />
+                          Activer les notifications
+                        </div>
+                        <Switch
+                          id="notifications-toggle"
+                          checked={settings.notifications_enabled}
+                          onCheckedChange={(checked) => handleChange("notifications_enabled", checked)}
+                        />
                       </Label>
-                      <p className="text-sm text-gray-600 dark:text-gray-400 mt-2">
-                      Permet d'être informé des gains de points liés à l'utilisation de l'application.
-                      </p>
+                      <div className="mt-2 text-xs text-gray-500 dark:text-gray-400 bg-blue-50 dark:bg-blue-900/20 p-3 rounded-md">
+                        <p>
+                        Permet d'être informé des gains de points liés à l'utilisation de l'application.
+                        </p>
+                      </div>
                     </div>
-                    <Switch
-                      id="notifications-toggle"
-                      checked={settings.notifications_enabled}
-                      onCheckedChange={(checked) => handleChange("notifications_enabled", checked)}
-                    />
                     </div>
                   </Card>
                   </div>
@@ -347,9 +422,11 @@ const SettingsPanel: React.FC = () => {
                           <span>15 min</span>
                           <span>120 min</span>
                         </div>
-                        <p className="text-sm text-gray-600 dark:text-gray-400 mt-2">
-                          Votre session expirera automatiquement après {settings.session_timeout} minutes d'inactivité, vous obligeant à vous reconnecter pour des raisons de sécurité. Cette mesure protège vos données en votre absence.
-                        </p>
+                        <div className="mt-2 text-xs text-gray-500 dark:text-gray-400 bg-blue-50 dark:bg-blue-900/20 p-3 rounded-md">
+                          <p>
+                            Votre session expirera automatiquement après {settings.session_timeout} minutes d'inactivité, vous obligeant à vous reconnecter pour des raisons de sécurité. Cette mesure protège vos données en votre absence.
+                          </p>
+                        </div>
                       </div>
                     </div>
                   </Card>
@@ -361,7 +438,7 @@ const SettingsPanel: React.FC = () => {
                 <div className="space-y-6">
                   <h3 className="text-xl font-semibold text-gray-800 dark:text-white mb-4">Confidentialité</h3>
                   <Card className="p-4">
-                    <div className="flex items-center justify-between">
+                    <div className="flex items-center justify-between mr-2">
                       <Label htmlFor="analytics-consent" className="flex items-center gap-2">
                         <Lock className="h-5 w-5" />
                         Autoriser la collecte de données analytiques
@@ -373,7 +450,7 @@ const SettingsPanel: React.FC = () => {
                       />
                     </div>
                     
-                    <div className="text-sm text-gray-600 dark:text-gray-400">
+                    <div className="mt-2 text-xs text-gray-500 dark:text-gray-400 bg-blue-50 dark:bg-blue-900/20 p-3 rounded-md">
                       <p>
                         Ces données nous aident à comprendre comment vous utilisez notre application 
                         et à l'améliorer. Aucune information personnelle n'est collectée.
@@ -382,6 +459,91 @@ const SettingsPanel: React.FC = () => {
                         Vos données sont stockées conformément à notre politique de confidentialité 
                         et au Règlement Général sur la Protection des Données (RGPD).
                       </p>
+                    </div>
+                  </Card>
+                </div>
+              )}
+
+              {/* Onglet de statistiques */}
+              {activeSideTab === "statistics" && (
+                <div className="space-y-6">
+                  <h3 className="text-xl font-semibold text-gray-800 dark:text-white mb-4">Configuration des statistiques</h3>
+                  <Card className="p-4">
+                    <div className="flex items-center justify-between mr-2">
+                      <Label htmlFor="stats-toggle" className="flex items-center gap-2">
+                        <BarChart2 className="h-5 w-5" />
+                        Collecte automatique des statistiques
+                      </Label>
+                      <Switch
+                        id="stats-toggle"
+                        checked={statsEnabled}
+                        onCheckedChange={(isChecked) => {
+                          setStatsEnabled(isChecked);
+                          localStorage.setItem('statsEnabled', isChecked.toString());
+                          
+                          // Afficher un log dans la console
+                          console.log(`Collecte automatique de statistiques ${isChecked ? 'activée' : 'désactivée'}`);
+                          
+                          window.dispatchEvent(new StorageEvent('storage', {
+                            key: 'statsEnabled',
+                            newValue: isChecked.toString()
+                          }));
+                          
+                          // Afficher une notification toast
+                          toast.info(isChecked ? "Collecte activée" : "Collecte désactivée", {
+                            description: isChecked 
+                              ? "Les statistiques seront collectées et envoyées automatiquement" 
+                              : "Les statistiques ne seront plus collectées automatiquement"
+                          });
+                        }}
+                      />
+                    </div>
+                    
+                    {/* Bouton pour envoyer manuellement les statistiques (debug) */}
+                    {/* <div className="mt-4 flex justify-center">
+                      <Button
+                        variant="outline"
+                        size="sm"
+                        className="flex items-center gap-2 bg-blue-50 border-blue-200 hover:bg-blue-100 dark:bg-blue-900/30 dark:border-blue-800 dark:hover:bg-blue-800/50"
+                        onClick={() => {
+                          // Déclencher l'événement d'envoi manuel des statistiques
+                          window.dispatchEvent(new CustomEvent('sendStatsManually'));
+                          
+                          // Afficher un log dans la console
+                          console.log("Envoi manuel des statistiques demandé à:", new Date().toLocaleTimeString());
+                          
+                          // Notification toast
+                          toast.success("Envoi des statistiques", {
+                            description: "Demande d'envoi manuel des statistiques envoyée"
+                          });
+                        }}
+                      >
+                        <BarChart2 className="h-4 w-4" />
+                        <span>Envoyer les statistiques maintenant (debug)</span>
+                      </Button>
+                    </div> */}
+                    
+                    <div className="grid grid-cols-1 md:grid-cols-2 gap-3 items-center">
+                      <Label htmlFor="frequency-select" className="flex items-center gap-2">
+                        Fréquence d'envoi des statistiques
+                      </Label>
+                      <select
+                        id="frequency-select"
+                        className="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-blue-500 focus:border-blue-500 block w-full p-2.5 dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400 dark:text-white dark:focus:ring-blue-500 dark:focus:border-blue-500"
+                        value={currentFrequency}
+                        onChange={handleFrequencyChange}
+                        disabled={!statsEnabled}
+                      >
+                        {frequencyOptions.map((option) => (
+                          <option key={option.value} value={option.value}>
+                            {option.label}
+                          </option>
+                        ))}
+                      </select>
+                    </div>
+                    
+                    <div className="text-xs text-gray-500 dark:text-gray-400 bg-blue-50 dark:bg-blue-900/20 p-3 rounded-md">
+                      <p>Les statistiques d'utilisation des objets connectés sont collectées automatiquement et envoyées à notre base de données centrale pour analyse. Ces données sont utilisées pour optimiser l'efficacité énergétique et améliorer la surveillance du système.</p>
                     </div>
                   </Card>
                 </div>

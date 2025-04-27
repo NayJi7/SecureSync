@@ -164,6 +164,9 @@ EMAIL_HOST_USER =   "89f96d002@smtp-brevo.com"
 EMAIL_HOST_PASSWORD =   "gmdWROfhZrQFN5JL"
 DEFAULT_FROM_EMAIL = 'SecureSync <securesynccytech@gmail.com>'
 
+# Configuration pour les emails
+COPYRIGHT_YEAR = '2025'
+
 # Configuration pour Django REST Framework et JWT
 REST_FRAMEWORK = {
     'DEFAULT_AUTHENTICATION_CLASSES': (

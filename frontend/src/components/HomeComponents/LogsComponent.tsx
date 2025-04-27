@@ -448,13 +448,6 @@ const LogsComponent: React.FC<{ prisonId: string }> = ({ prisonId }) => {
                         <Activity className="h-4 w-4 mr-1 text-green-500" />
                         {loading ? 'Chargement...' : `${filteredLogs.length} événements`}
                     </span>
-                    <button
-                        onClick={fetchLogs}
-                        className="p-2 bg-gray-100 rounded-full hover:bg-gray-200 dark:bg-gray-700 dark:hover:bg-gray-600 transition-colors"
-                        disabled={refreshing}
-                    >
-                        <RefreshCw className={`h-4 w-4 text-gray-600 dark:text-gray-300 ${refreshing ? 'animate-spin' : ''}`} />
-                    </button>
                 </div>
             </div>
 
@@ -511,7 +504,7 @@ const LogsComponent: React.FC<{ prisonId: string }> = ({ prisonId }) => {
                             id="filterType"
                             value={filterType}
                             onChange={(e) => setFilterType(e.target.value)}
-                            className="flex-1 min-w-[120px] px-2 py-1.5 text-sm bg-white dark:bg-gray-700 border border-gray-300 dark:border-gray-600 rounded-md shadow-sm focus:outline-none focus:ring-indigo-500 focus:border-indigo-500"
+                            className="flex-1 min-w-[120px] px-2 py-1.5 text-sm text-gray-800 dark:text-gray-200 bg-white dark:bg-gray-700 border border-gray-300 dark:border-gray-600 rounded-md shadow-sm focus:outline-none focus:ring-indigo-500 focus:border-indigo-500"
                         >
                             <option value="">Type: Tous</option>
                             {objectTypes.map(type => (
@@ -528,7 +521,7 @@ const LogsComponent: React.FC<{ prisonId: string }> = ({ prisonId }) => {
                             id="filterObject"
                             value={filterObject}
                             onChange={(e) => setFilterObject(e.target.value)}
-                            className="flex-1 min-w-[120px] px-2 py-1.5 text-sm bg-white dark:bg-gray-700 border border-gray-300 dark:border-gray-600 rounded-md shadow-sm focus:outline-none focus:ring-indigo-500 focus:border-indigo-500"
+                            className="flex-1 min-w-[120px] px-2 py-1.5 text-sm text-gray-800 dark:text-gray-200 bg-white dark:bg-gray-700 border border-gray-300 dark:border-gray-600 rounded-md shadow-sm focus:outline-none focus:ring-indigo-500 focus:border-indigo-500"
                         >
                             <option value="">Objet: Tous</option>
                             {uniqueObjectNames.map(name => (
@@ -542,7 +535,7 @@ const LogsComponent: React.FC<{ prisonId: string }> = ({ prisonId }) => {
                                 id="filterAction"
                                 value={filterAction}
                                 onChange={(e) => setFilterAction(e.target.value)}
-                                className="flex-1 min-w-[120px] px-2 py-1.5 text-sm bg-white dark:bg-gray-700 border border-gray-300 dark:border-gray-600 rounded-md shadow-sm focus:outline-none focus:ring-indigo-500 focus:border-indigo-500"
+                                className="flex-1 min-w-[120px] px-2 py-1.5 text-sm text-gray-800 dark:text-gray-200 bg-white dark:bg-gray-700 border border-gray-300 dark:border-gray-600 rounded-md shadow-sm focus:outline-none focus:ring-indigo-500 focus:border-indigo-500"
                             >
                                 <option value="">Action: Toutes</option>
                                 {[...defaultObjectActionTypes, ...objectActionTypes].filter((v, i, a) => a.indexOf(v) === i).map(action => (
@@ -559,7 +552,7 @@ const LogsComponent: React.FC<{ prisonId: string }> = ({ prisonId }) => {
                             id="filterAction"
                             value={filterAction}
                             onChange={(e) => setFilterAction(e.target.value)}
-                            className="flex-1 min-w-[120px] px-2 py-1.5 text-sm bg-white dark:bg-gray-700 border border-gray-300 dark:border-gray-600 rounded-md shadow-sm focus:outline-none focus:ring-indigo-500 focus:border-indigo-500"
+                            className="flex-1 min-w-[120px] px-2 py-1.5 text-sm text-gray-800 dark:text-gray-200 bg-white dark:bg-gray-700 border border-gray-300 dark:border-gray-600 rounded-md shadow-sm focus:outline-none focus:ring-indigo-500 focus:border-indigo-500"
                         >
                             <option value="">Action: Toutes</option>
                             {userActionTypes.map(action => (
@@ -574,7 +567,7 @@ const LogsComponent: React.FC<{ prisonId: string }> = ({ prisonId }) => {
                             id="filterAction"
                             value={filterAction}
                             onChange={(e) => setFilterAction(e.target.value)}
-                            className="flex-1 min-w-[120px] px-2 py-1.5 text-sm bg-white dark:bg-gray-700 border border-gray-300 dark:border-gray-600 rounded-md shadow-sm focus:outline-none focus:ring-indigo-500 focus:border-indigo-500"
+                            className="flex-1 min-w-[120px] px-2 py-1.5 text-sm text-gray-800 dark:text-gray-200 bg-white dark:bg-gray-700 border border-gray-300 dark:border-gray-600 rounded-md shadow-sm focus:outline-none focus:ring-indigo-500 focus:border-indigo-500"
                         >
                             <option value="">Action: Toutes</option>
                             {allActionTypes.map(action => (
@@ -588,7 +581,7 @@ const LogsComponent: React.FC<{ prisonId: string }> = ({ prisonId }) => {
                         id="filterUser"
                         value={filterUser}
                         onChange={(e) => setFilterUser(e.target.value)}
-                        className="flex-1 min-w-[120px] px-2 py-1.5 text-sm bg-white dark:bg-gray-700 border border-gray-300 dark:border-gray-600 rounded-md shadow-sm focus:outline-none focus:ring-indigo-500 focus:border-indigo-500"
+                        className="flex-1 min-w-[120px] px-2 py-1.5 text-sm text-gray-800 dark:text-gray-200 bg-white dark:bg-gray-700 border border-gray-300 dark:border-gray-600 rounded-md shadow-sm focus:outline-none focus:ring-indigo-500 focus:border-indigo-500"
                     >
                         <option value="">Utilisateur: Tous</option>
                         {uniqueUsers.map(user => (
@@ -742,7 +735,7 @@ const LogsComponent: React.FC<{ prisonId: string }> = ({ prisonId }) => {
                                     setItemsPerPage(Number(e.target.value));
                                     setCurrentPage(1);
                                 }}
-                                className="px-2 py-1 bg-white dark:bg-gray-700 border border-gray-300 dark:border-gray-600 rounded-md text-sm"
+                                className="px-2 py-1 text-gray-800 dark:text-gray-200 bg-white dark:bg-gray-700 border border-gray-300 dark:border-gray-600 rounded-md text-sm"
                             >
                                 <option value={5}>5 par page</option>
                                 <option value={10}>10 par page</option>
@@ -757,7 +750,7 @@ const LogsComponent: React.FC<{ prisonId: string }> = ({ prisonId }) => {
                                 <ChevronLeft className="h-5 w-5" />
                             </button>
                             {/* Page number display */}
-                            <span className="px-3 py-1 text-sm">
+                            <span className="px-3 py-1 text-sm text-gray-700 dark:text-gray-300">
                                 {currentPage} / {totalPages || 1}
                             </span>
                             <button

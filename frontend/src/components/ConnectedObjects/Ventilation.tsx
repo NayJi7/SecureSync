@@ -133,7 +133,7 @@ const Ventilation: React.FC<VentilationProps> = ({ objects, onAddObject, onStatu
         setNewName(object.nom);
         setNewX(object.coord_x);
         setNewY(object.coord_y);
-        setNewConsumption(object.consommation || 0);
+        setNewConsumption(object.consomation || 0);
         setNewConnection(object.connection as 'wifi' | 'filaire' || 'wifi');
         setActiveMenu(null);
     };
@@ -172,7 +172,7 @@ const Ventilation: React.FC<VentilationProps> = ({ objects, onAddObject, onStatu
                 nom: newName,
                 coord_x: newX,
                 coord_y: newY,
-                consommation: newConsumption,
+                consomation: newConsumption,
                 connection: newConnection
             });
 
@@ -336,13 +336,15 @@ const Ventilation: React.FC<VentilationProps> = ({ objects, onAddObject, onStatu
     // Get the icon based on current ventilation level
     const getVentilationIcon = (level: number) => {
         const baseClass = "h-4 w-4";
+        const colorClass = "text-green-600 dark:text-green-400"; // Vert en mode clair, vert plus clair en mode sombre
+        
         switch (level) {
             case 3:
-                return <Wind className={`${baseClass} animate-pulse`} style={{ animationDuration: '0.5s' }} />;
+                return <Wind className={`${baseClass} ${colorClass} animate-pulse`} style={{ animationDuration: '0.5s' }} />;
             case 2:
-                return <Wind className={`${baseClass} animate-pulse`} style={{ animationDuration: '1s' }} />;
+                return <Wind className={`${baseClass} ${colorClass} animate-pulse`} style={{ animationDuration: '1s' }} />;
             default: // level 1 or fallback
-                return <Wind className={`${baseClass} animate-pulse`} style={{ animationDuration: '1.5s' }} />;
+                return <Wind className={`${baseClass} ${colorClass} animate-pulse`} style={{ animationDuration: '1.5s' }} />;
         }
     };
 
@@ -517,7 +519,7 @@ const Ventilation: React.FC<VentilationProps> = ({ objects, onAddObject, onStatu
                                                     <Info className="h-4 w-4 text-green-600 dark:text-green-400" />
                                                 </button>
                                                 <button onClick={() => handleToggleState(ventilation.id, ventilation.etat)} disabled={toggleLoading === ventilation.id} className={`p-1.5 rounded-full hover:bg-green-100 dark:hover:bg-green-900/30 transition-colors ${toggleLoading === ventilation.id ? 'opacity-50 cursor-not-allowed' : ''}`} title="Changer état">
-                                                    <ToggleLeft className="h-4 w-4 text-green-600 dark:text-green-400" />
+                                                    <ToggleLeft className="h-4 w-4 text-green-600 dark:text-white" />
                                                 </button>
                                                 <button onClick={() => handleMenuToggle(ventilation.id)} className="p-1.5 rounded-full hover:bg-gray-200 dark:hover:bg-gray-600 transition-colors" title="Options">
                                                     <MoreVertical className="h-4 w-4 text-gray-600 dark:text-gray-400" />
@@ -583,7 +585,7 @@ const Ventilation: React.FC<VentilationProps> = ({ objects, onAddObject, onStatu
                                                 </div>
                                                 <div className="space-y-1">
                                                     <p className="text-xs text-gray-500 dark:text-gray-400">Consommation</p>
-                                                    <p className="font-medium text-gray-700 dark:text-gray-300">{ventilation.consommation || 0} W</p>
+                                                    <p className="font-medium text-gray-700 dark:text-gray-300">{ventilation.consomation || 0} W</p>
                                                 </div>
                                                 <div className="space-y-1">
                                                     <p className="text-xs text-gray-500 dark:text-gray-400">Maintenance</p>
@@ -734,4 +736,4 @@ const Ventilation: React.FC<VentilationProps> = ({ objects, onAddObject, onStatu
     );
 };
 
-export default Ventilation; 
+export default Ventilation;

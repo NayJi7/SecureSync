@@ -21,11 +21,12 @@ import ProfileModal from '../components/HomeComponents/ProfileModal'
 import ConnectedObjects from '../components/HomeComponents/ConnectedObjects';
 import LogsComponent from '../components/HomeComponents/LogsComponent'
 import SettingsPanel from '../components/HomeComponents/SettingsPanel'
+import StatsReport from '../components/HomeComponents/StatsReport'
 
 // Icônes
 import { HiAdjustments, HiClipboardList, HiDotsVertical, HiTrash } from "react-icons/hi"
 import { MdDashboard, MdSecurity, MdOutlinePersonAdd } from "react-icons/md"
-import { Settings } from 'lucide-react';
+import { Settings, BarChart2 } from 'lucide-react';
 
 // Interface pour le profil utilisateur
 interface UserProfile {
@@ -75,8 +76,9 @@ export default function HomePage({ children }: { children?: React.ReactNode }) {
   const [profile, setProfile] = useState<UserProfile | null>(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState('');
-  // État pour les droits d'accès aux logs
+  // État pour les droits d'accès aux logs et statistiques
   const [hasLogsRights, setHasLogsRights] = useState(false);
+  const [hasStatsRights, setHasStatsRights] = useState(false);
   // États pour le système de gain de points
   const [pointsTotal, setPointsTotal] = useState<number | null>(null);
   const [showPointsMessage, setShowPointsMessage] = useState(false);
@@ -155,8 +157,11 @@ export default function HomePage({ children }: { children?: React.ReactNode }) {
     // Accès pour les employés de niveau Senior (1000+ points)
     const isEmployeeSenior = role === 'employe' && profile?.points && profile.points >= 1000;
 
-    // Mise à jour des droits d'accès
+    // Mise à jour des droits d'accès aux logs
     setHasLogsRights(isPrivilegedRole || (isEmployeeSenior === true));
+
+    // Mise à jour des droits d'accès aux statistiques (seulement admin et gérant)
+    setHasStatsRights(role === 'admin' || role === 'gerant');
 
     // Si l'employé a accès aux logs grâce à son niveau Senior, on affiche un message dans la console
     if (isEmployeeSenior) {
@@ -250,15 +255,22 @@ export default function HomePage({ children }: { children?: React.ReactNode }) {
     ),
     settings: (
       <div className="relative h-full">
-        <div className="my-8">
+        <div className="my-6">
           <SettingsPanel />
         </div>
       </div>
     ),
     logs: (
       <div className="relative h-full">
-        <div className="my-8">
+        <div className="my-6">
           <LogsComponent prisonId={currentPrison} />
+        </div>
+      </div>
+    ),
+    statistics: (
+      <div className="relative h-full">
+        <div className="my-6">
+          <StatsReport />
         </div>
       </div>
     ),
@@ -383,6 +395,15 @@ export default function HomePage({ children }: { children?: React.ReactNode }) {
                         <HiClipboardList className="w-4 h-4" />
                         Historique
                       </DropdownMenuItem>
+                      {hasStatsRights && (
+                        <DropdownMenuItem
+                          className={`flex items-center gap-2 ${activeTab === "statistics" ? "bg-gray-100 dark:bg-gray-600" : ""}`}
+                          onClick={() => setActiveTab("statistics")}
+                        >
+                          <BarChart2 className="w-4 h-4" />
+                          Statistiques
+                        </DropdownMenuItem>
+                      )}
                       <DropdownMenuItem
                         className={`flex items-center gap-2 ${activeTab === "settings" ? "bg-gray-100 dark:bg-gray-600" : ""}`}
                         onClick={() => setActiveTab("settings")}
@@ -399,6 +420,7 @@ export default function HomePage({ children }: { children?: React.ReactNode }) {
                   {activeTab === "dashboard" && tabContents.dashboard}
                   {activeTab === "settings" && tabContents.settings}
                   {activeTab === "logs" && tabContents.logs}
+                  {activeTab === "statistics" && tabContents.statistics}
                 </div>
               </div>
             ) : (
@@ -414,7 +436,8 @@ export default function HomePage({ children }: { children?: React.ReactNode }) {
                 onActiveTabChange={(tab) => {
                   if (tab === 0) setActiveTab("dashboard");
                   else if (tab === 1) setActiveTab("logs");
-                  else if (tab === 2) setActiveTab("settings");
+                  else if (tab === 2) setActiveTab("statistics");
+                  else if (tab === 3) setActiveTab("settings");
                 }}
               >
                 <TabItem title="Tableau de Bord" icon={MdDashboard}>
@@ -422,6 +445,9 @@ export default function HomePage({ children }: { children?: React.ReactNode }) {
                 </TabItem>
                 <TabItem disabled={!hasLogsRights} title="Historique" icon={HiClipboardList}>
                   {tabContents.logs}
+                </TabItem>
+                <TabItem disabled={!hasStatsRights} title="Statistiques" icon={BarChart2}>
+                  {tabContents.statistics}
                 </TabItem>
                 <TabItem title="Paramètres" icon={Settings}>
                   {tabContents.settings}

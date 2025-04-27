@@ -1,7 +1,8 @@
 import React, { useEffect, useState, useRef } from 'react';
 import { ObjectType } from './types';
 import { getObjects } from '../../services/objectService';
-import { PieChart, DoorClosed, Lightbulb, Video, Thermometer, Activity, BarChart2, Plus, Wind, MonitorPlay } from 'lucide-react';
+import { DoorClosed, Lightbulb, Video, Thermometer, Activity, Wind, MonitorPlay, Library } from 'lucide-react';
+import axios from 'axios';
 
 // Define a type for the add object callback
 export type AddObjectCallback = (type: 'porte' | 'lumiere' | 'camera' | 'thermostat' | 'ventilation' | "panneau d'affichage") => void;
@@ -12,6 +13,10 @@ const ObjectsChart: React.FC<{ onAddObject?: AddObjectCallback }> = ({ onAddObje
     const [lastUpdateTime, setLastUpdateTime] = useState(new Date());
     const [showConsommation, setShowConsommation] = useState(false);
     const intervalRef = useRef<NodeJS.Timeout | null>(null);
+    const statsIntervalRef = useRef<NodeJS.Timeout | null>(null); // Intervalle pour l'envoi des statistiques
+    const [statsEnabled, setStatsEnabled] = useState<boolean>(
+        localStorage.getItem('statsEnabled') !== 'false'
+    );
 
     const fetchObjects = async () => {
         try {
@@ -48,22 +53,228 @@ const ObjectsChart: React.FC<{ onAddObject?: AddObjectCallback }> = ({ onAddObje
         }
     };
 
+    // Fonction pour envoyer les statistiques à l'API
+    const sendStatsToApi = async () => {
+        try {
+            // Récupération de l'ID de la prison
+            const prisonId = localStorage.getItem('userPrison');
+            
+            // Récupération des stats calculées avec l'ID de la prison
+            const statsData = calculateStats(objects, prisonId);
+            
+            // Token d'authentification pour l'API
+            const token = localStorage.getItem('sessionToken');
+            
+            // Envoi des statistiques à l'API
+            await axios.post('http://localhost:8000/api/stats/', statsData, {
+                headers: {
+                    'Authorization': `Bearer ${token}`
+                }
+            });
+            
+            console.log('Statistiques envoyées avec succès:', new Date().toLocaleString());
+        } catch (error) {
+            console.error('Erreur lors de l\'envoi des statistiques:', error);
+        }
+    };
+
+    // Fonction pour calculer toutes les statistiques requises
+    const calculateStats = (objectsList: ObjectType[], prisonId?: string | null) => {
+        // Nombre total d'objets
+        const total = objectsList.length;
+        
+        // Objets allumés/éteints
+        const active = objectsList.filter(obj => obj.etat === 'on').length;
+        const inactive = total - active;
+        
+        // Pourcentage d'objets allumés
+        const pourcentage_allumes = total > 0 ? (active / total) * 100 : 0;
+        
+        // Fonction pour obtenir la consommation d'un objet
+        const getConsommation = (obj: ObjectType) => {
+            if (obj.consomation === undefined) {
+                switch(obj.type) {
+                    case 'porte': return 15;
+                    case 'lumiere': return 10;
+                    case 'camera': return 8;
+                    case 'thermostat': return 5;
+                    case 'ventilation': return 20;
+                    case "paneau d'affichage": return 25;
+                    default: return 10;
+                }
+            }
+            return obj.consomation;
+        };
+        
+        // Objets allumés par type
+        const porteAllumees = objectsList.filter(obj => obj.type === 'porte' && obj.etat === 'on').length;
+        const lumiereAllumees = objectsList.filter(obj => obj.type === 'lumiere' && obj.etat === 'on').length;
+        const cameraAllumees = objectsList.filter(obj => obj.type === 'camera' && obj.etat === 'on').length;
+        const thermostatAllumes = objectsList.filter(obj => obj.type === 'thermostat' && obj.etat === 'on').length;
+        const ventilationAllumees = objectsList.filter(obj => obj.type === 'ventilation' && obj.etat === 'on').length;
+        const panneauAllumes = objectsList.filter(obj => obj.type === "paneau d'affichage" && obj.etat === 'on').length;
+        
+        // Consommation par type
+        const porteConsommation = objectsList
+            .filter(obj => obj.type === 'porte' && obj.etat === 'on')
+            .reduce((total, obj) => total + getConsommation(obj), 0);
+            
+        const lumiereConsommation = objectsList
+            .filter(obj => obj.type === 'lumiere' && obj.etat === 'on')
+            .reduce((total, obj) => total + getConsommation(obj), 0);
+            
+        const cameraConsommation = objectsList
+            .filter(obj => obj.type === 'camera' && obj.etat === 'on')
+            .reduce((total, obj) => total + getConsommation(obj), 0);
+            
+        const thermostatConsommation = objectsList
+            .filter(obj => obj.type === 'thermostat' && obj.etat === 'on')
+            .reduce((total, obj) => total + getConsommation(obj), 0);
+            
+        const ventilationConsommation = objectsList
+            .filter(obj => obj.type === 'ventilation' && obj.etat === 'on')
+            .reduce((total, obj) => total + getConsommation(obj), 0);
+            
+        const panneauConsommation = objectsList
+            .filter(obj => obj.type === "paneau d'affichage" && obj.etat === 'on')
+            .reduce((total, obj) => total + getConsommation(obj), 0);
+        
+        // Consommation totale et moyenne
+        const consommationTotale = objectsList
+            .filter(obj => obj.etat === 'on')
+            .reduce((total, obj) => total + getConsommation(obj), 0);
+            
+        const consommationMoyenne = active > 0 ? consommationTotale / active : 0;
+        
+        // Coût horaire (0.15€ par kWh)
+        const coutHoraire = consommationTotale * 0.15 / 1000;
+        
+        // Construction de l'objet à envoyer à l'API
+        return {
+            nombre_objets: total,
+            pourcentage_allumes: parseFloat(pourcentage_allumes.toFixed(2)),
+            nbr_on: active,
+            nbr_off: inactive,
+            type: 6, // Valeur fixe comme dans StatForm
+            consommation_total_actuelle: parseFloat(consommationTotale.toFixed(2)),
+            consommation_moyenne: parseFloat(consommationMoyenne.toFixed(2)),
+            cout_horaire: parseFloat(coutHoraire.toFixed(4)),
+            porte_allumees: porteAllumees,
+            porte_consommation: parseFloat(porteConsommation.toFixed(2)),
+            camera_allumees: cameraAllumees,
+            camera_consommation: parseFloat(cameraConsommation.toFixed(2)),
+            lumiere_allumees: lumiereAllumees,
+            lumiere_consommation: parseFloat(lumiereConsommation.toFixed(2)),
+            panneau_allumes: panneauAllumes,
+            panneau_consommation: parseFloat(panneauConsommation.toFixed(2)),
+            thermostat_allumes: thermostatAllumes,
+            thermostat_consommation: parseFloat(thermostatConsommation.toFixed(2)),
+            ventilation_allumees: ventilationAllumees,
+            ventilation_consommation: parseFloat(ventilationConsommation.toFixed(2)),
+            prison_id: prisonId || '' // Ajout de l'ID de la prison
+        };
+    };
+
     useEffect(() => {
         // Initial fetch
         fetchObjects();
 
-        // Set up interval for periodic refresh (every second)
+        // Set up interval for periodic refresh (every 5 seconds)
         intervalRef.current = setInterval(() => {
             fetchObjects();
         }, 5000);
 
-        // Clean up interval on component unmount
+        // Récupérer la configuration des statistiques
+        const isStatsEnabled = localStorage.getItem('statsEnabled') !== 'false';
+        setStatsEnabled(isStatsEnabled);
+
+        // Si les statistiques sont activées, configurer l'envoi périodique
+        if (isStatsEnabled) {
+            // Récupérer la fréquence depuis localStorage (défaut: 1 heure)
+            const statsFrequency = parseInt(localStorage.getItem('statsFrequency') || '3600000');
+            
+            // Configurer l'intervalle d'envoi des statistiques
+            statsIntervalRef.current = setInterval(() => {
+                if (objects.length > 0) {  // S'assurer qu'il y a des objets à analyser
+                    sendStatsToApi();
+                }
+            }, statsFrequency);
+        }
+        
+        // Ajouter un écouteur pour l'envoi manuel des statistiques (debug)
+        const handleManualStatsSend = () => {
+            if (objects.length > 0) {
+                console.log("Envoi manuel des statistiques à:", new Date().toLocaleString());
+                sendStatsToApi();
+            } else {
+                console.warn("Impossible d'envoyer des statistiques: aucun objet disponible");
+            }
+        };
+        
+        // Ajouter l'écouteur d'événements
+        window.addEventListener('sendStatsManually', handleManualStatsSend);
+
+        // Configurer un écouteur pour les changements de configuration
+        const handleStorageChange = (event: StorageEvent) => {
+            // Changement de fréquence
+            if (event.key === 'statsFrequency') {
+                // Si l'intervalle existe déjà, le nettoyer
+                if (statsIntervalRef.current) {
+                    clearInterval(statsIntervalRef.current);
+                    statsIntervalRef.current = null;
+                }
+                
+                // Récupérer la nouvelle fréquence
+                const newFrequency = parseInt(event.newValue || '3600000');
+                const isEnabled = localStorage.getItem('statsEnabled') !== 'false';
+                
+                // Reconfigurer l'intervalle si la collecte est activée
+                if (isEnabled) {
+                    statsIntervalRef.current = setInterval(() => {
+                        if (objects.length > 0) {
+                            sendStatsToApi();
+                        }
+                    }, newFrequency);
+                }
+            } 
+            // Changement d'état d'activation
+            else if (event.key === 'statsEnabled') {
+                const isEnabled = event.newValue !== 'false';
+                setStatsEnabled(isEnabled);
+                
+                // Nettoyer l'intervalle existant
+                if (statsIntervalRef.current) {
+                    clearInterval(statsIntervalRef.current);
+                    statsIntervalRef.current = null;
+                }
+                
+                // Reconfigurer uniquement si activé
+                if (isEnabled) {
+                    const freq = parseInt(localStorage.getItem('statsFrequency') || '3600000');
+                    statsIntervalRef.current = setInterval(() => {
+                        if (objects.length > 0) {
+                            sendStatsToApi();
+                        }
+                    }, freq);
+                }
+            }
+        };
+        
+        // Ajouter l'écouteur
+        window.addEventListener('storage', handleStorageChange);
+
+        // Clean up intervals on component unmount
         return () => {
             if (intervalRef.current) {
                 clearInterval(intervalRef.current);
             }
+            if (statsIntervalRef.current) {
+                clearInterval(statsIntervalRef.current);
+            }
+            window.removeEventListener('storage', handleStorageChange);
+            window.removeEventListener('sendStatsManually', handleManualStatsSend);
         };
-    }, []);
+    }, [objects.length]);
 
     if (loading) {
         return <div className="text-center p-10 bg-white dark:bg-gray-800 rounded-lg shadow-lg animate-pulse">
@@ -83,7 +294,7 @@ const ObjectsChart: React.FC<{ onAddObject?: AddObjectCallback }> = ({ onAddObje
     // Gérer les cas où les propriétés peuvent être undefined
     const getConsommation = (obj: ObjectType) => {
         // Si la propriété n'existe pas ou est undefined, on retourne une valeur par défaut
-        if (obj.consommation === undefined) {
+        if (obj.consomation === undefined) {
             // Définition d'une consommation par défaut selon le type
             switch(obj.type) {
                 case 'porte': return 15;
@@ -95,7 +306,7 @@ const ObjectsChart: React.FC<{ onAddObject?: AddObjectCallback }> = ({ onAddObje
                 default: return 10;
             }
         }
-        return obj.consommation;
+        return obj.consomation;
     };
 
     const stats = {
@@ -152,9 +363,9 @@ const ObjectsChart: React.FC<{ onAddObject?: AddObjectCallback }> = ({ onAddObje
             <div className="flex justify-between items-center mb-5">
                 <div className="flex items-center">
                     <div className="bg-indigo-100 dark:bg-indigo-900/30 p-2 rounded-lg mr-3">
-                        <BarChart2 className="h-5 w-5 text-indigo-600 dark:text-indigo-400" />
+                        <Library className="h-5 w-5 text-indigo-600 dark:text-indigo-400" />
                     </div>
-                    <h3 className="text-md font-medium text-gray-700 dark:text-gray-300">Statistiques</h3>
+                    <h3 className="text-md font-medium text-gray-700 dark:text-gray-300">Informations</h3>
                 </div>
 
             </div>
@@ -240,8 +451,7 @@ const ObjectsChart: React.FC<{ onAddObject?: AddObjectCallback }> = ({ onAddObje
 
             {/* Section pour les statistiques de consommation avec toggle */}
             <div className="mt-8 border-t border-gray-200 dark:border-gray-700 pt-6">
-                <div className="flex justify-between items-center mb-4">
-                    <h4 className="text-xs font-medium text-gray-600 dark:text-gray-400 uppercase">Consommation énergétique</h4>
+                <div className="flex justify-end items-center">
                     <button 
                         onClick={() => setShowConsommation(prev => !prev)} 
                         className="flex items-center text-xs font-medium text-indigo-600 dark:text-indigo-400 hover:text-indigo-800 dark:hover:text-indigo-300 transition-colors"
@@ -267,6 +477,7 @@ const ObjectsChart: React.FC<{ onAddObject?: AddObjectCallback }> = ({ onAddObje
                 {/* Afficher les statistiques de consommation uniquement si toggle activé */}
                 {showConsommation && (
                     <>
+                        <h4 className="text-xs font-medium text-gray-600 dark:text-gray-400 uppercase mb-4">Consommation énergétique</h4>
                         <div className="grid grid-cols-1 md:grid-cols-3 gap-4 mb-5 animate-fadeIn">
                             {/* Consommation totale */}
                             <div className="bg-orange-50 dark:bg-orange-900/20 p-4 rounded-lg border border-orange-100 dark:border-orange-900/30 flex flex-col justify-between">

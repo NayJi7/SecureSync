@@ -7,6 +7,13 @@ class Stat(models.Model):
         help_text="Date et heure de création de la statistique.",
         verbose_name="Date de création"
     )
+    prison_id = models.CharField(
+        max_length=100,
+        blank=True,
+        null=True,
+        help_text="ID de la prison associée à cette statistique.",
+        verbose_name="ID Prison"
+    )
     nombre_objets = models.IntegerField(
         default=0,
         help_text="Nombre total d'objets.",
