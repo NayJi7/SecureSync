@@ -555,7 +555,7 @@ const SettingsPanel: React.FC = () => {
               <Button 
                 variant="outline" 
                 onClick={resetSettings} 
-                className="border-gray-300 dark:border-gray-600 hover:bg-gray-100 dark:hover:bg-gray-700"
+                className="border-gray-300 dark:text-white dark:border-gray-600 hover:bg-gray-100 dark:hover:bg-gray-700"
               >
                 Réinitialiser
               </Button>

@@ -530,7 +530,7 @@ export default function FeaturesPage() {
                     </Button>
                   </Link>
                   <Link to="/about">
-                    <Button variant="outline" size="lg" className="border-green-500 hover:bg-green-900/40 text-green-300 px-6 shadow-md shadow-green-900/30 hover:shadow-lg transition-all">
+                    <Button variant="outline" size="lg" className="border-green-500 hover:bg-green-900/40 text-green-300 px-6 shadow-md shadow-green-900/30 hover:shadow-lg transition-all hover:text-white">
                       En savoir plus
                     </Button>
                   </Link>

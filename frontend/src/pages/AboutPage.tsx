@@ -317,7 +317,7 @@ export default function AboutPage() {
                     </Button>
                   </Link>
                   <Link to="/features">
-                    <Button variant="outline" size="lg" className="border-green-500 hover:bg-green-900/30 text-green-300 px-6">
+                    <Button variant="outline" size="lg" className="border-green-500 hover:bg-green-900/30 hover:text-white text-green-300 px-6">
                       Découvrir nos fonctionnalités
                     </Button>
                   </Link>
