@@ -127,19 +127,36 @@ const StaffModal: React.FC<StaffModalProps> = ({ isOpen, onClose, prisonId }) =>
       
       // Définir les membres du staff
       // console.log('Réponse API staff:', staffResponse.data);
+      let staffData = [];
+      
       if (Array.isArray(staffResponse.data)) {
-        // Vérifier si les utilisateurs ont une date d'embauche
-        // console.log('Premier utilisateur:', staffResponse.data[0]);
-        setStaff(staffResponse.data);
+        staffData = staffResponse.data;
       } else if (staffResponse.data && typeof staffResponse.data === 'object') {
         const dataField = Object.keys(staffResponse.data).find(key => Array.isArray(staffResponse.data[key]));
         if (dataField) {
-          // console.log('Premier utilisateur:', staffResponse.data[dataField][0]);
-          setStaff(staffResponse.data[dataField]);
+          staffData = staffResponse.data[dataField];
         } else {
           setError('Format de données inattendu reçu du serveur');
         }
       }
+      
+      // Normaliser les données pour garantir la cohérence entre snake_case et camelCase
+      const normalizedStaffData = staffData.map(member => {
+        // Créer une copie du membre
+        const normalizedMember = { ...member };
+        
+        // Normaliser date_joined/dateJoined
+        if (!normalizedMember.date_joined && (normalizedMember as any).dateJoined) {
+          normalizedMember.date_joined = (normalizedMember as any).dateJoined;
+        }
+        
+        return normalizedMember;
+      });
+      
+      // Débogage
+      console.log('Premier membre après normalisation:', normalizedStaffData.length > 0 ? normalizedStaffData[0] : 'Aucun membre');
+      
+      setStaff(normalizedStaffData);
 
       // Définir l'utilisateur courant
       setCurrentUser(userResponse.data);
@@ -546,8 +563,7 @@ const StaffModal: React.FC<StaffModalProps> = ({ isOpen, onClose, prisonId }) =>
                       <p className="text-sm font-medium text-gray-500 dark:text-gray-400">Date d'embauche</p>
                       <p className="text-sm text-gray-900 dark:text-gray-200">
                         {member.date_joined ? formatDate(member.date_joined) : 
-                         (member as any).date_joined ? formatDate((member as any).date_joined) : 
-                         formatDate((member as any)?.dateJoined || new Date().toISOString())}
+                         (member as any)?.dateJoined ? formatDate((member as any).dateJoined) : 'Non spécifié'}
                       </p>
                     </div>
                     <div>

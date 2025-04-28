@@ -94,7 +94,7 @@ from .models import CustomUser
 class StaffSerializer(serializers.ModelSerializer):
     class Meta:
         model = CustomUser
-        fields = ['username', 'email', 'first_name', 'last_name', 'sexe', 'date_naissance', 'role', 'section', 'prison', 'points']
+        fields = ['username', 'email', 'first_name', 'last_name', 'sexe', 'date_naissance', 'date_joined', 'role', 'section', 'prison', 'points']
 
 class UserActivityLogSerializer(serializers.ModelSerializer):
     user = serializers.SerializerMethodField()
