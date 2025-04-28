@@ -342,7 +342,7 @@ export default function ObjectDashboard() {
               <div className="mb-2 text-sm text-gray-600 space-y-1">
                 <p><strong>Position</strong> : ({obj.coord_x}, {obj.coord_y})</p>
                 <p><strong>Connexion</strong> : {obj.connection ?? "—"}</p>
-                <p><strong>Consommation</strong> : {obj.consommation} W</p>
+                <p><strong>Consommation</strong> : {obj.consommation} kWh</p>
                 <p><strong>Valeur actuelle</strong> : {obj.valeur_actuelle ?? "—"}</p>
                 <p><strong>Valeur cible</strong> : {obj.valeur_cible ?? "—"}</p>
                 <p><strong>Durabilité</strong> : {obj.durabilité} %</p>

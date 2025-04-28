@@ -54,7 +54,7 @@ const StatsReport: React.FC = () => {
   const [prisonId, setPrisonId] = useState<string | null>(localStorage.getItem('userPrison') || localStorage.getItem('selectedPrison'));
   const [generating, setGenerating] = useState<boolean>(false);
   const [isEditingCost, setIsEditingCost] = useState<boolean>(false);
-  const [customCostRate, setCustomCostRate] = useState<number | null>(null);
+  const [customCostRate, setCustomCostRate] = useState<number | null>(0.018);
   const { isMobile } = useDevice();
 
   useEffect(() => {
@@ -476,9 +476,7 @@ const StatsReport: React.FC = () => {
                   <div>
                     <p className="text-sm text-gray-500 dark:text-gray-400">Coût estimé (24h)</p>
                     <p className="text-xl sm:text-2xl font-bold">
-                      {customCostRate !== null 
-                        ? (customCostRate * 24).toFixed(2) 
-                        : averages.totalCout24h.toFixed(2)}€
+                      {(customCostRate * 24).toFixed(2)}€
                     </p>
                   </div>
                   <div className="bg-purple-100 dark:bg-purple-900/30 p-2 rounded-full">
@@ -493,7 +491,7 @@ const StatsReport: React.FC = () => {
                         type="number"
                         step="0.001"
                         min="0"
-                        value={customCostRate !== null ? customCostRate : (averages.avgCoutHoraire * 200).toFixed(3)}
+                        value={customCostRate !== null ? customCostRate : (averages.avgCoutHoraire * 180).toFixed(3)}
                         onChange={(e) => setCustomCostRate(parseFloat(e.target.value))}
                         className="w-16 mx-1 p-0.5 text-xs border border-purple-400 rounded dark:bg-gray-700"
                       />

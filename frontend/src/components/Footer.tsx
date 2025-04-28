@@ -13,7 +13,6 @@ export default function Footer() {
         
         <div className="flex flex-wrap gap-x-6 gap-y-2 text-sm justify-center md:justify-start">
           <Link to="/about" className="text-green-300/60 hover:text-green-300 transition-colors">À propos</Link>
-          <Link to="/privacy" className="text-green-300/60 hover:text-green-300 transition-colors">Politique de confidentialité</Link>
           <Link to="/terms" className="text-green-300/60 hover:text-green-300 transition-colors">Conditions d'utilisation</Link>
           <Link to="/contact" className="text-green-300/60 hover:text-green-300 transition-colors">Contact</Link>
         </div>
