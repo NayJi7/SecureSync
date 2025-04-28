@@ -90,7 +90,7 @@ const StatsReport: React.FC = () => {
         
         // Récupérer l'ID de la prison actuelle
         const prisonId = localStorage.getItem('userPrison');
-        
+
         // Filtrer les statistiques selon la période sélectionnée ET l'ID de la prison
         const filteredStats = response.data
           .filter(stat => {
@@ -304,9 +304,66 @@ const StatsReport: React.FC = () => {
 
   if (stats.length === 0) {
     return (
-      <div className="w-full bg-white dark:bg-gray-800 rounded-lg shadow-lg border border-gray-100 dark:border-gray-700 p-6 mb-8 flex flex-col items-center justify-center h-64">
-        <div className="bg-yellow-100 border border-yellow-400 text-yellow-700 px-4 py-3 rounded">
-          <p>Aucune statistique disponible pour les dernières 24 heures.</p>
+      <div className="w-full bg-white dark:bg-gray-800 rounded-lg shadow-lg border border-gray-100 dark:border-gray-700 p-6 mb-8">
+        <div className="mb-6">
+          <div className="flex flex-col md:flex-row md:items-center md:justify-between">
+            <div className="flex items-center mb-4 md:mb-0">
+              <BarChart2 className="h-6 w-6 mr-2 text-indigo-600 dark:text-indigo-400" />
+              <div>
+                <h2 className="text-2xl font-bold text-gray-800 dark:text-white">
+                  Rapport statistique - {isMobile ? <br /> : ''} {getTimeRangeTitle()}
+                </h2>
+              </div>
+            </div>
+            
+            {/* Sélecteur de période même quand pas de stats */}
+            <div className="flex flex-col sm:flex-row items-center sm:items-center space-y-3 sm:space-y-0 sm:space-x-4">
+              <div className="flex items-center space-x-2">
+                <span className="text-sm text-gray-600 dark:text-gray-300">Période :</span>
+                <div className="inline-flex rounded-md shadow-sm" role="group">
+                  <button
+                    type="button"
+                    onClick={() => setTimeRange('24h')}
+                    className={`px-4 py-2 text-sm font-medium rounded-l-lg ${
+                      timeRange === '24h'
+                        ? 'bg-indigo-600 text-white'
+                        : 'bg-white text-gray-700 border border-gray-300 hover:bg-gray-50 dark:bg-gray-800 dark:text-gray-200 dark:border-gray-600 dark:hover:bg-gray-700'
+                    }`}
+                  >
+                    24h
+                  </button>
+                  <button
+                    type="button"
+                    onClick={() => setTimeRange('week')}
+                    className={`px-4 py-2 text-sm font-medium ${
+                      timeRange === 'week'
+                        ? 'bg-indigo-600 text-white'
+                        : 'bg-white text-gray-700 border-t border-b border-gray-300 hover:bg-gray-50 dark:bg-gray-800 dark:text-gray-200 dark:border-gray-600 dark:hover:bg-gray-700'
+                    }`}
+                  >
+                    Semaine
+                  </button>
+                  <button
+                    type="button"
+                    onClick={() => setTimeRange('month')}
+                    className={`px-4 py-2 text-sm font-medium rounded-r-lg ${
+                      timeRange === 'month'
+                        ? 'bg-indigo-600 text-white'
+                        : 'bg-white text-gray-700 border border-gray-300 hover:bg-gray-50 dark:bg-gray-800 dark:text-gray-200 dark:border-gray-600 dark:hover:bg-gray-700'
+                    }`}
+                  >
+                    Mois
+                  </button>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+        
+        <div className="flex flex-col items-center justify-center h-64">
+          <div className="bg-yellow-100 border border-yellow-400 text-yellow-700 px-4 py-3 rounded">
+            <p>Aucune statistique disponible pour {getTimeRangeTitle()}.</p>
+          </div>
         </div>
       </div>
     );
