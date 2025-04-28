@@ -440,20 +440,22 @@ const Camera: React.FC<CameraProps> = ({ objects, onAddObject, onStatusChange, a
                                             <div>
                                                 <p className="font-medium text-gray-800 dark:text-white text-sm flex items-center">
                                                     {camera.nom}
-                                                    <button
-                                                        onClick={() => {
-                                                            const randomUrl = videoLinks[Math.floor(Math.random() * videoLinks.length)];
-                                                            setCurrentVideoUrl(randomUrl);
-                                                            setShowVideoId(camera.id);
-                                                        }}
-                                                        className="ml-2 p-1.5 rounded-full hover:bg-indigo-100 dark:hover:bg-indigo-900/30 transition-colors"
-                                                        title="Visualiser la caméra en 3D"
-                                                    >
-                                                        <svg xmlns="http://www.w3.org/2000/svg" className="h-4 w-4 text-indigo-600 dark:text-indigo-300" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth="2">
-                                                            <path strokeLinecap="round" strokeLinejoin="round" d="M1.5 12s4-7.5 10.5-7.5S22.5 12 22.5 12s-4 7.5-10.5 7.5S1.5 12 1.5 12z" />
-                                                            <circle cx="12" cy="12" r="3" />
-                                                        </svg>
-                                                    </button>
+                                                    {camera.etat === 'on' && (
+                                                        <button
+                                                            onClick={() => {
+                                                                const randomUrl = videoLinks[Math.floor(Math.random() * videoLinks.length)];
+                                                                setCurrentVideoUrl(randomUrl);
+                                                                setShowVideoId(camera.id);
+                                                            }}
+                                                            className="ml-2 p-1.5 rounded-full hover:bg-indigo-100 dark:hover:bg-indigo-900/30 transition-colors"
+                                                            title="Visualiser la caméra en 3D"
+                                                        >
+                                                            <svg xmlns="http://www.w3.org/2000/svg" className="h-4 w-4 text-indigo-600 dark:text-indigo-300" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth="2">
+                                                                <path strokeLinecap="round" strokeLinejoin="round" d="M1.5 12s4-7.5 10.5-7.5S22.5 12 22.5 12s-4 7.5-10.5 7.5S1.5 12 1.5 12z" />
+                                                                <circle cx="12" cy="12" r="3" />
+                                                            </svg>
+                                                        </button>
+                                                    )}
                                                 </p>
                                                 <div className="flex items-center mt-1">
                                                     <span className={`inline-flex items-center px-2 py-0.5 rounded-full text-xs ${camera.etat === 'on'

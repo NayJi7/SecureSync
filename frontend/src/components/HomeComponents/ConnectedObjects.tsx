@@ -12,6 +12,7 @@ import { LayoutGrid, Activity, RefreshCw, X, PlusCircle, AlertCircle, MapPin, To
 import axios from 'axios';
 import VideoView from './VideoView';
 import { DotLottieReact } from '@lottiefiles/dotlottie-react';
+import { useDevice } from '../../hooks/use-device';
 
 interface ConnectedObjectsProps {
     prisonId?: string;
@@ -19,6 +20,7 @@ interface ConnectedObjectsProps {
 }
 
 const ConnectedObjects: React.FC<ConnectedObjectsProps> = ({ prisonId, addPoints }) => {
+    const { isMobile } = useDevice();
     const [objects, setObjects] = useState<ObjectType[]>([]);
     const [loading, setLoading] = useState(true);
     const [refreshing, setRefreshing] = useState(false);
@@ -480,11 +482,14 @@ const ConnectedObjects: React.FC<ConnectedObjectsProps> = ({ prisonId, addPoints
                                 marseille: 'Marseille',
                             };
                             const id = (prisonId || currentPrisonId || '').toLowerCase();
-                            return id && prisonNames[id] ? ` - Prison de ${prisonNames[id]}` : '';
+                            if (id && prisonNames[id]) {
+                                return isMobile ? ` - ${prisonNames[id]}` : ` - Prison de ${prisonNames[id]}`;
+                            }
+                            return '';
                         })()}
                         <button
                             title="Visualiser la prison en 3D"
-                            className="ml-3 inline-flex items-center px-2 py-1 rounded-full bg-indigo-100 dark:bg-indigo-900/40 border border-indigo-300 dark:border-indigo-700 text-indigo-700 dark:text-indigo-200 hover:bg-indigo-200 dark:hover:bg-indigo-800 transition-colors shadow-sm focus:outline-none focus:ring-2 focus:ring-indigo-400"
+                            className={`${isMobile ? 'mr-4' : 'ml-3'} inline-flex items-center px-2 py-1 rounded-full bg-indigo-100 dark:bg-indigo-900/40 border border-indigo-300 dark:border-indigo-700 text-indigo-700 dark:text-indigo-200 hover:bg-indigo-200 dark:hover:bg-indigo-800 transition-colors shadow-sm focus:outline-none focus:ring-2 focus:ring-indigo-400`}
                             onClick={() => setShow3D(true)}
                         >
                             <svg xmlns="http://www.w3.org/2000/svg" className="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth="2">
