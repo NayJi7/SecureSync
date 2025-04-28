@@ -406,19 +406,36 @@ const PanneauAffichage: React.FC<PanneauAffichageProps> = ({ objects, onStatusCh
                                         <MoreVertical className="h-4 w-4 text-gray-600 dark:text-gray-400" />
                                     </button>
                                     {activeMenu === panneau.id && (
-                                        <div ref={dropdownRef} className="absolute right-0 top-auto mt-8 w-48 bg-white dark:bg-gray-800 shadow-lg rounded-md border border-gray-200 dark:border-gray-700 z-10">
-                                            <button onClick={() => handleMessageClick(panneau.id)} className="flex items-center w-full px-4 py-2 text-sm text-left text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-700">
-                                                <MessageSquare className="h-4 w-4 mr-2 text-gray-500 dark:text-gray-400" />
-                                                Modifier message
-                                            </button>
-                                            <button onClick={() => handleEditClick(panneau)} className="flex items-center w-full px-4 py-2 text-sm text-left text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-700">
-                                                <Pencil className="h-4 w-4 mr-2 text-gray-500 dark:text-gray-400" />
-                                                Modifier
-                                            </button>
-                                            <button onClick={() => handleDeleteClick(panneau.id)} className="flex items-center w-full px-4 py-2 text-sm text-left text-red-600 dark:text-red-400 hover:bg-red-50 dark:hover:bg-red-900/20">
-                                                <Trash2 className="h-4 w-4 mr-2" />
-                                                Supprimer
-                                            </button>
+                                        <div ref={dropdownRef} className="absolute right-0 top-5 mt-0.5 w-48 bg-white dark:bg-gray-800 shadow-lg rounded-md border border-gray-200 dark:border-gray-700 z-10">
+                                            <ul className="py-1">
+                                                <li>
+                                                    <button 
+                                                        onClick={() => handleMessageClick(panneau.id)} 
+                                                        className="flex items-center w-full px-4 py-2 text-sm text-left text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-700"
+                                                    >
+                                                        <MessageSquare className="h-3.5 w-3.5 mr-2 text-gray-500 dark:text-gray-400" />
+                                                        Modifier message
+                                                    </button>
+                                                </li>
+                                                <li>
+                                                    <button 
+                                                        onClick={() => handleEditClick(panneau)} 
+                                                        className="flex items-center w-full px-4 py-2 text-sm text-left text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-700"
+                                                    >
+                                                        <Pencil className="h-3.5 w-3.5 mr-2 text-gray-500 dark:text-gray-400" />
+                                                        Modifier
+                                                    </button>
+                                                </li>
+                                                <li>
+                                                    <button 
+                                                        onClick={() => handleDeleteClick(panneau.id)} 
+                                                        className="flex items-center w-full px-4 py-2 text-sm text-left text-red-600 dark:text-red-400 hover:bg-gray-100 dark:hover:bg-gray-700"
+                                                    >
+                                                        <Trash2 className="h-3.5 w-3.5 mr-2 text-red-600 dark:text-red-400" />
+                                                        Supprimer
+                                                    </button>
+                                                </li>
+                                            </ul>
                                         </div>
                                     )}
                                 </div>
@@ -590,9 +607,9 @@ const PanneauAffichage: React.FC<PanneauAffichageProps> = ({ objects, onStatusCh
                                             <p className="text-xs text-gray-500 dark:text-gray-400">Durabilité</p>
                                             <div className="flex items-center space-x-2">
                                                 <p className="text-xs font-medium text-gray-700 dark:text-gray-300">{panneau.durabilité || 0}%</p>
+                                                {(panneau.durabilité || 0) <= 0 && panneau.maintenance !== 'fonctionnel' && (
                                                 <button
                                                     onClick={() => handleRepair(panneau.id)}
-                                                    disabled={(panneau.durabilité || 0) > 0 && panneau.maintenance === 'fonctionnel'}
                                                     className={`flex items-center px-3 py-1.5 text-sm rounded font-medium ${
                                                         (panneau.durabilité !== undefined && panneau.durabilité <= 0) || panneau.maintenance !== 'fonctionnel'
                                                         ? 'bg-green-600 hover:bg-green-700 text-white'
@@ -602,6 +619,7 @@ const PanneauAffichage: React.FC<PanneauAffichageProps> = ({ objects, onStatusCh
                                                     <Wrench className="h-4 w-4 mr-1" />
                                                     {(panneau.durabilité !== undefined && panneau.durabilité <= 0) || panneau.maintenance !== 'fonctionnel' ? 'Réparer' : 'OK'}
                                                 </button>
+                                                )}
                                             </div>
                                         </div>
                                         <div className="w-full bg-gray-200 dark:bg-gray-700 rounded-full h-1.5">

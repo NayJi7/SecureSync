@@ -535,7 +535,7 @@ const Door: React.FC<DoorProps> = ({ objects, onAddObject, onStatusChange, addPo
                                             </button>
 
                                             {activeMenu === door.id && (
-                                                <div ref={dropdownRef} className="absolute right-0 top-auto mt-8 w-48 bg-white dark:bg-gray-800 shadow-lg rounded-md border border-gray-200 dark:border-gray-700 z-10">
+                                                <div ref={dropdownRef} className="absolute right-0 top-10 mt-0.5 w-48 bg-white dark:bg-gray-800 shadow-lg rounded-md border border-gray-200 dark:border-gray-700 z-10">
                                                     <button
                                                         onClick={() => handleEditClick(door)}
                                                         className="flex items-center w-full px-4 py-2 text-sm text-left text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-700"
@@ -598,18 +598,19 @@ const Door: React.FC<DoorProps> = ({ objects, onAddObject, onStatusChange, addPo
                                                     <p className="text-xs text-gray-500 dark:text-gray-400">Durabilité</p>
                                                     <div className="flex items-center space-x-2">
                                                         <p className="text-xs font-medium text-gray-700 dark:text-gray-300">{door.durabilité || 0}%</p>
-                                                        <button
-                                                            onClick={() => handleRepair(door.id)}
-                                                            disabled={(door.durabilité || 0) > 0 && door.maintenance === 'fonctionnel'}
-                                                            className={`flex items-center px-3 py-1.5 text-sm rounded font-medium ${
-                                                                (door.durabilité !== undefined && door.durabilité <= 0) || door.maintenance !== 'fonctionnel'
-                                                                ? 'bg-green-600 hover:bg-green-700 text-white'
-                                                                : 'bg-gray-300 text-gray-600 cursor-default'
-                                                            }`}
-                                                        >
-                                                            <Wrench className="h-3 w-3 mr-0.5" />
-                                                            {(door.durabilité !== undefined && door.durabilité <= 0) || door.maintenance !== 'fonctionnel' ? 'Réparer' : 'OK'}
-                                                        </button>
+                                                        {(door.durabilité || 0) <= 0 && door.maintenance !== 'fonctionnel' && (
+                                                            <button
+                                                                onClick={() => handleRepair(door.id)}
+                                                                className={`flex items-center px-3 py-1.5 text-sm rounded font-medium ${
+                                                                    (door.durabilité !== undefined && door.durabilité <= 0) || door.maintenance !== 'fonctionnel'
+                                                                    ? 'bg-green-600 hover:bg-green-700 text-white'
+                                                                    : 'bg-gray-300 text-gray-600 cursor-default'
+                                                                }`}
+                                                            >
+                                                                <Wrench className="h-3 w-3 mr-0.5" />
+                                                                {(door.durabilité !== undefined && door.durabilité <= 0) || door.maintenance !== 'fonctionnel' ? 'Réparer' : 'OK'}
+                                                            </button>
+                                                        )}
                                                     </div>
                                                 </div>
                                                 <div className="w-full bg-gray-200 dark:bg-gray-700 rounded-full h-1.5">

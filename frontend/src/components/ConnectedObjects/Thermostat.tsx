@@ -631,7 +631,7 @@ const Thermostat: React.FC<ThermostatProps> = ({ objects, onAddObject, onStatusC
                                         
                                         {/* Dropdown menu */}
                                         {activeMenu === thermostat.id && (
-                                            <div ref={dropdownRef} className="absolute right-0 top-auto mt-8 w-48 bg-white dark:bg-gray-800 shadow-lg rounded-md border border-gray-200 dark:border-gray-700 z-10">
+                                            <div ref={dropdownRef} className="absolute right-0 top-10 mt-0.5 w-48 bg-white dark:bg-gray-800 shadow-lg rounded-md border border-gray-200 dark:border-gray-700 z-10">
                                                 <button onClick={() => handleEditClick(thermostat)} className="flex items-center w-full px-4 py-2 text-sm text-left text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-700">
                                                     <Pencil className="h-4 w-4 mr-2 text-gray-500 dark:text-gray-400" />
                                                     Modifier
@@ -684,18 +684,19 @@ const Thermostat: React.FC<ThermostatProps> = ({ objects, onAddObject, onStatusC
                                                     <p className="text-xs text-gray-500 dark:text-gray-400">Durabilité</p>
                                                     <div className="flex items-center space-x-2">
                                                         <p className="text-xs font-medium text-gray-700 dark:text-gray-300">{thermostat.durabilité || 0}%</p>
-                                                        <button
-                                                            onClick={() => handleRepair(thermostat.id)}
-                                                            disabled={(thermostat.durabilité || 0) > 0 && thermostat.maintenance === 'fonctionnel'}
-                                                            className={`flex items-center px-3 py-1.5 text-sm rounded font-medium ${
-                                                                (thermostat.durabilité !== undefined && thermostat.durabilité <= 0) || thermostat.maintenance !== 'fonctionnel'
-                                                                ? 'bg-green-600 hover:bg-green-700 text-white'
-                                                                : 'bg-gray-300 text-gray-600 cursor-default'
-                                                            }`}
-                                                        >
-                                                            <Wrench className="h-4 w-4 mr-1" />
-                                                            {(thermostat.durabilité !== undefined && thermostat.durabilité <= 0) || thermostat.maintenance !== 'fonctionnel' ? 'Réparer' : 'OK'}
-                                                        </button>
+                                                        {(thermostat.durabilité || 0) <= 0 && thermostat.maintenance !== 'fonctionnel' && (
+                                                            <button
+                                                                onClick={() => handleRepair(thermostat.id)}
+                                                                className={`flex items-center px-3 py-1.5 text-sm rounded font-medium ${
+                                                                    (thermostat.durabilité !== undefined && thermostat.durabilité <= 0) || thermostat.maintenance !== 'fonctionnel'
+                                                                    ? 'bg-green-600 hover:bg-green-700 text-white'
+                                                                    : 'bg-gray-300 text-gray-600 cursor-default'
+                                                                }`}
+                                                            >
+                                                                <Wrench className="h-4 w-4 mr-1" />
+                                                                {(thermostat.durabilité !== undefined && thermostat.durabilité <= 0) || thermostat.maintenance !== 'fonctionnel' ? 'Réparer' : 'OK'}
+                                                            </button>
+                                                        )}
                                                     </div>
                                                 </div>
                                                 <div className="w-full bg-gray-200 dark:bg-gray-700 rounded-full h-1.5">

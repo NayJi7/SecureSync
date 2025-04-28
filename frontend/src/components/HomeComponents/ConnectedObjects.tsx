@@ -8,8 +8,10 @@ import Thermostat from '../ConnectedObjects/Thermostat';
 import Ventilation from '../ConnectedObjects/Ventilation';
 import PanneauAffichage from '../ConnectedObjects/PanneauAffichage';
 import ObjectsChart, { AddObjectCallback } from '../ConnectedObjects/ObjectsChart';
-import { LayoutGrid, Activity, RefreshCw, X, PlusCircle, AlertCircle, MapPin, ToggleLeft } from 'lucide-react';
+import { LayoutGrid, Activity, RefreshCw, X, PlusCircle, AlertCircle, MapPin, ToggleLeft, AlertTriangle, Wrench } from 'lucide-react';
 import axios from 'axios';
+import VideoView from './VideoView';
+import { DotLottieReact } from '@lottiefiles/dotlottie-react';
 
 interface ConnectedObjectsProps {
     prisonId?: string;
@@ -32,6 +34,11 @@ const ConnectedObjects: React.FC<ConnectedObjectsProps> = ({ prisonId, addPoints
     const [newTargetValue, setNewTargetValue] = useState<number>(22);
     const [isSaving, setIsSaving] = useState(false);
     const [error, setError] = useState<string | null>(null);
+    const [show3D, setShow3D] = useState(false);
+    const [repairModalObject, setRepairModalObject] = useState<ObjectType | null>(null);
+    const [repairInProgress, setRepairInProgress] = useState<number | null>(null);
+    const [repairProgress, setRepairProgress] = useState(0);
+    const [repairCountdown, setRepairCountdown] = useState(5);
 
     // Get the prison ID from props or from localStorage if not provided
     const currentPrisonId = prisonId || localStorage.getItem('userPrison') || localStorage.getItem('selectedPrison');
@@ -401,8 +408,16 @@ const ConnectedObjects: React.FC<ConnectedObjectsProps> = ({ prisonId, addPoints
                                     </td>
                                     <td className="px-4 py-3">
                                         <button
-                                            onClick={() => handleToggleState(object.id, object.etat)}
-                                            className="flex items-center px-3 py-1 bg-indigo-100 hover:bg-indigo-200 dark:bg-indigo-900/30 dark:hover:bg-indigo-800/40 text-indigo-700 dark:text-indigo-300 rounded-md transition-colors text-sm"
+                                            onClick={() => {
+                                                if (object.maintenance && object.maintenance !== 'fonctionnel') {
+                                                    setRepairModalObject(object);
+                                                } else {
+                                                    handleToggleState(object.id, object.etat);
+                                                }
+                                            }}
+                                            className="flex items-center px-3 py-1 rounded-md transition-colors text-sm
+                                                bg-indigo-100 dark:bg-indigo-900/30 text-indigo-700 dark:text-indigo-300
+                                                hover:bg-indigo-200 dark:hover:bg-indigo-800/40"
                                         >
                                             <ToggleLeft className="h-3 w-3 mr-1" />
                                             Changer état
@@ -417,12 +432,67 @@ const ConnectedObjects: React.FC<ConnectedObjectsProps> = ({ prisonId, addPoints
         );
     };
 
+    // Fonction de réparation (similaire à Light.tsx)
+    const handleRepair = async (objectId: number) => {
+        setRepairInProgress(objectId);
+        setRepairProgress(0);
+        setRepairCountdown(5);
+        let progress = 0;
+        let countdown = 5;
+        const interval = setInterval(() => {
+            progress += 20;
+            countdown -= 1;
+            setRepairProgress(progress);
+            setRepairCountdown(countdown);
+            if (progress >= 100) {
+                clearInterval(interval);
+                setTimeout(async () => {
+                    // Appel effectif de l'API de réparation
+                    try {
+                        // Import dynamique pour éviter les cycles
+                        const { repairObject } = await import('../../services/objectService');
+                        await repairObject(objectId);
+                    } catch (e) {
+                        console.error('Erreur lors de la réparation de l\'objet :', e);
+                    }
+                    setRepairInProgress(null);
+                    setRepairProgress(0);
+                    setRepairCountdown(5);
+                    await fetchObjects();
+                }, 500);
+            }
+        }, 1000);
+    };
+
     return (
         <div className="w-full bg-white dark:bg-gray-800 rounded-lg shadow-lg border border-gray-100 dark:border-gray-700 p-6 mb-8">
             <div className="flex justify-between items-center mb-6">
                 <div className="flex items-center">
                     <LayoutGrid className="h-6 w-6 mr-2 text-indigo-600 dark:text-indigo-400" />
-                    <h2 className="text-2xl font-bold text-gray-800 dark:text-white">Tableau de Bord</h2>
+                    <h2 className="text-2xl font-bold text-gray-800 dark:text-white flex items-center">
+                        Tableau de Bord
+                        {(() => {
+                            // Correspondance ID -> nom lisible
+                            const prisonNames: Record<string, string> = {
+                                paris: 'Paris',
+                                cergy: 'Cergy',
+                                lyon: 'Lyon',
+                                marseille: 'Marseille',
+                            };
+                            const id = (prisonId || currentPrisonId || '').toLowerCase();
+                            return id && prisonNames[id] ? ` - Prison de ${prisonNames[id]}` : '';
+                        })()}
+                        <button
+                            title="Visualiser la prison en 3D"
+                            className="ml-3 inline-flex items-center px-2 py-1 rounded-full bg-indigo-100 dark:bg-indigo-900/40 border border-indigo-300 dark:border-indigo-700 text-indigo-700 dark:text-indigo-200 hover:bg-indigo-200 dark:hover:bg-indigo-800 transition-colors shadow-sm focus:outline-none focus:ring-2 focus:ring-indigo-400"
+                            onClick={() => setShow3D(true)}
+                        >
+                            <svg xmlns="http://www.w3.org/2000/svg" className="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth="2">
+                                <path strokeLinecap="round" strokeLinejoin="round" d="M1.5 12s4-7.5 10.5-7.5S22.5 12 22.5 12s-4 7.5-10.5 7.5S1.5 12 1.5 12z" />
+                                <circle cx="12" cy="12" r="3" />
+                            </svg>
+                        </button>
+                    </h2>
                 </div>
                 <div className="flex items-center space-x-2">
                     <span className="text-sm text-gray-500 dark:text-gray-400 flex items-center">
@@ -683,8 +753,83 @@ const ConnectedObjects: React.FC<ConnectedObjectsProps> = ({ prisonId, addPoints
                     </div>
                 </div>
             )}
-        </div>
-    );
-};
+
+            {/* 3D View Modal */}
+            {show3D && (
+                <VideoView 
+                    onClose={() => setShow3D(false)}
+                    videoUrl="https://www.youtube.com/embed/g1uriA73Bp4?autoplay=1&controls=0&modestbranding=1&rel=0&showinfo=0&mute=1&disablekb=1&fs=0&iv_load_policy=3&playsinline=1"
+                />
+            )}
+
+            {/* Repair Modal */}
+            {repairModalObject && (
+                <div className="fixed inset-0 flex items-center justify-center z-50">
+                    <div className="fixed inset-0 bg-black/30" onClick={() => setRepairModalObject(null)}></div>
+                    <div className="bg-white dark:bg-gray-800 rounded-lg shadow-lg p-5 max-w-md w-full mx-4 relative z-10 border-l-4 border-amber-500">
+                        <div className="flex items-start mb-3">
+                            <div className="mr-3 mt-0.5">
+                                <AlertTriangle className="h-5 w-5 text-amber-500" />
+                            </div>
+                            <div className="flex-1">
+                                <h3 className="text-lg font-medium text-gray-900 dark:text-white mb-1">
+                                    Appareil en panne
+                                </h3>
+                                <p className="text-gray-600 dark:text-gray-300 mb-4">
+                                    Cet appareil est en panne. Vous devez le réparer avant de pouvoir l'utiliser à nouveau.
+                                </p>
+                                <div className="flex justify-end space-x-3">
+                                    <button
+                                        onClick={() => setRepairModalObject(null)}
+                                        className="px-4 py-2 text-sm bg-gray-100 hover:bg-gray-200 text-gray-700 dark:bg-gray-700 dark:hover:bg-gray-600 dark:text-gray-300 rounded"
+                                    >
+                                        Annuler
+                                    </button>
+                                    <button
+                                        onClick={() => {
+                                            handleRepair(repairModalObject.id);
+                                            setRepairModalObject(null);
+                                        }}
+                                        className="px-4 py-2 text-sm bg-green-600 hover:bg-green-700 text-white rounded flex items-center"
+                                    >
+                                        <Wrench className="h-4 w-4 mr-1.5" /> Réparer maintenant
+                                    </button>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            )}
+
+            {/* Replace the repair in progress modal with new UI */}
+            {repairInProgress !== null && (
+                <div className="fixed inset-0 flex items-center justify-center z-50">
+                    <div className="fixed inset-0 bg-black/15" onClick={() => {}}></div>
+                    <div className="bg-white dark:bg-gray-800 rounded-lg shadow-lg p-6 max-w-xs w-full mx-4 relative z-10">
+                        <div className="flex flex-col items-center">
+                            <div className="mb-4 w-40 h-40 filter grayscale brightness-[0.6] contrast-[1.2]">
+                                <DotLottieReact
+                                    src="https://lottie.host/bab12c80-4bd7-4261-b763-0f7ec72a2834/LE6JcmwrGJ.lottie"
+                                    loop
+                                    autoplay
+                                />
+                            </div>
+                            
+                            <div className="w-full bg-gray-200 dark:bg-gray-700 rounded-full h-2 mb-2">
+                                <div
+                                    className="h-2 rounded-full bg-green-500 transition-all duration-1000 ease-linear"
+                                    style={{ width: `${repairProgress}%` }}
+                                ></div>
+                            </div>
+                            
+                            <div className="flex justify-center items-center mt-1">
+                                <p className="text-sm font-medium text-gray-600 dark:text-gray-300">{repairCountdown}s</p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            )}
+                </div>
+            )}
 
 export default ConnectedObjects;

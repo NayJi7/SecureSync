@@ -29,7 +29,8 @@ const TeamEditModal: React.FC<TeamEditModalProps> = ({ isOpen, onClose, member, 
   // Mettre à jour les données du formulaire lorsque member change
   useEffect(() => {
     if (member) {
-    //   console.log('Membre:', member);
+      console.log('Membre reçu dans TeamEditModal:', member);
+      console.log('Type de member:', typeof member, 'Clés:', Object.keys(member));
       
       // Récupérer les données complètes du membre
       const fetchCompleteData = async () => {
@@ -39,8 +40,11 @@ const TeamEditModal: React.FC<TeamEditModalProps> = ({ isOpen, onClose, member, 
             if (!token) return;
             
             // Utiliser le nouvel endpoint spécifique pour récupérer les détails de l'utilisateur
+            const usernameForFetch = member.username;
+            console.log('Récupération des détails pour le username:', usernameForFetch);
+            
             const response = await axios.get(
-              `http://localhost:8000/api/staff/${member.username}/`,
+              `http://localhost:8000/api/staff/${usernameForFetch}/`,
               {
                 headers: {
                   Authorization: `Bearer ${token}`,
@@ -106,14 +110,20 @@ const TeamEditModal: React.FC<TeamEditModalProps> = ({ isOpen, onClose, member, 
     
     try {
       const token = localStorage.getItem('sessionToken');
+      console.log('Token d\'authentification présent:', !!token);
       if (!token) {
         setError('Session expirée, veuillez vous reconnecter');
         setLoading(false);
         return;
       }
       
+      console.log("Envoi de requête pour le membre:", member);
+      // Assurons-nous d'utiliser le bon username pour la mise à jour
+      const usernameToUse = memberData.username;
+      console.log("Username utilisé pour la mise à jour:", usernameToUse);
+      
       await axios.put(
-        `http://localhost:8000/api/staff/${member.id || member.username}/update/`,
+        `http://localhost:8000/api/staff/${usernameToUse}/update/`,
         memberData,
         {
           headers: {
@@ -133,13 +143,28 @@ const TeamEditModal: React.FC<TeamEditModalProps> = ({ isOpen, onClose, member, 
       
     } catch (err: any) {
       console.error('Erreur lors de la mise à jour :', err);
+      // Log détaillé de l'erreur 
+      console.log('Status de l\'erreur:', err.response?.status);
+      console.log('URL qui a échoué:', err.config?.url);
+      console.log('Données envoyées:', err.config?.data);
+      console.log('Headers envoyés:', err.config?.headers);
+      
       if (err.response && err.response.data) {
+        const errorDetails = typeof err.response.data === 'object' 
+          ? JSON.stringify(err.response.data) 
+          : err.response.data.toString().substring(0, 200) + '...';
+        console.log('Détails de la réponse:', errorDetails);
+        
         const errorMessages = Object.keys(err.response.data)
-          .map(key => `${key}: ${err.response.data[key].join(', ')}`)
+          .map(key => {
+            const value = err.response.data[key];
+            return `${key}: ${Array.isArray(value) ? value.join(', ') : value}`;
+          })
           .join('; ');
-        setError(errorMessages || 'Erreur lors de la mise à jour');
+          
+        setError(errorMessages || `Erreur lors de la mise à jour: ${err.message}`);
       } else {
-        setError('Une erreur s\'est produite lors de la mise à jour de l\'employé');
+        setError(`Une erreur s'est produite: ${err.message}`);
       }
     } finally {
       setLoading(false);

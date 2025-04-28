@@ -591,18 +591,19 @@ const Light: React.FC<LightProps> = ({ objects, onAddObject, onStatusChange, add
                                                     <p className="text-xs text-gray-500 dark:text-gray-400">Durabilité</p>
                                                     <div className="flex items-center space-x-2">
                                                         <p className="text-xs font-medium text-gray-700 dark:text-gray-300">{light.durabilité || 0}%</p>
-                                                        <button
-                                                            onClick={() => handleRepair(light.id)}
-                                                            disabled={(light.durabilité || 0) > 0 && light.maintenance === 'fonctionnel'}
-                                                            className={`flex items-center px-3 py-1.5 text-sm rounded font-medium ${
-                                                                (light.durabilité !== undefined && light.durabilité <= 0) || light.maintenance !== 'fonctionnel'
-                                                                ? 'bg-green-600 hover:bg-green-700 text-white'
-                                                                : 'bg-gray-300 text-gray-600 cursor-default'
-                                                            }`}
-                                                        >
-                                                            <Wrench className="h-4 w-4 mr-1.5" />
-                                                            {(light.durabilité !== undefined && light.durabilité <= 0) || light.maintenance !== 'fonctionnel' ? 'Réparer' : 'OK'}
-                                                        </button>
+                                                        {(light.durabilité || 0) <= 0 && light.maintenance !== 'fonctionnel' && (
+                                                            <button
+                                                                onClick={() => handleRepair(light.id)}
+                                                                className={`flex items-center px-3 py-1.5 text-sm rounded font-medium ${
+                                                                    (light.durabilité !== undefined && light.durabilité <= 0) || light.maintenance !== 'fonctionnel'
+                                                                    ? 'bg-green-600 hover:bg-green-700 text-white'
+                                                                    : 'bg-gray-300 text-gray-600 cursor-default'
+                                                                }`}
+                                                            >
+                                                                <Wrench className="h-4 w-4 mr-1.5" />
+                                                                {(light.durabilité !== undefined && light.durabilité <= 0) || light.maintenance !== 'fonctionnel' ? 'Réparer' : 'OK'}
+                                                            </button>
+                                                        )}
                                                     </div>
                                                 </div>
                                                 <div className="w-full bg-gray-200 dark:bg-gray-700 rounded-full h-1.5">
@@ -664,7 +665,7 @@ const Light: React.FC<LightProps> = ({ objects, onAddObject, onStatusChange, add
                                             </button>
 
                                             {activeMenu === light.id && (
-                                                <div ref={dropdownRef} className="absolute right-0 top-auto mt-8 w-48 bg-white dark:bg-gray-800 shadow-lg rounded-md border border-gray-200 dark:border-gray-700 z-10">
+                                                <div ref={dropdownRef} className="absolute right-0 top-auto mt-25 w-48 bg-white dark:bg-gray-800 shadow-lg rounded-md border border-gray-200 dark:border-gray-700 z-10">
                                                     <button
                                                         onClick={() => handleEditClick(light)}
                                                         className="flex items-center w-full px-4 py-2 text-sm text-left text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-700"

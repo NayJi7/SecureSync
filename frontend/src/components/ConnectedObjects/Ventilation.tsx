@@ -550,7 +550,7 @@ const Ventilation: React.FC<VentilationProps> = ({ objects, onAddObject, onStatu
                                         
                                         {/* Dropdown menu */}
                                         {activeMenu === ventilation.id && (
-                                            <div ref={dropdownRef} className="absolute right-0 top-auto mt-8 w-48 bg-white dark:bg-gray-800 shadow-lg rounded-md border border-gray-200 dark:border-gray-700 z-10">
+                                            <div ref={dropdownRef} className="absolute right-0 top-13 mt-0.5 w-48 bg-white dark:bg-gray-800 shadow-lg rounded-md border border-gray-200 dark:border-gray-700 z-10">
                                                 <button onClick={() => handleEditClick(ventilation)} className="flex items-center w-full px-4 py-2 text-sm text-left text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-700">
                                                     <Pencil className="h-4 w-4 mr-2 text-gray-500 dark:text-gray-400" />
                                                     Modifier
@@ -603,9 +603,9 @@ const Ventilation: React.FC<VentilationProps> = ({ objects, onAddObject, onStatu
                                                     <p className="text-xs text-gray-500 dark:text-gray-400">Durabilité</p>
                                                     <div className="flex items-center space-x-2">
                                                         <p className="text-xs font-medium text-gray-700 dark:text-gray-300">{ventilation.durabilité || 0}%</p>
+                                                        {(ventilation.durabilité || 0) <= 0 && ventilation.maintenance !== 'fonctionnel' && (
                                                         <button
                                                             onClick={() => handleRepair(ventilation.id)}
-                                                            disabled={(ventilation.durabilité || 0) > 0 && ventilation.maintenance === 'fonctionnel'}
                                                             className={`flex items-center px-3 py-1.5 text-sm rounded font-medium ${
                                                                 (ventilation.durabilité !== undefined && ventilation.durabilité <= 0) || ventilation.maintenance !== 'fonctionnel'
                                                                 ? 'bg-green-600 hover:bg-green-700 text-white'
@@ -615,6 +615,7 @@ const Ventilation: React.FC<VentilationProps> = ({ objects, onAddObject, onStatu
                                                             <Wrench className="h-4 w-4 mr-1" />
                                                             {(ventilation.durabilité !== undefined && ventilation.durabilité <= 0) || ventilation.maintenance !== 'fonctionnel' ? 'Réparer' : 'OK'}
                                                         </button>
+                                                        )}
                                                     </div>
                                                 </div>
                                                 <div className="w-full bg-gray-200 dark:bg-gray-700 rounded-full h-1.5">

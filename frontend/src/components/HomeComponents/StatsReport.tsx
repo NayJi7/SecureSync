@@ -476,7 +476,7 @@ const StatsReport: React.FC = () => {
                   <div>
                     <p className="text-sm text-gray-500 dark:text-gray-400">Coût estimé (24h)</p>
                     <p className="text-xl sm:text-2xl font-bold">
-                      {(customCostRate * 24).toFixed(2)}€
+                      {(customCostRate !== null ? customCostRate * 24 : averages?.avgCoutHoraire * 24).toFixed(2)}€
                     </p>
                   </div>
                   <div className="bg-purple-100 dark:bg-purple-900/30 p-2 rounded-full">

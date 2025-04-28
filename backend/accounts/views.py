@@ -338,6 +338,27 @@ class StaffView(APIView):
             # Pour déboguer
             print("Données renvoyées:", serializer.data)
             return Response(serializer.data)
+            
+    def put(self, request, username=None):
+        # Vérification que nous avons un nom d'utilisateur
+        if not username:
+            return Response({"error": "Nom d'utilisateur non spécifié"}, status=status.HTTP_400_BAD_REQUEST)
+            
+        try:
+            # Récupérer l'utilisateur à mettre à jour
+            user = CustomUser.objects.get(username=username)
+            
+            # Utiliser le serializer avec les données de la requête
+            serializer = StaffSerializer(user, data=request.data, partial=True)
+            
+            if serializer.is_valid():
+                serializer.save()
+                return Response(serializer.data)
+            else:
+                return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+                
+        except CustomUser.DoesNotExist:
+            return Response({"error": "Utilisateur non trouvé"}, status=status.HTTP_404_NOT_FOUND)
 
 
 User = get_user_model()
