@@ -50,13 +50,6 @@ export default function Header({ isScrolled, mobileMenuOpen, setMobileMenuOpen }
         </div>
         
         <div className="flex items-center gap-4">
-          {!isMobile && (
-            <Link to="/contact">
-              <Button variant="ghost" className="text-green-300/90 hover:text-green-300 hover:bg-green-900/30">
-                Démo
-              </Button>
-            </Link>
-          )}
           <Link to="/login">
             <Button variant="outline" className="text-black-300 border-green-500 hover:bg-green-900/30 hover:text-white">
               Connexion
