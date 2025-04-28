@@ -491,7 +491,7 @@ const ObjectsChart: React.FC<{ onAddObject?: AddObjectCallback }> = ({ onAddObje
                                 </div>
                                 <div className="flex justify-between items-end">
                                     <p className="text-2xl font-bold text-orange-600 dark:text-orange-400">{stats.consommationTotale.toFixed(0)}</p>
-                                    <p className="text-xs text-gray-500 dark:text-gray-400">watts/h</p>
+                                    <p className="text-xs text-gray-500 dark:text-gray-400">kWh</p>
                                 </div>
                             </div>
 
@@ -507,7 +507,7 @@ const ObjectsChart: React.FC<{ onAddObject?: AddObjectCallback }> = ({ onAddObje
                                 </div>
                                 <div className="flex justify-between items-end">
                                     <p className="text-2xl font-bold text-orange-600 dark:text-orange-400">{stats.consommationMoyenne.toFixed(1)}</p>
-                                    <p className="text-xs text-gray-500 dark:text-gray-400">watts/h/objet</p>
+                                    <p className="text-xs text-gray-500 dark:text-gray-400">kWh/objet</p>
                                 </div>
                             </div>
 
@@ -659,7 +659,7 @@ const ObjectsChart: React.FC<{ onAddObject?: AddObjectCallback }> = ({ onAddObje
                                     ></div>
                                 </div>
                                 <div className="w-24 text-right">
-                                    <span className="text-xs font-medium text-gray-700 dark:text-gray-300">{stats.consommationParType.porte.toFixed(0)} W</span>
+                                    <span className="text-xs font-medium text-gray-700 dark:text-gray-300">{stats.consommationParType.porte.toFixed(0)} kW</span>
                                 </div>
                             </div>
 
@@ -679,7 +679,7 @@ const ObjectsChart: React.FC<{ onAddObject?: AddObjectCallback }> = ({ onAddObje
                                     ></div>
                                 </div>
                                 <div className="w-24 text-right">
-                                    <span className="text-xs font-medium text-gray-700 dark:text-gray-300">{stats.consommationParType.lumiere.toFixed(0)} W</span>
+                                    <span className="text-xs font-medium text-gray-700 dark:text-gray-300">{stats.consommationParType.lumiere.toFixed(0)} kW</span>
                                 </div>
                             </div>
 
@@ -699,7 +699,7 @@ const ObjectsChart: React.FC<{ onAddObject?: AddObjectCallback }> = ({ onAddObje
                                     ></div>
                                 </div>
                                 <div className="w-24 text-right">
-                                    <span className="text-xs font-medium text-gray-700 dark:text-gray-300">{stats.consommationParType.camera.toFixed(0)} W</span>
+                                    <span className="text-xs font-medium text-gray-700 dark:text-gray-300">{stats.consommationParType.camera.toFixed(0)} kW</span>
                                 </div>
                             </div>
 
@@ -719,7 +719,7 @@ const ObjectsChart: React.FC<{ onAddObject?: AddObjectCallback }> = ({ onAddObje
                                     ></div>
                                 </div>
                                 <div className="w-24 text-right">
-                                    <span className="text-xs font-medium text-gray-700 dark:text-gray-300">{stats.consommationParType.thermostat.toFixed(0)} W</span>
+                                    <span className="text-xs font-medium text-gray-700 dark:text-gray-300">{stats.consommationParType.thermostat.toFixed(0)}kW</span>
                                 </div>
                             </div>
 
@@ -739,7 +739,7 @@ const ObjectsChart: React.FC<{ onAddObject?: AddObjectCallback }> = ({ onAddObje
                                     ></div>
                                 </div>
                                 <div className="w-24 text-right">
-                                    <span className="text-xs font-medium text-gray-700 dark:text-gray-300">{stats.consommationParType.ventilation.toFixed(0)} W</span>
+                                    <span className="text-xs font-medium text-gray-700 dark:text-gray-300">{stats.consommationParType.ventilation.toFixed(0)} kW</span>
                                 </div>
                             </div>
 
@@ -759,7 +759,7 @@ const ObjectsChart: React.FC<{ onAddObject?: AddObjectCallback }> = ({ onAddObje
                                     ></div>
                                 </div>
                                 <div className="w-24 text-right">
-                                    <span className="text-xs font-medium text-gray-700 dark:text-gray-300">{stats.consommationParType.paneauAffichage.toFixed(0)} W</span>
+                                    <span className="text-xs font-medium text-gray-700 dark:text-gray-300">{stats.consommationParType.paneauAffichage.toFixed(0)} kW</span>
                                 </div>
                             </div>
                         </div>

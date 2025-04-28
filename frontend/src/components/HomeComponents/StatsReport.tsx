@@ -439,7 +439,7 @@ const StatsReport: React.FC = () => {
                 <div className="flex items-center justify-between">
                   <div>
                     <p className="text-sm text-gray-500 dark:text-gray-400">Consommation moyenne</p>
-                    <p className="text-xl sm:text-2xl font-bold">{averages.avgConsommation.toFixed(1)} W</p>
+                    <p className="text-xl sm:text-2xl font-bold">{averages.avgConsommation.toFixed(1)} kW</p>
                   </div>
                   <div className="bg-blue-100 dark:bg-blue-900/30 p-2 rounded-full">
                     <Zap className="h-6 w-6 sm:h-8 sm:w-8 text-blue-500" />
@@ -447,7 +447,7 @@ const StatsReport: React.FC = () => {
                 </div>
                 <div className="mt-2">
                   <span className={`text-xs ${averages.consommationTrend > 0 ? 'text-red-500' : 'text-green-500'}`}>
-                    {averages.consommationTrend > 0 ? '↑' : '↓'} {Math.abs(averages.consommationTrend).toFixed(1)} W
+                    {averages.consommationTrend > 0 ? '↑' : '↓'} {Math.abs(averages.consommationTrend).toFixed(1)}kW
                   </span>
                   <span className="text-xs text-gray-500 dark:text-gray-400 ml-1">depuis le début</span>
                 </div>
@@ -493,7 +493,7 @@ const StatsReport: React.FC = () => {
                         type="number"
                         step="0.001"
                         min="0"
-                        value={customCostRate !== null ? customCostRate : averages.avgCoutHoraire.toFixed(3)}
+                        value={customCostRate !== null ? customCostRate : (averages.avgCoutHoraire * 200).toFixed(3)}
                         onChange={(e) => setCustomCostRate(parseFloat(e.target.value))}
                         className="w-16 mx-1 p-0.5 text-xs border border-purple-400 rounded dark:bg-gray-700"
                       />
@@ -549,7 +549,7 @@ const StatsReport: React.FC = () => {
                   <YAxis yAxisId="right" orientation="right" stroke="#82ca9d" tick={{ fontSize: 10 }} width={30} />
                   <Tooltip contentStyle={{ fontSize: '12px', backgroundColor: 'white', color: 'black', border: '1px solid #ccc' }} />
                   <Legend wrapperStyle={{ fontSize: '11px' }} />
-                  <Bar yAxisId="left" dataKey="consommation" name="Conso (W)" fill="#8884d8" />
+                  <Bar yAxisId="left" dataKey="consommation" name="Conso (kW)" fill="#8884d8" />
                   <Bar yAxisId="right" dataKey="objetsAllumés" name="Objets ON" fill="#82ca9d" />
                 </BarChart>
               </ResponsiveContainer>
@@ -569,7 +569,7 @@ const StatsReport: React.FC = () => {
                   <YAxis tick={{ fontSize: 10 }} width={30} />
                   <Tooltip contentStyle={{ fontSize: '12px', backgroundColor: 'white', color: 'black', border: '1px solid #ccc' }} />
                   <Legend wrapperStyle={{ fontSize: '11px' }} />
-                  <Line type="monotone" dataKey="consommation" name="Conso (W)" stroke="#8884d8" activeDot={{ r: 6 }} strokeWidth={2} />
+                  <Line type="monotone" dataKey="consommation" name="Conso (kW)" stroke="#8884d8" activeDot={{ r: 6 }} strokeWidth={2} />
                 </LineChart>
               </ResponsiveContainer>
             </div>
@@ -585,18 +585,18 @@ const StatsReport: React.FC = () => {
                       <tr className="border-b">
                         <td className="py-2 text-gray-600 dark:text-gray-300">Consommation minimale</td>
                         <td className="py-2 font-medium text-right">
-                          {Math.min(...stats.map(s => s.consommation_total_actuelle)).toFixed(1)} W
+                          {Math.min(...stats.map(s => s.consommation_total_actuelle)).toFixed(1)} kW
                         </td>
                       </tr>
                       <tr className="border-b">
                         <td className="py-2 text-gray-600 dark:text-gray-300">Consommation maximale</td>
                         <td className="py-2 font-medium text-right">
-                          {Math.max(...stats.map(s => s.consommation_total_actuelle)).toFixed(1)} W
+                          {Math.max(...stats.map(s => s.consommation_total_actuelle)).toFixed(1)} kW
                         </td>
                       </tr>
                       <tr className="border-b">
                         <td className="py-2 text-gray-600 dark:text-gray-300">Consommation moyenne</td>
-                        <td className="py-2 font-medium text-right">{averages.avgConsommation.toFixed(1)} W</td>
+                        <td className="py-2 font-medium text-right">{averages.avgConsommation.toFixed(1)} kW</td>
                       </tr>
                       <tr className="border-b">
                         <td className="py-2 text-gray-600 dark:text-gray-300">Coût horaire moyen</td>
@@ -629,7 +629,7 @@ const StatsReport: React.FC = () => {
                       cy="50%"
                       outerRadius={80}
                       fill="#8884d8"
-                      label={({ name, consommation }) => `${name}: ${consommation.toFixed(1)}W`}
+                      label={({ name, consommation }) => `${name}: ${consommation.toFixed(1)}kW`}
                     >
                       {objetTypesData.map((entry, index) => (
                         <Cell key={`cell-${index}`} fill={COLORS[index % COLORS.length]} />
@@ -680,7 +680,7 @@ const StatsReport: React.FC = () => {
                   <tr>
                     <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-200 uppercase tracking-wider">Type d'objet</th>
                     <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-200 uppercase tracking-wider">Objets allumés</th>
-                    <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-200 uppercase tracking-wider">Consommation (W)</th>
+                    <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-200 uppercase tracking-wider">Consommation (kW)</th>
                     <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-200 uppercase tracking-wider">Conso. moyenne par objet</th>
                   </tr>
                 </thead>
@@ -689,9 +689,9 @@ const StatsReport: React.FC = () => {
                     <tr key={index}>
                       <td className="px-6 py-4 whitespace-nowrap">{type.name}</td>
                       <td className="px-6 py-4 whitespace-nowrap">{type.value}</td>
-                      <td className="px-6 py-4 whitespace-nowrap">{type.consommation.toFixed(1)} W</td>
+                      <td className="px-6 py-4 whitespace-nowrap">{type.consommation.toFixed(1)} kW</td>
                       <td className="px-6 py-4 whitespace-nowrap">
-                        {type.value > 0 ? (type.consommation / type.value).toFixed(1) : 0} W
+                        {type.value > 0 ? (type.consommation / type.value).toFixed(1) : 0} kW
                       </td>
                     </tr>
                   ))}
@@ -746,7 +746,7 @@ const StatsReport: React.FC = () => {
                   </h4>
                   <div className="mt-2 flex items-center">
                     <span className={`text-xl sm:text-2xl font-bold ${averages.consommationTrend > 0 ? 'text-red-600 dark:text-red-400' : 'text-green-600 dark:text-green-400'}`}>
-                      {averages.consommationTrend > 0 ? '↑' : '↓'} {Math.abs(averages.consommationTrend).toFixed(1)} W
+                      {averages.consommationTrend > 0 ? '↑' : '↓'} {Math.abs(averages.consommationTrend).toFixed(1)} kW
                     </span>
                   </div>
                   <p className="mt-1 text-xs sm:text-sm text-gray-600 dark:text-gray-300">
