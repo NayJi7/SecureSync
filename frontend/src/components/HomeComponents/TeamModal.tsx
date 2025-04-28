@@ -141,7 +141,7 @@ const StaffModal: React.FC<StaffModalProps> = ({ isOpen, onClose, prisonId }) =>
       }
       
       // Normaliser les données pour garantir la cohérence entre snake_case et camelCase
-      const normalizedStaffData = staffData.map(member => {
+      const normalizedStaffData = staffData.map((member: any) => {
         // Créer une copie du membre
         const normalizedMember = { ...member };
         
