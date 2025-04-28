@@ -18,6 +18,7 @@ export default function ContactPage() {
   });
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [submitSuccess, setSubmitSuccess] = useState(false);
+  const [submitError, setSubmitError] = useState('');
   const { isMobile } = useDevice();
   const [isScrolled, setIsScrolled] = useState(false);
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
@@ -43,16 +44,34 @@ export default function ContactPage() {
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setIsSubmitting(true);
+    setSubmitError('');
     
-    // Simuler un envoi du formulaire (à remplacer par un vrai appel API)
-    setTimeout(() => {
-      setIsSubmitting(false);
-      setSubmitSuccess(true);
-      setFormData({ name: '', email: '', subject: '', message: '' });
+    try {
+      const response = await fetch('http://localhost:8000/api/contact/', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify(formData),
+      });
       
-      // Réinitialiser le message de succès après 5 secondes
-      setTimeout(() => setSubmitSuccess(false), 5000);
-    }, 1500);
+      const data = await response.json();
+      
+      if (data.success) {
+        setIsSubmitting(false);
+        setSubmitSuccess(true);
+        setFormData({ name: '', email: '', subject: '', message: '' });
+        
+        // Réinitialiser le message de succès après 5 secondes
+        setTimeout(() => setSubmitSuccess(false), 5000);
+      } else {
+        throw new Error(data.message || 'Erreur lors de l\'envoi');
+      }
+    } catch (error) {
+      console.error('Error sending contact form:', error);
+      setIsSubmitting(false);
+      setSubmitError(error instanceof Error ? error.message : 'Une erreur est survenue lors de l\'envoi');
+    }
   };
 
   return (
@@ -107,8 +126,8 @@ export default function ContactPage() {
                         </div>
                         <div>
                           <h3 className="font-medium text-green-200">Email</h3>
-                          <a href="mailto:contact@securesync.com" className="text-gray-300 hover:text-green-300 transition-colors">
-                            contact@securesync.com
+                          <a href="mailto:securesynccytech@gmail.com" className="text-gray-300 hover:text-green-300 transition-colors">
+                            securesynccytech@gmail.com
                           </a>
                         </div>
                       </div>
@@ -162,6 +181,13 @@ export default function ContactPage() {
                     </div>
                   ) : (
                     <form onSubmit={handleSubmit} className="space-y-6">
+                      {submitError && (
+                        <div className="p-4 bg-red-900/40 border border-red-500 rounded-lg text-red-200">
+                          <p className="font-medium">Erreur:</p>
+                          <p className="mt-1">{submitError}</p>
+                        </div>
+                      )}
+                      
                       <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                         <div>
                           <label htmlFor="name" className="block mb-2 text-green-200">

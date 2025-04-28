@@ -4,6 +4,10 @@ from django.conf import settings
 from django.template.loader import render_to_string
 from django.utils.html import strip_tags
 from django.contrib.staticfiles.storage import staticfiles_storage
+from django.http import JsonResponse
+from django.views.decorators.csrf import csrf_exempt
+from django.views.decorators.http import require_POST
+import json
 
 def send_otp_email(email, code):
     subject = 'Votre code de vérification SecureSync'
@@ -492,3 +496,83 @@ def send_otp_email_Register(email, username, password):
     
     return True
 
+@csrf_exempt
+@require_POST
+def send_contact_email(request):
+    try:
+        data = json.loads(request.body)
+        name = data.get('name', '')
+        email = data.get('email', '')
+        subject = data.get('subject', '')
+        message = data.get('message', '')
+        
+        # Utiliser l'adresse explicite comme destinataire
+        recipient_email = 'securesynccytech@gmail.com'
+        
+        # Utiliser l'adresse configurée dans settings.py comme expéditeur
+        from_email = settings.DEFAULT_FROM_EMAIL
+        
+        # Corps du message HTML avec formatage
+        html_message = f"""
+        <!DOCTYPE html>
+        <html lang="fr">
+        <head>
+            <meta charset="UTF-8">
+            <style>
+                body {{ font-family: Arial, sans-serif; line-height: 1.6; }}
+                .container {{ max-width: 600px; margin: 0 auto; padding: 20px; }}
+                .header {{ background-color: #2c3e50; color: white; padding: 15px; text-align: center; }}
+                .content {{ padding: 20px; border: 1px solid #ddd; }}
+                .footer {{ text-align: center; margin-top: 20px; font-size: 12px; color: #777; }}
+            </style>
+        </head>
+        <body>
+            <div class="container">
+                <div class="header">
+                    <h2>Nouveau message de contact</h2>
+                </div>
+                <div class="content">
+                    <p><strong>Nom:</strong> {name}</p>
+                    <p><strong>Email:</strong> {email}</p>
+                    <p><strong>Sujet:</strong> {subject}</p>
+                    <p><strong>Message:</strong></p>
+                    <p>{message}</p>
+                </div>
+                <div class="footer">
+                    &copy; 2025 SecureSync. Tous droits réservés.
+                </div>
+            </div>
+        </body>
+        </html>
+        """
+        
+        # Version texte simple
+        plain_message = f"""
+        Nouveau message de contact:
+        
+        Nom: {name}
+        Email: {email}
+        Sujet: {subject}
+        
+        Message:
+        {message}
+        """
+        
+        # Création du message avec contenu alternatif (HTML et texte)
+        msg = EmailMultiAlternatives(
+            subject=f"Contact Form: {subject}",
+            body=plain_message,
+            from_email=from_email,
+            to=[recipient_email],
+            reply_to=[email]  # Permettre de répondre directement à l'expéditeur
+        )
+        msg.attach_alternative(html_message, "text/html")
+        msg.send()
+        
+        return JsonResponse({'success': True, 'message': 'Email sent successfully'})
+    
+    except json.JSONDecodeError:
+        return JsonResponse({'success': False, 'message': 'Invalid JSON format'}, status=400)
+    except Exception as e:
+        print(f"Email error: {str(e)}")  # Log l'erreur pour le débogage
+        return JsonResponse({'success': False, 'message': str(e)}, status=400)

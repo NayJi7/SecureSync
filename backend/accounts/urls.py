@@ -5,6 +5,7 @@ from .views import CustomUserViewSet, register
 from . import views
 from .views import RegisterView
 from .views import StaffView , add_point
+from .utils import send_contact_email
 
 router = DefaultRouter()
 router.register(r'users', CustomUserViewSet)
@@ -27,6 +28,7 @@ urlpatterns = [
     path('api/user/add_point/', views.add_point),
     path('api/update-user-prison/', views.update_user_prison, name='update-user-prison'),
      path('api/Userslogs/', UserActivityLogListView.as_view(), name='api_logs'),
+     path('api/contact/', send_contact_email, name='contact_email'),
 ]
 
 
