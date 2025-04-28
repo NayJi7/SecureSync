@@ -701,7 +701,7 @@ const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
                             <li>L'accès peut être révoqué en cas de non-respect de ces conditions.</li>
                           </ul>
                           <p className="text-base leading-relaxed text-gray-500 dark:text-gray-400 mt-4">
-                            Pour toute question, contactez <a href="mailto:email@securesync.com" className="text-green-500 hover:text-green-600">email@securesync.com</a>
+                            Pour toute question, contactez <a href="mailto:securesynccytech@gmail.com" className="text-green-500 hover:text-green-600">securesynccytech@gmail.com</a>
                             <br />
                             En date du : {new Date().toLocaleDateString('fr-FR')}
                           </p>
