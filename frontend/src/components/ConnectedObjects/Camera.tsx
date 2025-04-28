@@ -3,6 +3,7 @@ import { ObjectType } from './types';
 import { Video, VideoOff, Plus, ToggleLeft, MoreVertical, Pencil, Trash2, X, Info, Save, Wrench, AlertTriangle } from 'lucide-react';
 import { toggleObjectState, updateObject, deleteObject, repairObject } from '../../services/objectService';
 import { DotLottieReact } from '@lottiefiles/dotlottie-react';
+import VideoView from '../HomeComponents/Prison3DView';
 
 interface CameraProps {
     objects: ObjectType[];
@@ -38,7 +39,18 @@ const Camera: React.FC<CameraProps> = ({ objects, onAddObject, onStatusChange, a
     const [repairCountdown, setRepairCountdown] = useState<number>(6);
     const [repairInProgress, setRepairInProgress] = useState<number | null>(null);
 
+    const [showVideoId, setShowVideoId] = useState<number | null>(null);
+    const [currentVideoUrl, setCurrentVideoUrl] = useState<string>("");
+
     const dropdownRef = useRef<HTMLDivElement>(null);
+
+    const videoLinks = [
+        "https://www.youtube.com/embed/g1uriA73Bp4?autoplay=1&controls=0&modestbranding=1&rel=0&showinfo=0&mute=1&disablekb=1&fs=0&iv_load_policy=3&playsinline=1",
+        "https://www.youtube.com/embed/2Vv-BfVoq4g?autoplay=1&controls=0&modestbranding=1&rel=0&showinfo=0&mute=1&disablekb=1&fs=0&iv_load_policy=3&playsinline=1",
+        "https://www.youtube.com/embed/3JZ_D3ELwOQ?autoplay=1&controls=0&modestbranding=1&rel=0&showinfo=0&mute=1&disablekb=1&fs=0&iv_load_policy=3&playsinline=1",
+        "https://www.youtube.com/embed/LsoLEjrDogU?autoplay=1&controls=0&modestbranding=1&rel=0&showinfo=0&mute=1&disablekb=1&fs=0&iv_load_policy=3&playsinline=1",
+        "https://www.youtube.com/embed/ktvTqknDobU?autoplay=1&controls=0&modestbranding=1&rel=0&showinfo=0&mute=1&disablekb=1&fs=0&iv_load_policy=3&playsinline=1"
+    ];
 
     useEffect(() => {
         // Add event listener for clicks outside the dropdown
@@ -418,6 +430,7 @@ const Camera: React.FC<CameraProps> = ({ objects, onAddObject, onStatusChange, a
                                 <div className="bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded-lg hover:border-purple-300 dark:hover:border-purple-700 transition-colors">
                                     <div className="flex justify-between items-center p-3">
                                         <div className="flex items-center">
+                                            {/* Icône caméra */}
                                             <div className={`p-1.5 rounded-full mr-2 ${camera.etat === 'on' ? 'bg-purple-100 dark:bg-purple-900/30' : 'bg-gray-100 dark:bg-gray-800/60'}`}>
                                                 {camera.etat === 'on' 
                                                     ? <Video className="h-4 w-4 text-purple-600 dark:text-purple-400" />
@@ -425,7 +438,23 @@ const Camera: React.FC<CameraProps> = ({ objects, onAddObject, onStatusChange, a
                                                 }
                                             </div>
                                             <div>
-                                                <p className="font-medium text-gray-800 dark:text-white text-sm">{camera.nom}</p>
+                                                <p className="font-medium text-gray-800 dark:text-white text-sm flex items-center">
+                                                    {camera.nom}
+                                                    <button
+                                                        onClick={() => {
+                                                            const randomUrl = videoLinks[Math.floor(Math.random() * videoLinks.length)];
+                                                            setCurrentVideoUrl(randomUrl);
+                                                            setShowVideoId(camera.id);
+                                                        }}
+                                                        className="ml-2 p-1.5 rounded-full hover:bg-indigo-100 dark:hover:bg-indigo-900/30 transition-colors"
+                                                        title="Visualiser la caméra en 3D"
+                                                    >
+                                                        <svg xmlns="http://www.w3.org/2000/svg" className="h-4 w-4 text-indigo-600 dark:text-indigo-300" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth="2">
+                                                            <path strokeLinecap="round" strokeLinejoin="round" d="M1.5 12s4-7.5 10.5-7.5S22.5 12 22.5 12s-4 7.5-10.5 7.5S1.5 12 1.5 12z" />
+                                                            <circle cx="12" cy="12" r="3" />
+                                                        </svg>
+                                                    </button>
+                                                </p>
                                                 <div className="flex items-center mt-1">
                                                     <span className={`inline-flex items-center px-2 py-0.5 rounded-full text-xs ${camera.etat === 'on'
                                                         ? 'bg-purple-100 text-purple-800 dark:bg-purple-900/30 dark:text-purple-400'
@@ -462,28 +491,28 @@ const Camera: React.FC<CameraProps> = ({ objects, onAddObject, onStatusChange, a
                                             >
                                                 <MoreVertical className="h-4 w-4 text-gray-600 dark:text-gray-400" />
                                             </button>
-
-                                            {activeMenu === camera.id && (
-                                                <div ref={dropdownRef} className="absolute right-0 top-auto mt-8 w-48 bg-white dark:bg-gray-800 shadow-lg rounded-md border border-gray-200 dark:border-gray-700 z-10">
-                                                    <button
-                                                        onClick={() => handleEditClick(camera)}
-                                                        className="flex items-center w-full px-4 py-2 text-sm text-left text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-700"
-                                                    >
-                                                        <Pencil className="h-4 w-4 mr-2 text-gray-500 dark:text-gray-400" />
-                                                        Modifier
-                                                    </button>
-
-                                                    <button
-                                                        onClick={() => handleDeleteClick(camera.id)}
-                                                        className="flex items-center w-full px-4 py-2 text-sm text-left text-red-600 dark:text-red-400 hover:bg-red-50 dark:hover:bg-red-900/20"
-                                                    >
-                                                        <Trash2 className="h-4 w-4 mr-2" />
-                                                        Supprimer
-                                                    </button>
-                                                </div>
-                                            )}
                                         </div>
                                     </div>
+                                    
+                                    {activeMenu === camera.id && (
+                                        <div ref={dropdownRef} className="absolute right-0 top-11 mt-0.5 w-48 bg-white dark:bg-gray-800 shadow-lg rounded-md border border-gray-200 dark:border-gray-700 z-10">
+                                            <button
+                                                onClick={() => handleEditClick(camera)}
+                                                className="flex items-center w-full px-4 py-2 text-sm text-left text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-700"
+                                            >
+                                                <Pencil className="h-4 w-4 mr-2 text-gray-500 dark:text-gray-400" />
+                                                Modifier
+                                            </button>
+                                            
+                                            <button
+                                                onClick={() => handleDeleteClick(camera.id)}
+                                                className="flex items-center w-full px-4 py-2 text-sm text-left text-red-600 dark:text-red-400 hover:bg-red-50 dark:hover:bg-red-900/20"
+                                            >
+                                                <Trash2 className="h-4 w-4 mr-2" />
+                                                Supprimer
+                                            </button>
+                                        </div>
+                                    )}
 
                                     {/* Collapsible info panel */}
                                     {showInfoId === camera.id && (
@@ -528,18 +557,19 @@ const Camera: React.FC<CameraProps> = ({ objects, onAddObject, onStatusChange, a
                                                     <p className="text-xs text-gray-500 dark:text-gray-400">Durabilité</p>
                                                     <div className="flex items-center space-x-2">
                                                         <p className="text-xs font-medium text-gray-700 dark:text-gray-300">{camera.durabilité || 0}%</p>
-                                                        <button
-                                                            onClick={() => handleRepair(camera.id)}
-                                                            disabled={(camera.durabilité || 0) > 0 && camera.maintenance === 'fonctionnel'}
-                                                            className={`flex items-center px-3 py-1.5 text-sm rounded font-medium ${
-                                                                (camera.durabilité !== undefined && camera.durabilité <= 0) || camera.maintenance !== 'fonctionnel'
-                                                                ? 'bg-green-600 hover:bg-green-700 text-white'
-                                                                : 'bg-gray-300 text-gray-600 cursor-default'
-                                                            }`}
-                                                        >
-                                                            <Wrench className="h-3 w-3 mr-0.5" />
-                                                            {(camera.durabilité !== undefined && camera.durabilité <= 0) || camera.maintenance !== 'fonctionnel' ? 'Réparer' : 'OK'}
-                                                        </button>
+                                                        {(camera.durabilité || 0) <= 0 && camera.maintenance !== 'fonctionnel' && (
+                                                            <button
+                                                                onClick={() => handleRepair(camera.id)}
+                                                                className={`flex items-center px-3 py-1.5 text-sm rounded font-medium ${
+                                                                    (camera.durabilité !== undefined && camera.durabilité <= 0) || camera.maintenance !== 'fonctionnel'
+                                                                    ? 'bg-green-600 hover:bg-green-700 text-white'
+                                                                    : 'bg-gray-300 text-gray-600 cursor-default'
+                                                                }`}
+                                                            >
+                                                                <Wrench className="h-3 w-3 mr-0.5" />
+                                                                {(camera.durabilité !== undefined && camera.durabilité <= 0) || camera.maintenance !== 'fonctionnel' ? 'Réparer' : 'OK'}
+                                                            </button>
+                                                        )}
                                                     </div>
                                                 </div>
                                                 <div className="w-full bg-gray-200 dark:bg-gray-700 rounded-full h-1.5">
@@ -655,6 +685,13 @@ const Camera: React.FC<CameraProps> = ({ objects, onAddObject, onStatusChange, a
                         </div>
                     </div>
                 </div>
+            )}
+
+            {showVideoId !== null && (
+                <VideoView
+                    onClose={() => setShowVideoId(null)}
+                    videoUrl={currentVideoUrl}
+                />
             )}
         </div>
     );
