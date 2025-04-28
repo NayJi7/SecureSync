@@ -146,8 +146,8 @@ const ObjectsChart: React.FC<{ onAddObject?: AddObjectCallback }> = ({ onAddObje
             
         const consommationMoyenne = active > 0 ? consommationTotale / active : 0;
         
-        // Coût horaire (0.15€ par kWh)
-        const coutHoraire = consommationTotale * 0.15 / 1000;
+        // Coût horaire (0.2€ par kWh)
+        const coutHoraire = consommationTotale * 0.2;
         
         // Construction de l'objet à envoyer à l'API
         return {
@@ -522,7 +522,7 @@ const ObjectsChart: React.FC<{ onAddObject?: AddObjectCallback }> = ({ onAddObje
                                     <h5 className="text-sm font-medium text-gray-600 dark:text-gray-300">Coût horaire</h5>
                                 </div>
                                 <div className="flex justify-between items-end">
-                                    <p className="text-2xl font-bold text-orange-600 dark:text-orange-400">{(stats.consommationTotale * 0.15 / 1000).toFixed(2)}</p>
+                                    <p className="text-2xl font-bold text-orange-600 dark:text-orange-400">{(stats.consommationTotale * 0.2).toFixed(2)}</p>
                                     <p className="text-xs text-gray-500 dark:text-gray-400">€/heure</p>
                                 </div>
                             </div>
