@@ -342,7 +342,7 @@ export default function LandingPage() {
                     Planifier une Démo
                   </Button>
                 </Link>
-                <Link to="/pricing">
+                <Link to="/features">
                   <Button variant="outline" size="lg" className="text-black-300 border-green-500 hover:bg-green-900/30 hover:text-white px-6 py-3">
                     Voir les Tarifs
                   </Button>

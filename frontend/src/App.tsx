@@ -12,6 +12,7 @@ import ObjectPage from '@/pages/ObjectDashboard';
 import PrisonSelectionPage from '@/pages/PrisonSelectionPage';
 import StatForm from '@/pages/StatPage';
 import StatPage from '@/pages/StatList';
+import TermsPage from '@/pages/TermsPage';
 import VideoSurveillance from '@/pages/VideoSurveillance';
 
 // Composant de protection des routes
@@ -68,6 +69,7 @@ export default function App() {
         <Route path="/about" element={<AboutPage />} />
         <Route path="/contact" element={<ContactPage />} />
         <Route path="/features" element={<FeaturesPage />} />
+        <Route path="/terms" element={<TermsPage />} />
         <Route path="/Stat" element={<StatForm />} />
         <Route path="/StatPage" element={<StatPage />} />
         <Route path="/VideoSurveillance" element={<VideoSurveillance />} />

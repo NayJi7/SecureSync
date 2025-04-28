@@ -8,7 +8,7 @@ export interface ObjectType {
   coord_y: number;
   etat: 'on' | 'off';
   Prison_id?: string; // ID de la prison à laquelle appartient l'objet
-  consomation?: number; // Orthographe du backend: Consommation électrique en watts
+  consomation?: number; // Orthographe du backend: Consommation électrique en kWh
   durabilité?: number; // Durabilité de l'objet en pourcentage
   maintenance?: string; // État de maintenance de l'objet
   connection?: string; // État de la connexion de l'objet

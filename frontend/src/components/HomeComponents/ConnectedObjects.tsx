@@ -172,7 +172,7 @@ const ConnectedObjects: React.FC<ConnectedObjectsProps> = ({ prisonId, addPoints
                 coord_y: newObjectY,
                 Prison_id: prisonId, // Utiliser une variable explicite
                 // Champs requis par le modèle backend
-                consomation: newConsumption, // Consumption in watts
+                consomation: newConsumption, // Consumption in kWh
                 valeur_actuelle: initialValue,
                 valeur_cible: addingObjectType === 'thermostat' ? newTargetValue : 0, // Use target value for thermostat
                 durabilité: cappedDurability, // Use the capped durability value
@@ -570,7 +570,7 @@ const ConnectedObjects: React.FC<ConnectedObjectsProps> = ({ prisonId, addPoints
                             <div className="grid grid-cols-2 gap-4">
                                 <div>
                                     <label htmlFor="consumption" className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
-                                        Consommation (Watts)
+                                        Consommation (kWh)
                                     </label>
                                     <input
                                         type="number"
