@@ -466,7 +466,7 @@ const PanneauAffichage: React.FC<PanneauAffichageProps> = ({ objects, onStatusCh
                                         </div>
 
                                         <div>
-                                            <label className="block text-xs font-medium text-gray-600 dark:text-gray-400 mb-1">Consommation (Watts)</label>
+                                            <label className="block text-xs font-medium text-gray-600 dark:text-gray-400 mb-1">Consommation (kW)</label>
                                             <input
                                                 type="number"
                                                 value={newConsumption}
@@ -572,7 +572,7 @@ const PanneauAffichage: React.FC<PanneauAffichageProps> = ({ objects, onStatusCh
                                         </div>
                                         <div className="space-y-1">
                                             <p className="text-xs text-gray-500 dark:text-gray-400">Consommation</p>
-                                            <p className="font-medium text-gray-700 dark:text-gray-300">{panneau.consomation || 0} W</p>
+                                            <p className="font-medium text-gray-700 dark:text-gray-300">{panneau.consomation || 0} kW</p>
                                         </div>
                                         <div className="space-y-1">
                                             <p className="text-xs text-gray-500 dark:text-gray-400">Maintenance</p>

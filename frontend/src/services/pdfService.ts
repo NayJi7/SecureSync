@@ -216,7 +216,7 @@ export const generateStatsPDF = async (
       doc.setFontSize(12);
       doc.setTextColor(textColor);
       doc.text('Consommation moyenne:', 14, 30);
-      doc.text(`${averages.avgConsommation.toFixed(1)} W`, 100, 30);
+      doc.text(`${averages.avgConsommation.toFixed(1)} kW`, 100, 30);
       
       doc.text('Pourcentage d\'objets allumés:', 14, 38);
       doc.text(`${averages.avgPourcentageAllumes.toFixed(1)} %`, 100, 38);
@@ -228,7 +228,7 @@ export const generateStatsPDF = async (
       doc.text(`${averages.totalCout24h.toFixed(2)} €`, 100, 54);
       
       doc.text('Tendance consommation:', 14, 62);
-      doc.text(`${averages.consommationTrend > 0 ? '+' : ''}${averages.consommationTrend.toFixed(1)} W`, 100, 62);
+      doc.text(`${averages.consommationTrend > 0 ? '+' : ''}${averages.consommationTrend.toFixed(1)} kW`, 100, 62);
       
       doc.text('Tendance objets allumés:', 14, 70);
       doc.text(`${averages.pourcentageTrend > 0 ? '+' : ''}${averages.pourcentageTrend.toFixed(1)} %`, 100, 70);
@@ -248,8 +248,8 @@ export const generateStatsPDF = async (
       const tableData = chartData.objetTypesData.map(obj => [
         obj.name,
         obj.value.toString(),
-        `${obj.consommation.toFixed(1)} W`,
-        obj.value > 0 ? `${(obj.consommation / obj.value).toFixed(1)} W` : '0 W'
+        `${obj.consommation.toFixed(1)} kW`,
+        obj.value > 0 ? `${(obj.consommation / obj.value).toFixed(1)} kW` : '0 kW'
       ]);
       
       // Utiliser autoTable directement
