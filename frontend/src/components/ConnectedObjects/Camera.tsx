@@ -3,7 +3,7 @@ import { ObjectType } from './types';
 import { Video, VideoOff, Plus, ToggleLeft, MoreVertical, Pencil, Trash2, X, Info, Save, Wrench, AlertTriangle } from 'lucide-react';
 import { toggleObjectState, updateObject, deleteObject, repairObject } from '../../services/objectService';
 import { DotLottieReact } from '@lottiefiles/dotlottie-react';
-import VideoView from '../HomeComponents/Prison3DView';
+import VideoView from '../HomeComponents/VideoView';
 
 interface CameraProps {
     objects: ObjectType[];
@@ -438,7 +438,7 @@ const Camera: React.FC<CameraProps> = ({ objects, onAddObject, onStatusChange, a
                                                                 setCurrentVideoUrl("https://www.youtube.com/embed/dQw4w9WgXcQ?autoplay=1&controls=0&modestbranding=1&rel=0&showinfo=0&mute=1&disablekb=1&fs=0&iv_load_policy=3&playsinline=1");                                                              setShowVideoId(camera.id);
                                                             }}
                                                             className="ml-2 p-1.5 rounded-full hover:bg-indigo-100 dark:hover:bg-indigo-900/30 transition-colors"
-                                                            title="Visualiser la caméra en 3D"
+                                                            title="Visualiser la caméra"
                                                         >
                                                             <svg xmlns="http://www.w3.org/2000/svg" className="h-4 w-4 text-indigo-600 dark:text-indigo-300" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth="2">
                                                                 <path strokeLinecap="round" strokeLinejoin="round" d="M1.5 12s4-7.5 10.5-7.5S22.5 12 22.5 12s-4 7.5-10.5 7.5S1.5 12 1.5 12z" />
