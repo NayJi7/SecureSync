@@ -6,7 +6,7 @@ from django.contrib import messages
 from django.contrib.auth.decorators import login_required
 from django import forms
 from django.contrib.auth.hashers import check_password
-from .models import CustomUser , UserActivityLog
+from .models import CustomUser, UserActivityLog, Prison
 from .forms import CustomUserCreationForm, CustomAuthenticationForm, CustomUserUpdateForm
 
 from rest_framework import viewsets, generics, status
@@ -15,7 +15,7 @@ from rest_framework.response import Response
 from rest_framework.permissions import AllowAny, IsAuthenticated
 from rest_framework_simplejwt.tokens import RefreshToken
 from rest_framework.decorators import api_view, permission_classes
-from .serializers import ProfileSerializer
+from .serializers import ProfileSerializer, PrisonSerializer
 from .serializers import UserActivityLogSerializer
 import logging
 logger = logging.getLogger(__name__)
@@ -509,3 +509,129 @@ def update_user_prison(request):
 class UserActivityLogListView(generics.ListAPIView):
     queryset = UserActivityLog.objects.select_related('user').order_by('-timestamp')[:100]
     serializer_class = UserActivityLogSerializer
+
+
+# =======================
+# ✅ API REST - Gestion des Prisons
+# =======================
+
+# =======================
+# 🏢 API REST - Gestion des prisons
+# =======================
+
+class PrisonListView(APIView):
+    """
+    Vue pour lister toutes les prisons et en créer de nouvelles.
+    Seuls les administrateurs peuvent accéder à cette vue.
+    """
+    permission_classes = [IsAuthenticated]
+
+    def get(self, request):
+        """Récupère toutes les prisons."""
+        # Vérification des permissions (admin seulement)
+        if request.user.role != 'admin':
+            return Response(
+                {'detail': 'Seuls les administrateurs peuvent accéder à cette ressource.'},
+                status=status.HTTP_403_FORBIDDEN
+            )
+        
+        prisons = Prison.objects.all().order_by('nom')
+        serializer = PrisonSerializer(prisons, many=True)
+        return Response(serializer.data)
+
+    def post(self, request):
+        """Crée une nouvelle prison."""
+        # Vérification des permissions (admin seulement)
+        if request.user.role != 'admin':
+            return Response(
+                {'detail': 'Seuls les administrateurs peuvent créer des prisons.'},
+                status=status.HTTP_403_FORBIDDEN
+            )
+        
+        serializer = PrisonSerializer(data=request.data)
+        if serializer.is_valid():
+            serializer.save()
+            UserActivityLog.objects.create(
+                user=request.user,
+                action=f'create_prison_{serializer.instance.id}'
+            )
+            return Response(serializer.data, status=status.HTTP_201_CREATED)
+        return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+
+
+class PrisonDetailView(APIView):
+    """
+    Vue pour gérer les opérations sur une prison spécifique.
+    Seuls les administrateurs peuvent accéder à cette vue.
+    """
+    permission_classes = [IsAuthenticated]
+
+    def get_object(self, prison_id):
+        """Récupère une prison par son ID."""
+        try:
+            return Prison.objects.get(pk=prison_id)
+        except Prison.DoesNotExist:
+            return None
+
+    def get(self, request, prison_id):
+        """Récupère les détails d'une prison spécifique."""
+        # Vérification des permissions (admin seulement)
+        if request.user.role != 'admin':
+            return Response(
+                {'detail': 'Seuls les administrateurs peuvent accéder à cette ressource.'},
+                status=status.HTTP_403_FORBIDDEN
+            )
+        
+        prison = self.get_object(prison_id)
+        if not prison:
+            return Response(
+                {'detail': f'La prison avec l\'ID {prison_id} n\'existe pas.'},
+                status=status.HTTP_404_NOT_FOUND
+            )
+        
+        serializer = PrisonSerializer(prison)
+        return Response(serializer.data)
+
+    def delete(self, request, prison_id):
+        """Supprime une prison spécifique."""
+        # Vérification des permissions (admin seulement)
+        if request.user.role != 'admin':
+            return Response(
+                {'detail': 'Seuls les administrateurs peuvent supprimer des prisons.'},
+                status=status.HTTP_403_FORBIDDEN
+            )
+        
+        prison = self.get_object(prison_id)
+        if not prison:
+            return Response(
+                {'detail': f'La prison avec l\'ID {prison_id} n\'existe pas.'},
+                status=status.HTTP_404_NOT_FOUND
+            )
+        
+        # Vérifier si des utilisateurs sont associés à cette prison
+        users_count = CustomUser.objects.filter(prison=prison_id).count()
+        if users_count > 0:
+            return Response(
+                {'detail': f'Impossible de supprimer cette prison car {users_count} utilisateur(s) y sont associés.'},
+                status=status.HTTP_400_BAD_REQUEST
+            )
+        
+        # Log de l'action avant de supprimer
+        UserActivityLog.objects.create(
+            user=request.user,
+            action=f'delete_prison_{prison_id}'
+        )
+        
+        # Suppression de la prison
+        prison.delete()
+        return Response(status=status.HTTP_204_NO_CONTENT)
+
+@api_view(['POST'])
+@permission_classes([IsAuthenticated])
+def log_logout(request):
+    """Endpoint pour enregistrer la déconnexion d'un utilisateur"""
+    UserActivityLog.objects.create(
+        user=request.user,
+        action='logout'
+    )
+    return Response({'detail': 'Déconnexion enregistrée avec succès'})

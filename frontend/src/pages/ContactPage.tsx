@@ -182,6 +182,7 @@ export default function ContactPage() {
                           <h3 className="font-medium text-green-200">Téléphone</h3>
                           <a href="tel:+33123456789" className="text-gray-300 hover:text-green-300 transition-colors">
                             +212 6 11 21 43 18
+                            +212 6 11 21 43 18
                           </a>
                         </div>
                       </motion.div>
@@ -196,6 +197,8 @@ export default function ContactPage() {
                         <div>
                           <h3 className="font-medium text-green-200">Adresse</h3>
                           <address className="not-italic text-gray-300">
+                            Avenue du Parc<br />
+                            95000 Cergy-Pontoise<br />
                             Avenue du Parc<br />
                             95000 Cergy-Pontoise<br />
                             France
@@ -225,168 +228,174 @@ export default function ContactPage() {
                       <p>Dimanche: Fermé</p>
                     </motion.div>
                   </motion.div>
-                </div>
+              </motion.div>
+            </motion.div>
+        </div>
 
-                {/* Formulaire de contact */}
-                <motion.div
-                  className="lg:col-span-3 backdrop-blur-md bg-black/40 p-6 rounded-lg border border-green-900/30"
-                  initial={{ opacity: 0, y: 20 }}
-                  whileInView={{ opacity: 1, y: 0 }}
-                  transition={{ duration: 0.6, delay: 0.3 }}
-                  viewport={{ once: true }}
-                >
-                  <motion.h2
-                    className="text-2xl font-semibold mb-6 text-green-300"
-                    initial={{ opacity: 0 }}
-                    whileInView={{ opacity: 1 }}
-                    viewport={{ once: true }}
-                    transition={{ duration: 0.5, delay: 0.5 }}
-                  >
-                    Envoyez-nous un message
-                  </motion.h2>
+        {/* Formulaire de contact */}
+        <motion.div
+          className="lg:col-span-3 backdrop-blur-md bg-black/40 p-6 rounded-lg border border-green-900/30"
+          initial={{ opacity: 0, y: 20 }}
+          whileInView={{ opacity: 1, y: 0 }}
+          transition={{ duration: 0.6, delay: 0.3 }}
+          viewport={{ once: true }}
+        >
+          <motion.h2
+            className="text-2xl font-semibold mb-6 text-green-300"
+            initial={{ opacity: 0 }}
+            whileInView={{ opacity: 1 }}
+            viewport={{ once: true }}
+            transition={{ duration: 0.5, delay: 0.5 }}
+          >
+            Envoyez-nous un message
+          </motion.h2>
 
-                  {submitSuccess ? (
-                    <motion.div
-                      className="p-4 bg-green-900/40 border border-green-500 rounded-lg text-green-200"
-                      initial={{ opacity: 0, scale: 0.9 }}
-                      animate={{ opacity: 1, scale: 1 }}
-                      transition={{ duration: 0.5 }}
-                    >
-                      <p className="font-medium">Message envoyé avec succès!</p>
-                      <p className="mt-2">Nous vous répondrons dans les plus brefs délais.</p>
+          {submitSuccess ? (
+            <motion.div
+              className="p-4 bg-green-900/40 border border-green-500 rounded-lg text-green-200"
+              initial={{ opacity: 0, scale: 0.9 }}
+              animate={{ opacity: 1, scale: 1 }}
+              transition={{ duration: 0.5 }}
+            >
+              <p className="font-medium">Message envoyé avec succès!</p>
+              <p className="mt-2">Nous vous répondrons dans les plus brefs délais.</p>
+            </motion.div>
                     </motion.div>
-                  ) : (
-                    <form onSubmit={handleSubmit} className="space-y-6">
-                      {submitError && (
-                        <motion.div
-                          className="p-4 bg-red-900/40 border border-red-500 rounded-lg text-red-200"
-                          initial={{ opacity: 0 }}
-                          animate={{ opacity: 1 }}
-                          transition={{ duration: 0.3 }}
-                        >
-                          <p className="font-medium">Erreur:</p>
-                          <p className="mt-1">{submitError}</p>
+        ) : (
+        <form onSubmit={handleSubmit} className="space-y-6">
+          {submitError && (
+            <motion.div
+              className="p-4 bg-red-900/40 border border-red-500 rounded-lg text-red-200"
+              initial={{ opacity: 0 }}
+              animate={{ opacity: 1 }}
+              transition={{ duration: 0.3 }}
+            >
+              <p className="font-medium">Erreur:</p>
+              <p className="mt-1">{submitError}</p>
+            </motion.div>
                         </motion.div>
                       )}
 
-                      <motion.div
-                        className="grid grid-cols-1 md:grid-cols-2 gap-6"
-                        variants={staggerChildrenVariants}
-                        initial="hidden"
-                        whileInView="visible"
-                        viewport={{ once: true }}
-                      >
-                        <motion.div variants={fadeInVariants}>
-                          <label htmlFor="name" className="block mb-2 text-green-200">
-                            Nom complet
-                          </label>
-                          <Input
-                            id="name"
-                            name="name"
-                            value={formData.name}
-                            onChange={handleChange}
-                            required
-                            className="bg-black/30 border-green-900/50 focus:border-green-500 text-white"
-                          />
-                        </motion.div>
+        <motion.div
+          className="grid grid-cols-1 md:grid-cols-2 gap-6"
+          variants={staggerChildrenVariants}
+          initial="hidden"
+          whileInView="visible"
+          viewport={{ once: true }}
+        >
+          <motion.div variants={fadeInVariants}>
+            <label htmlFor="name" className="block mb-2 text-green-200">
+              Nom complet
+            </label>
+            <Input
+              id="name"
+              name="name"
+              value={formData.name}
+              onChange={handleChange}
+              required
+              className="bg-black/30 border-green-900/50 focus:border-green-500 text-white"
+            />
+          </motion.div>
 
-                        <motion.div variants={fadeInVariants}>
-                          <label htmlFor="email" className="block mb-2 text-green-200">
-                            Email
-                          </label>
-                          <Input
-                            id="email"
-                            name="email"
-                            type="email"
-                            value={formData.email}
-                            onChange={handleChange}
-                            required
-                            className="bg-black/30 border-green-900/50 focus:border-green-500 text-white"
-                          />
-                        </motion.div>
-                      </motion.div>
+          <motion.div variants={fadeInVariants}>
+            <label htmlFor="email" className="block mb-2 text-green-200">
+              Email
+            </label>
+            <Input
+              id="email"
+              name="email"
+              type="email"
+              value={formData.email}
+              onChange={handleChange}
+              required
+              className="bg-black/30 border-green-900/50 focus:border-green-500 text-white"
+            />
+          </motion.div>
+        </motion.div>
 
-                      <motion.div
-                        initial={{ opacity: 0 }}
-                        whileInView={{ opacity: 1 }}
-                        transition={{ duration: 0.5, delay: 0.2 }}
-                        viewport={{ once: true }}
-                      >
-                        <label htmlFor="subject" className="block mb-2 text-green-200">
-                          Sujet
-                        </label>
-                        <Input
-                          id="subject"
-                          name="subject"
-                          value={formData.subject}
-                          onChange={handleChange}
-                          required
-                          className="bg-black/30 border-green-900/50 focus:border-green-500 text-white"
-                        />
-                      </motion.div>
+        <motion.div
+          initial={{ opacity: 0 }}
+          whileInView={{ opacity: 1 }}
+          transition={{ duration: 0.5, delay: 0.2 }}
+          viewport={{ once: true }}
+        >
+          <label htmlFor="subject" className="block mb-2 text-green-200">
+            Sujet
+          </label>
+          <Input
+            id="subject"
+            name="subject"
+            value={formData.subject}
+            onChange={handleChange}
+            required
+            className="bg-black/30 border-green-900/50 focus:border-green-500 text-white"
+          />
+        </motion.div>
 
-                      <motion.div
-                        initial={{ opacity: 0 }}
-                        whileInView={{ opacity: 1 }}
-                        transition={{ duration: 0.5, delay: 0.3 }}
-                        viewport={{ once: true }}
-                      >
-                        <label htmlFor="message" className="block mb-2 text-green-200">
-                          Message
-                        </label>
-                        <Textarea
-                          id="message"
-                          name="message"
-                          value={formData.message}
-                          onChange={handleChange}
-                          required
-                          rows={5}
-                          className="bg-black/30 border-green-900/50 focus:border-green-500 text-white"
-                        />
-                      </motion.div>
+        <motion.div
+          initial={{ opacity: 0 }}
+          whileInView={{ opacity: 1 }}
+          transition={{ duration: 0.5, delay: 0.3 }}
+          viewport={{ once: true }}
+        >
+          <label htmlFor="message" className="block mb-2 text-green-200">
+            Message
+          </label>
+          <Textarea
+            id="message"
+            name="message"
+            value={formData.message}
+            onChange={handleChange}
+            required
+            rows={5}
+            className="bg-black/30 border-green-900/50 focus:border-green-500 text-white"
+          />
+        </motion.div>
 
-                      <motion.div
-                        initial={{ opacity: 0, y: 10 }}
-                        whileInView={{ opacity: 1, y: 0 }}
-                        transition={{ duration: 0.5, delay: 0.4 }}
-                        viewport={{ once: true }}
-                      >
-                        <Button
-                          type="submit"
-                          className="bg-green-900/60 hover:bg-green-900/80 text-white font-semibold cursor-pointer border border-green-500/50"
-                          disabled={isSubmitting}
-                        >
-                          {isSubmitting ? 'Envoi en cours...' : 'Envoyer le message'}
-                        </Button>
-                      </motion.div>
-                    </form>
+        <motion.div
+          initial={{ opacity: 0, y: 10 }}
+          whileInView={{ opacity: 1, y: 0 }}
+          transition={{ duration: 0.5, delay: 0.4 }}
+          viewport={{ once: true }}
+        >
+          <Button
+            type="submit"
+            className="bg-green-900/60 hover:bg-green-900/80 text-white font-semibold cursor-pointer border border-green-500/50"
+            disabled={isSubmitting}
+          >
+            {isSubmitting ? 'Envoi en cours...' : 'Envoyer le message'}
+          </Button>
+        </motion.div>
+      </form>
                   )}
-                </motion.div>
-              </motion.div>
+    </motion.div>
+              </motion.div >
 
-              {/* Section de la carte */}
-              <motion.div
-                className="w-full h-64 md:h-96 rounded-lg overflow-hidden border border-green-900/30"
-                initial={{ opacity: 0, y: 50 }}
-                whileInView={{ opacity: 1, y: 0 }}
-                transition={{ duration: 0.8, delay: 0.2 }}
-                viewport={{ once: true, amount: 0.1 }}
+    {/* Section de la carte */ }
+    < motion.div
+  className = "w-full h-64 md:h-96 rounded-lg overflow-hidden border border-green-900/30"
+  initial = {{ opacity: 0, y: 50 }
+}
+whileInView = {{ opacity: 1, y: 0 }}
+transition = {{ duration: 0.8, delay: 0.2 }}
+viewport = {{ once: true, amount: 0.1 }}
               >
-                <iframe
-                  src="https://www.google.com/maps/embed?pb=!1m18!1m12!1m3!1d6600.589234947048!2d2.067171476913903!3d49.03505808825709!2m3!1f0!2f0!3f0!3m2!1i1024!2i768!4f13.1!3m3!1m2!1s0x47e6f5265bbc2f79%3A0x301dd6c7102e1852!2sCy%20Tech!5e1!3m2!1sen!2sfr!4v1744546910410!5m2!1sen!2sfr"
-                  width="100%"
-                  height="100%"
-                  style={{ border: 0 }}
-                  allowFullScreen={true}
-                  loading="lazy"
-                ></iframe>
-              </motion.div>
-            </div>
-          </main>
+  <iframe
+    src="https://www.google.com/maps/embed?pb=!1m18!1m12!1m3!1d6600.589234947048!2d2.067171476913903!3d49.03505808825709!2m3!1f0!2f0!3f0!3m2!1i1024!2i768!4f13.1!3m3!1m2!1s0x47e6f5265bbc2f79%3A0x301dd6c7102e1852!2sCy%20Tech!5e1!3m2!1sen!2sfr!4v1744546910410!5m2!1sen!2sfr"
+    width="100%"
+    height="100%"
+    style={{ border: 0 }}
+    allowFullScreen={true}
+    loading="lazy"
+  ></iframe>
+              </motion.div >
+              </motion.div >
+            </div >
+          </main >
 
-          <Footer />
-        </div>
-      </div>
-    </div>
+  <Footer />
+        </div >
+      </div >
+    </div >
   );
 }

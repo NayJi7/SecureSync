@@ -1,10 +1,20 @@
 from rest_framework import serializers
-from .models import CustomUser , UserActivityLog
+from .models import CustomUser, UserActivityLog, Prison
 from django.contrib.auth.password_validation import validate_password
 from django.contrib.auth.hashers import check_password
 from rest_framework.decorators import api_view, permission_classes
 from rest_framework.response import Response
 from rest_framework.permissions import IsAuthenticated
+
+
+class PrisonSerializer(serializers.ModelSerializer):
+    """
+    Serializer pour le modèle Prison.
+    """
+    class Meta:
+        model = Prison
+        fields = ['id', 'nom', 'nb_detenus', 'date_creation']
+        read_only_fields = ['id', 'date_creation']  # L'ID est auto-généré
 
 
 class CustomUserSerializer(serializers.ModelSerializer):
@@ -32,8 +42,10 @@ class UpdateUserPrisonSerializer(serializers.Serializer):
     prison_id = serializers.CharField(required=True)
     
     def validate_prison_id(self, value):
-        prison_ids = [choice[0] for choice in CustomUser.PRISON_CHOICES]
-        if value not in prison_ids:
+        # Vérifier si l'ID de prison existe dans la base de données
+        try:
+            Prison.objects.get(id=value)
+        except Prison.DoesNotExist:
             raise serializers.ValidationError("Prison ID invalide.")
         return value
 

@@ -13,6 +13,7 @@ import PrisonSelectionPage from '@/pages/PrisonSelectionPage';
 import StatForm from '@/pages/StatPage';
 import StatPage from '@/pages/StatList';
 import TermsPage from '@/pages/TermsPage';
+
 // Composant de protection des routes
 import ProtectedRoute from './components/ProtectedRoute';
 // Gestionnaire de session
@@ -72,26 +73,26 @@ export default function App() {
         <Route path="/StatPage" element={<StatPage />} />
 
 
-        
+
         <Route path="/prison-selection" element={
           <ProtectedRoute>
             <PrisonSelectionPage />
           </ProtectedRoute>
         } />
-        
+
         {/* Routes avec paramètre prisonId */}
         <Route path="/:prisonId/home" element={
           <ProtectedRoute>
             <HomePage />
           </ProtectedRoute>
         } />
-        
+
         <Route path="/:prisonId/object" element={
           <ProtectedRoute>
             <ObjectPage />
           </ProtectedRoute>
         } />
-        
+
         {/* Composant de secours pour les autres routes */}
         <Route path="*" element={
           <div style={{ padding: '20px' }}>

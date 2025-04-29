@@ -4,6 +4,36 @@ from django.db import models
 def user_directory_path(instance, filename):
     return f'profile_pics/user_{instance.id}/{filename}'
 
+class Prison(models.Model):
+    """
+    Modèle pour les prisons du système.
+    """
+    id = models.CharField(max_length=20, primary_key=True, unique=True)
+    nom = models.CharField(max_length=100)
+    adresse = models.TextField(blank=True, null=True)
+    date_creation = models.DateTimeField(auto_now_add=True)
+    nb_detenus = models.IntegerField(default=0)
+    
+    def save(self, *args, **kwargs):
+        # Si c'est une nouvelle prison sans ID, générer un ID basé sur le nom
+        if not self.id:
+            # Générer un ID basé sur le nom de la prison en minuscule sans accent
+            try:
+                from unidecode import unidecode
+                self.id = unidecode(self.nom.lower())
+            except ImportError:
+                # Solution de repli si unidecode n'est pas disponible
+                import unicodedata
+                self.id = ''.join(
+                    c for c in unicodedata.normalize('NFD', self.nom.lower())
+                    if unicodedata.category(c) != 'Mn'
+                )
+        
+        super().save(*args, **kwargs)
+    
+    def __str__(self):
+        return f"{self.nom} ({self.id})"
+
 class CustomUser(AbstractUser):
     GENDER_CHOICES = (
         ('M', 'Masculin'),
@@ -25,6 +55,7 @@ class CustomUser(AbstractUser):
         ('toutes', 'Toutes')
     ]   
 
+    # Conservons les choix statiques pour la rétrocompatibilité
     PRISON_CHOICES = [
         ('paris', 'Paris'),
         ('lyon', 'Lyon'),
@@ -52,9 +83,20 @@ class CustomUser(AbstractUser):
         verbose_name="Section"
     )
 
-    prison= models.CharField(
-        max_length=10,  # "marseille"
+    # Champ de compatibilité pour les anciennes données
+    prison = models.CharField(
+        max_length=20,  # "marseille"
         choices=PRISON_CHOICES,
+        blank=True,
+        null=True,
+        verbose_name="Prison (legacy)"
+    )
+    
+    # Nouvelle relation vers le modèle Prison
+    prison_obj = models.ForeignKey(
+        'Prison',
+        on_delete=models.SET_NULL,
+        related_name='users',
         blank=True,
         null=True,
         verbose_name="Prison"
