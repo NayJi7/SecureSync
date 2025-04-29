@@ -9,7 +9,7 @@ import { useDevice } from '@/hooks/use-device';
 import Header from '@/components/Header.tsx';
 import Footer from '@/components/Footer.tsx';
 import { motion } from 'framer-motion';
-import { 
+import {
   slideRightVariants,
   staggerChildrenVariants,
   staggerItemVariants,
@@ -35,9 +35,9 @@ export default function ContactPage() {
     const handleScroll = () => {
       setIsScrolled(window.scrollY > 20);
     };
-    
+
     window.addEventListener('scroll', handleScroll);
-    
+
     return () => {
       window.removeEventListener('scroll', handleScroll);
     };
@@ -52,7 +52,7 @@ export default function ContactPage() {
     e.preventDefault();
     setIsSubmitting(true);
     setSubmitError('');
-    
+
     try {
       const response = await fetch('http://localhost:8000/api/contact/', {
         method: 'POST',
@@ -61,14 +61,14 @@ export default function ContactPage() {
         },
         body: JSON.stringify(formData),
       });
-      
+
       const data = await response.json();
-      
+
       if (data.success) {
         setIsSubmitting(false);
         setSubmitSuccess(true);
         setFormData({ name: '', email: '', subject: '', message: '' });
-        
+
         // Réinitialiser le message de succès après 5 secondes
         setTimeout(() => setSubmitSuccess(false), 5000);
       } else {
@@ -83,22 +83,22 @@ export default function ContactPage() {
 
   return (
     <div className="relative min-h-screen w-full overflow-x-hidden bg-black">
-      <Squares 
-        speed={0.2} 
+      <Squares
+        speed={0.2}
         squareSize={60}
         direction='diagonal'
         borderColor='#fff'
         hoverFillColor='#222'
       />
-      
+
       <div className="absolute inset-0 z-10 pointer-events-none">
         <div className="relative z-10 flex flex-col min-h-screen pointer-events-auto">
-          <Header 
-            isScrolled={isScrolled} 
-            mobileMenuOpen={mobileMenuOpen} 
-            setMobileMenuOpen={setMobileMenuOpen} 
+          <Header
+            isScrolled={isScrolled}
+            mobileMenuOpen={mobileMenuOpen}
+            setMobileMenuOpen={setMobileMenuOpen}
           />
-          
+
           {/* Mobile menu dropdown */}
           {isMobile && mobileMenuOpen && (
             <div className="fixed top-[60px] left-0 right-0 bg-black/95 backdrop-blur-lg z-40 border-t border-green-900/30 animate-in slide-in-from-top">
@@ -112,10 +112,10 @@ export default function ContactPage() {
               </div>
             </div>
           )}
-          
+
           <main className="flex-grow container mx-auto px-4 pt-32 pb-12">
             <div className="max-w-5xl mx-auto">
-              <motion.h1 
+              <motion.h1
                 className="text-4xl md:text-5xl font-bold mb-8 text-white text-center"
                 initial={{ opacity: 0, y: -20 }}
                 animate={{ opacity: 1, y: 0 }}
@@ -123,7 +123,7 @@ export default function ContactPage() {
               >
                 Contactez-nous
               </motion.h1>
-              <motion.p 
+              <motion.p
                 className="text-xl text-green-200 text-center mb-12"
                 initial={{ opacity: 0 }}
                 animate={{ opacity: 1 }}
@@ -131,8 +131,8 @@ export default function ContactPage() {
               >
                 Nous sommes à votre disposition pour répondre à toutes vos questions sur SecureSync
               </motion.p>
-              
-              <motion.div 
+
+              <motion.div
                 className="grid grid-cols-1 lg:grid-cols-5 gap-12 mb-12"
                 initial={{ opacity: 0, y: 30 }}
                 animate={{ opacity: 1, y: 0 }}
@@ -140,7 +140,7 @@ export default function ContactPage() {
               >
                 {/* Informations de contact */}
                 <div className="lg:col-span-2 space-y-8">
-                  <motion.div 
+                  <motion.div
                     className="backdrop-blur-md bg-black/40 p-6 rounded-lg border border-green-900/30"
                     initial={{ opacity: 0, y: 20 }}
                     whileInView={{ opacity: 1, y: 0 }}
@@ -148,15 +148,15 @@ export default function ContactPage() {
                     viewport={{ once: true }}
                   >
                     <h2 className="text-2xl font-semibold mb-6 text-green-300">Nos coordonnées</h2>
-                    
-                    <motion.div 
+
+                    <motion.div
                       className="space-y-6"
                       initial="hidden"
                       whileInView="visible"
                       variants={staggerChildrenVariants}
                       viewport={{ once: true, amount: 0.2 }}
                     >
-                      <motion.div 
+                      <motion.div
                         className="flex items-start"
                         variants={slideRightVariants}
                       >
@@ -170,8 +170,8 @@ export default function ContactPage() {
                           </a>
                         </div>
                       </motion.div>
-                      
-                      <motion.div 
+
+                      <motion.div
                         className="flex items-start"
                         variants={slideRightVariants}
                       >
@@ -185,8 +185,8 @@ export default function ContactPage() {
                           </a>
                         </div>
                       </motion.div>
-                      
-                      <motion.div 
+
+                      <motion.div
                         className="flex items-start"
                         variants={slideRightVariants}
                       >
@@ -204,8 +204,8 @@ export default function ContactPage() {
                       </motion.div>
                     </motion.div>
                   </motion.div>
-                  
-                  <motion.div 
+
+                  <motion.div
                     className="backdrop-blur-md bg-black/40 p-6 rounded-lg border border-green-900/30"
                     initial={{ opacity: 0, y: 20 }}
                     whileInView={{ opacity: 1, y: 0 }}
@@ -213,7 +213,7 @@ export default function ContactPage() {
                     viewport={{ once: true }}
                   >
                     <h2 className="text-2xl font-semibold mb-4 text-green-300">Horaires d'ouverture</h2>
-                    <motion.div 
+                    <motion.div
                       className="space-y-2 text-gray-300"
                       initial={{ opacity: 0 }}
                       whileInView={{ opacity: 1 }}
@@ -226,16 +226,16 @@ export default function ContactPage() {
                     </motion.div>
                   </motion.div>
                 </div>
-                
+
                 {/* Formulaire de contact */}
-                <motion.div 
+                <motion.div
                   className="lg:col-span-3 backdrop-blur-md bg-black/40 p-6 rounded-lg border border-green-900/30"
                   initial={{ opacity: 0, y: 20 }}
                   whileInView={{ opacity: 1, y: 0 }}
                   transition={{ duration: 0.6, delay: 0.3 }}
                   viewport={{ once: true }}
                 >
-                  <motion.h2 
+                  <motion.h2
                     className="text-2xl font-semibold mb-6 text-green-300"
                     initial={{ opacity: 0 }}
                     whileInView={{ opacity: 1 }}
@@ -244,9 +244,9 @@ export default function ContactPage() {
                   >
                     Envoyez-nous un message
                   </motion.h2>
-                  
+
                   {submitSuccess ? (
-                    <motion.div 
+                    <motion.div
                       className="p-4 bg-green-900/40 border border-green-500 rounded-lg text-green-200"
                       initial={{ opacity: 0, scale: 0.9 }}
                       animate={{ opacity: 1, scale: 1 }}
@@ -258,7 +258,7 @@ export default function ContactPage() {
                   ) : (
                     <form onSubmit={handleSubmit} className="space-y-6">
                       {submitError && (
-                        <motion.div 
+                        <motion.div
                           className="p-4 bg-red-900/40 border border-red-500 rounded-lg text-red-200"
                           initial={{ opacity: 0 }}
                           animate={{ opacity: 1 }}
@@ -268,8 +268,8 @@ export default function ContactPage() {
                           <p className="mt-1">{submitError}</p>
                         </motion.div>
                       )}
-                      
-                      <motion.div 
+
+                      <motion.div
                         className="grid grid-cols-1 md:grid-cols-2 gap-6"
                         variants={staggerChildrenVariants}
                         initial="hidden"
@@ -289,7 +289,7 @@ export default function ContactPage() {
                             className="bg-black/30 border-green-900/50 focus:border-green-500 text-white"
                           />
                         </motion.div>
-                        
+
                         <motion.div variants={fadeInVariants}>
                           <label htmlFor="email" className="block mb-2 text-green-200">
                             Email
@@ -305,7 +305,7 @@ export default function ContactPage() {
                           />
                         </motion.div>
                       </motion.div>
-                      
+
                       <motion.div
                         initial={{ opacity: 0 }}
                         whileInView={{ opacity: 1 }}
@@ -324,7 +324,7 @@ export default function ContactPage() {
                           className="bg-black/30 border-green-900/50 focus:border-green-500 text-white"
                         />
                       </motion.div>
-                      
+
                       <motion.div
                         initial={{ opacity: 0 }}
                         whileInView={{ opacity: 1 }}
@@ -344,7 +344,7 @@ export default function ContactPage() {
                           className="bg-black/30 border-green-900/50 focus:border-green-500 text-white"
                         />
                       </motion.div>
-                      
+
                       <motion.div
                         initial={{ opacity: 0, y: 10 }}
                         whileInView={{ opacity: 1, y: 0 }}
@@ -353,7 +353,7 @@ export default function ContactPage() {
                       >
                         <Button
                           type="submit"
-                          className="bg-green-600 hover:bg-green-700 text-black font-semibold px-6"
+                          className="bg-green-900/60 hover:bg-green-900/80 text-white font-semibold cursor-pointer border border-green-500/50"
                           disabled={isSubmitting}
                         >
                           {isSubmitting ? 'Envoi en cours...' : 'Envoyer le message'}
@@ -363,9 +363,9 @@ export default function ContactPage() {
                   )}
                 </motion.div>
               </motion.div>
-              
+
               {/* Section de la carte */}
-              <motion.div 
+              <motion.div
                 className="w-full h-64 md:h-96 rounded-lg overflow-hidden border border-green-900/30"
                 initial={{ opacity: 0, y: 50 }}
                 whileInView={{ opacity: 1, y: 0 }}
@@ -383,7 +383,7 @@ export default function ContactPage() {
               </motion.div>
             </div>
           </main>
-          
+
           <Footer />
         </div>
       </div>
