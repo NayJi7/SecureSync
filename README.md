@@ -27,15 +27,11 @@ Bienvenue dans ce projet de développement web combinant **Django** pour le back
     │   └── statistique
     ├── frontend
     │   ├── components.json
-    │   ├── eslint.config.js
     │   ├── index.html
     │   ├── jsrepo.json
-    │   ├── next-env.d.ts
     │   ├── node_modules
     │   ├── package.json
-    │   ├── package-lock.json
     │   ├── public
-    │   ├── README.md
     │   ├── src
     │   ├── tailwind.config.ts
     │   ├── tsconfig.app.json
@@ -43,67 +39,9 @@ Bienvenue dans ce projet de développement web combinant **Django** pour le back
     │   ├── tsconfig.node.json
     │   └── vite.config.ts
     ├── node_modules
-    │   ├── ansi-regex
-    │   ├── ansi-styles
-    │   ├── asynckit
-    │   ├── axios
-    │   ├── call-bind-apply-helpers
-    │   ├── chalk
-    │   ├── cliui
-    │   ├── color-convert
-    │   ├── color-name
-    │   ├── combined-stream
-    │   ├── concurrently
-    │   ├── delayed-stream
-    │   ├── dunder-proto
-    │   ├── emoji-regex
-    │   ├── escalade
-    │   ├── es-define-property
-    │   ├── es-errors
-    │   ├── es-object-atoms
-    │   ├── es-set-tostringtag
-    │   ├── follow-redirects
-    │   ├── form-data
-    │   ├── function-bind
-    │   ├── get-caller-file
-    │   ├── get-intrinsic
-    │   ├── get-proto
-    │   ├── gopd
-    │   ├── has-flag
-    │   ├── hasown
-    │   ├── has-symbols
-    │   ├── has-tostringtag
-    │   ├── is-fullwidth-code-point
-    │   ├── js-tokens
-    │   ├── lodash
-    │   ├── loose-envify
-    │   ├── math-intrinsics
-    │   ├── mime-db
-    │   ├── mime-types
-    │   ├── proxy-from-env
-    │   ├── react
-    │   ├── react-dom
-    │   ├── require-directory
-    │   ├── rxjs
-    │   ├── scheduler
-    │   ├── shell-quote
-    │   ├── string-width
-    │   ├── strip-ansi
-    │   ├── supports-color
-    │   ├── tree-kill
-    │   ├── tslib
-    │   ├── wrap-ansi
-    │   ├── y18n
-    │   ├── yargs
-    │   └── yargs-parser
     ├── package.json
-    ├── package-lock.json
     ├── README.md
     └── venv
-        ├── bin
-        ├── lib
-        ├── lib64 -> lib
-        └── pyvenv.cfg
 
 70 directories, 20 files
 
@@ -131,35 +69,39 @@ cd SecureSync
 2. Activer l'environnement virtuel Python
 ```bash
 source env/bin/activate
-
 # ou sous Windows
 env\Scripts\activate
 ```
-3. Installer les dépendances Django
+3. Installer les dépendances Python (avec pip)
 
 ```bash
 cd backend 
 pip install -r requirements.txt
 cd ..
 ```
-4. Lancer le frontend React avec Vite
-
+4. Installer les dépendances Node (avec npm)
 ```bash
 cd frontend
 npm install
+```
+
+5. Lancer le frontend React avec Vite
+
+```bash
 npm run dev
 ```
 🌍 Accès à l'application
 
-    Backend (API) : http://localhost:8000
-
-    Frontend (UI) : http://localhost:5173
+    Backend (API) : http://localhost:8000/admin
+    Frontend (UI) : http://localhost:5173/
 
 📦 Scripts utiles
-Commande	Description
-npm run dev	Lancer Vite en mode développement
-python manage.py makemigrations // trouver les migration 
-python manage.py migrate  // installer les migration
+```bash
+# Commande	Description
+npm run dev	# Lancer Vite en mode développement
+python manage.py makemigrations # trouver les migration 
+python manage.py migrate  # installer les migration
+```
 
 💪 Contributeur 
 
