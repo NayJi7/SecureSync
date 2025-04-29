@@ -479,7 +479,7 @@ export default function HomePage({ children }: { children?: React.ReactNode }) {
                 <DropdownMenuItem className="cursor-pointer" onClick={() => setStaffModalOpen(true)}>Équipe</DropdownMenuItem>
                 {isAdmin && (
                   <DropdownMenuItem className="cursor-pointer" onClick={handleChangePrison}>
-                    Changer de prison
+                    Gérer les prisons
                   </DropdownMenuItem>
                 )}
                 {isAdmin && (
