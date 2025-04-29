@@ -47,7 +47,7 @@ const VideoView: React.FC<VideoViewProps> = ({ onClose, videoUrl }) => {
             </h1>
           </div>
           
-          <div className="flex items-center gap-2 px-4 py-2 rounded-md
+          <div className="mr-15 flex items-center gap-2 px-4 py-2 rounded-md
                           bg-red-500/10 dark:bg-red-500/20
                           border border-red-500/20 dark:border-red-500/30">
             <div className="w-2.5 h-2.5 bg-red-600 dark:bg-red-500 rounded-full animate-pulse"></div>
