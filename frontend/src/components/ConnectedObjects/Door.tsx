@@ -105,7 +105,7 @@ const Door: React.FC<DoorProps> = ({ objects, onAddObject, onStatusChange, addPo
             
             setToggleLoading(id);
             const response = await toggleObjectState(id, currentState);
-            console.log('Toggle successful:', response);
+            // console.log('Toggle successful:', response);
 
             if (addPoints) {
                 await addPoints(4);
@@ -176,7 +176,7 @@ const Door: React.FC<DoorProps> = ({ objects, onAddObject, onStatusChange, addPo
             }
 
             setIsUpdating(id);
-            console.log(`Updating door ${id} with new values`);
+            // console.log(`Updating door ${id} with new values`);
 
             const response = await updateObject(id, {
                 nom: newName,
@@ -186,7 +186,7 @@ const Door: React.FC<DoorProps> = ({ objects, onAddObject, onStatusChange, addPo
                 connection: newConnection
             });
 
-            console.log('Update successful:', response);
+            // console.log('Update successful:', response);
             if (onStatusChange) {
                 onStatusChange();
             }
@@ -240,7 +240,7 @@ const Door: React.FC<DoorProps> = ({ objects, onAddObject, onStatusChange, addPo
         try {
             setIsDeleting(objectToDelete);
             const response = await deleteObject(objectToDelete);
-            console.log('Delete successful:', response);
+            // console.log('Delete successful:', response);
             if (onStatusChange) {
                 onStatusChange();
             }
@@ -432,7 +432,7 @@ const Door: React.FC<DoorProps> = ({ objects, onAddObject, onStatusChange, addPo
                                         </div>
 
                                         <div>
-                                            <label className="block text-xs font-medium text-gray-600 dark:text-gray-400 mb-1">Consommation (kW)</label>
+                                            <label className="block text-xs font-medium text-gray-600 dark:text-gray-400 mb-1">Consommation (kWh)</label>
                                             <input
                                                 type="number"
                                                 value={newConsumption}
@@ -579,7 +579,7 @@ const Door: React.FC<DoorProps> = ({ objects, onAddObject, onStatusChange, addPo
                                                 </div>
                                                 <div className="space-y-1">
                                                     <p className="text-xs text-gray-500 dark:text-gray-400">Consommation</p>
-                                                    <p className="font-medium text-gray-700 dark:text-gray-300">{door.consomation || 0} kW</p>
+                                                    <p className="font-medium text-gray-700 dark:text-gray-300">{door.consomation || 0} kWh</p>
                                                 </div>
                                                 <div className="space-y-1">
                                                     <p className="text-xs text-gray-500 dark:text-gray-400">Maintenance</p>

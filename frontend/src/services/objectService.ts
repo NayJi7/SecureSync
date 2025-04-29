@@ -36,13 +36,46 @@ export const createObject = (object: Omit<ObjectType, 'id'>) => {
     console.debug('Prison_id non fourni, utilisation de la valeur par défaut:', currentPrisonId);
   }
   
+  // Définir une consommation par défaut si aucune n'est spécifiée
+  if (objectToCreate.consomation === undefined || objectToCreate.consomation === 0) {
+    // Valeurs de consommation par défaut selon le type d'objet
+    let defaultConsumption = 10; // Valeur par défaut générale
+    
+    switch(objectToCreate.type) {
+      case 'porte': 
+        defaultConsumption = 1;
+        break;
+      case 'lumiere': 
+        defaultConsumption = 0.5;
+        break;
+      case 'camera': 
+        defaultConsumption = 0.2;
+        break;
+      case 'thermostat': 
+        defaultConsumption = 0.1;
+        break;
+      case 'ventilation': 
+        defaultConsumption = 2;
+        break;
+      case "paneau d'affichage": 
+        defaultConsumption = 4;
+        break;
+    }
+    
+    objectToCreate = {
+      ...objectToCreate,
+      consomation: defaultConsumption
+    };
+    console.debug(`Consommation non spécifiée, valeur par défaut utilisée: ${defaultConsumption} pour type: ${objectToCreate.type}`);
+  }
+  
   console.debug('Creating object with prison ID:', objectToCreate.Prison_id);
   return API.post<ObjectType>(OBJECTS_ENDPOINT, objectToCreate);
 };
 
 // Update an object
 export const updateObject = (id: number, object: Partial<Omit<ObjectType, 'id'>>) => {
-  console.debug(`Updating object ${id} with:`, object);
+  // console.debug(`Updating object ${id} with:`, object);
 
   // Ensure coordinates are numbers, not strings
   const payload = {

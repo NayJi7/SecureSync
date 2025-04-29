@@ -499,7 +499,7 @@ const Thermostat: React.FC<ThermostatProps> = ({ objects, onAddObject, onStatusC
                                         </div>
 
                                         <div>
-                                            <label className="block text-xs font-medium text-gray-600 dark:text-gray-400 mb-1">Consommation (kW)</label>
+                                            <label className="block text-xs font-medium text-gray-600 dark:text-gray-400 mb-1">Consommation (kWh)</label>
                                             <input
                                                 type="number"
                                                 value={newConsumption}
@@ -666,7 +666,7 @@ const Thermostat: React.FC<ThermostatProps> = ({ objects, onAddObject, onStatusC
                                                 </div>
                                                 <div className="space-y-1">
                                                     <p className="text-xs text-gray-500 dark:text-gray-400">Consommation</p>
-                                                    <p className="font-medium text-gray-700 dark:text-gray-300">{thermostat.consomation || 0} kW</p>
+                                                    <p className="font-medium text-gray-700 dark:text-gray-300">{thermostat.consomation || 0} kWh</p>
                                                 </div>
                                                 <div className="space-y-1">
                                                     <p className="text-xs text-gray-500 dark:text-gray-400">Maintenance</p>

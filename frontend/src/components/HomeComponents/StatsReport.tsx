@@ -57,6 +57,18 @@ const StatsReport: React.FC = () => {
   const [customCostRate, setCustomCostRate] = useState<number | null>(0.018);
   const { isMobile } = useDevice();
 
+  // Effet pour s'assurer que les graphiques sont bien rendus après un changement d'onglet
+  useEffect(() => {
+    const triggerResize = () => {
+      // Déclenche un redimensionnement de la fenêtre pour forcer les graphiques à se recalculer
+      window.dispatchEvent(new Event('resize'));
+    };
+
+    // Attendez un court instant après le changement d'onglet pour rafraîchir les graphiques
+    const timeoutId = setTimeout(triggerResize, 100);
+    return () => clearTimeout(timeoutId);
+  }, [activeTab]);
+
   useEffect(() => {
     const fetchStats = async () => {
       try {
@@ -105,11 +117,11 @@ const StatsReport: React.FC = () => {
           })
           .sort((a, b) => new Date(a.date_creation).getTime() - new Date(b.date_creation).getTime());
         
-        console.log(`Statistiques récupérées: ${filteredStats.length} entrées pour la période: ${timeRange} et prison ID: ${prisonId || 'toutes'}`);
+        // console.log(`Statistiques récupérées: ${filteredStats.length} entrées pour la période: ${timeRange} et prison ID: ${prisonId || 'toutes'}`);
         
         // Log pour debugging des IDs de prison dans les stats
         const prisonIds = [...new Set(filteredStats.map(stat => stat.prison_id || 'non défini'))];
-        console.log('IDs de prison dans les statistiques filtrées:', prisonIds);
+        // console.log('IDs de prison dans les statistiques filtrées:', prisonIds);
         
         setStats(filteredStats);
         setLoading(false);
@@ -236,14 +248,14 @@ const StatsReport: React.FC = () => {
       const data = await getPrisonData();
       setPrisonData(data);
       setPrisonDataLoading(false);
-      console.log('Données de la prison récupérées:', data);
-      console.log('Nombre d\'utilisateurs (sans admin):', data.users.length);
-      console.log('Nombre de logs utilisateur (sans admin):', data.userLogs.length);
-      console.log('Nombre de logs d\'objets (sans admin):', data.objectLogs.length);
+      // console.log('Données de la prison récupérées:', data);
+      // console.log('Nombre d\'utilisateurs (sans admin):', data.users.length);
+      // console.log('Nombre de logs utilisateur (sans admin):', data.userLogs.length);
+      // console.log('Nombre de logs d\'objets (sans admin):', data.objectLogs.length);
       
       // Vérification des rôles d'utilisateurs pour confirmer le filtrage
       const roles = data.users.map(user => user.role);
-      console.log('Rôles des utilisateurs filtrés:', [...new Set(roles)]);
+      // console.log('Rôles des utilisateurs filtrés:', [...new Set(roles)]);
     } catch (error) {
       console.error('Erreur lors de la récupération des données de la prison:', error);
       setPrisonDataLoading(false);
@@ -489,14 +501,14 @@ const StatsReport: React.FC = () => {
         </TabsList>
 
         {/* Onglet Aperçu global */}
-        <TabsContent value="apercu" className="space-y-4">
+        <TabsContent value="apercu" className="space-y-4" style={{ minHeight: '400px' }}>
           {averages && (
             <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-3 mb-6">
               <Card className="p-3 sm:p-4 border-l-4 border-l-blue-500">
                 <div className="flex items-center justify-between">
                   <div>
                     <p className="text-sm text-gray-500 dark:text-gray-400">Consommation moyenne</p>
-                    <p className="text-xl sm:text-2xl font-bold">{averages.avgConsommation.toFixed(1)} kW</p>
+                    <p className="text-xl sm:text-2xl font-bold">{averages.avgConsommation.toFixed(1)} kWh</p>
                   </div>
                   <div className="bg-blue-100 dark:bg-blue-900/30 p-2 rounded-full">
                     <Zap className="h-6 w-6 sm:h-8 sm:w-8 text-blue-500" />
@@ -504,7 +516,7 @@ const StatsReport: React.FC = () => {
                 </div>
                 <div className="mt-2">
                   <span className={`text-xs ${averages.consommationTrend > 0 ? 'text-red-500' : 'text-green-500'}`}>
-                    {averages.consommationTrend > 0 ? '↑' : '↓'} {Math.abs(averages.consommationTrend).toFixed(1)}kW
+                    {averages.consommationTrend > 0 ? '↑' : '↓'} {Math.abs(averages.consommationTrend).toFixed(1)}kWh
                   </span>
                   <span className="text-xs text-gray-500 dark:text-gray-400 ml-1">depuis le début</span>
                 </div>
@@ -587,8 +599,8 @@ const StatsReport: React.FC = () => {
           
           <Card className="p-3 sm:p-4">
             <h3 className="text-lg font-medium mb-3 sm:mb-4">Vue d'ensemble des dernières mesures</h3>
-            <div className="h-[250px] sm:h-[300px]">
-              <ResponsiveContainer width="100%" height="100%">
+            <div className="h-[250px] sm:h-[300px]" style={{ minWidth: "100px", minHeight: "200px" }}>
+              <ResponsiveContainer width="100%" height="100%" minWidth={100} minHeight={200}>
                 <BarChart 
                   data={timeRange === '24h' 
                     ? consommationData.slice(-8)  // Pour 24h, limiter à 8 entrées
@@ -604,7 +616,7 @@ const StatsReport: React.FC = () => {
                   <YAxis yAxisId="right" orientation="right" stroke="#82ca9d" tick={{ fontSize: 10 }} width={30} />
                   <Tooltip contentStyle={{ fontSize: '12px', backgroundColor: 'white', color: 'black', border: '1px solid #ccc' }} />
                   <Legend wrapperStyle={{ fontSize: '11px' }} />
-                  <Bar yAxisId="left" dataKey="consommation" name="Conso (kW)" fill="#8884d8" />
+                  <Bar yAxisId="left" dataKey="consommation" name="Conso (kWh)" fill="#8884d8" />
                   <Bar yAxisId="right" dataKey="objetsAllumés" name="Objets ON" fill="#82ca9d" />
                 </BarChart>
               </ResponsiveContainer>
@@ -613,18 +625,18 @@ const StatsReport: React.FC = () => {
         </TabsContent>
 
         {/* Onglet Consommation */}
-        <TabsContent value="consommation" className="space-y-4">
+        <TabsContent value="consommation" className="space-y-4" style={{ minHeight: '400px' }}>
           <Card className="p-3 sm:p-4">
             <h3 className="text-lg font-medium mb-3 sm:mb-4">Évolution de la consommation</h3>
-            <div className="h-[250px] sm:h-[350px]">
-              <ResponsiveContainer width="100%" height="100%">
+            <div className="h-[250px] sm:h-[350px]" style={{ minWidth: "100px", minHeight: "200px" }}>
+              <ResponsiveContainer width="100%" height="100%" minWidth={100} minHeight={200}>
                 <LineChart data={consommationData} margin={{ top: 5, right: 20, left: 0, bottom: 5 }}>
                   <CartesianGrid strokeDasharray="3 3" />
                   <XAxis dataKey="date" tick={{ fontSize: 10 }} />
                   <YAxis tick={{ fontSize: 10 }} width={30} />
                   <Tooltip contentStyle={{ fontSize: '12px', backgroundColor: 'white', color: 'black', border: '1px solid #ccc' }} />
                   <Legend wrapperStyle={{ fontSize: '11px' }} />
-                  <Line type="monotone" dataKey="consommation" name="Conso (kW)" stroke="#8884d8" activeDot={{ r: 6 }} strokeWidth={2} />
+                  <Line type="monotone" dataKey="consommation" name="Conso (kWh)" stroke="#8884d8" activeDot={{ r: 6 }} strokeWidth={2} />
                 </LineChart>
               </ResponsiveContainer>
             </div>
@@ -640,18 +652,18 @@ const StatsReport: React.FC = () => {
                       <tr className="border-b">
                         <td className="py-2 text-gray-600 dark:text-gray-300">Consommation minimale</td>
                         <td className="py-2 font-medium text-right">
-                          {Math.min(...stats.map(s => s.consommation_total_actuelle)).toFixed(1)} kW
+                          {Math.min(...stats.map(s => s.consommation_total_actuelle)).toFixed(1)} kWh
                         </td>
                       </tr>
                       <tr className="border-b">
                         <td className="py-2 text-gray-600 dark:text-gray-300">Consommation maximale</td>
                         <td className="py-2 font-medium text-right">
-                          {Math.max(...stats.map(s => s.consommation_total_actuelle)).toFixed(1)} kW
+                          {Math.max(...stats.map(s => s.consommation_total_actuelle)).toFixed(1)} kWh
                         </td>
                       </tr>
                       <tr className="border-b">
                         <td className="py-2 text-gray-600 dark:text-gray-300">Consommation moyenne</td>
-                        <td className="py-2 font-medium text-right">{averages.avgConsommation.toFixed(1)} kW</td>
+                        <td className="py-2 font-medium text-right">{averages.avgConsommation.toFixed(1)} kWh</td>
                       </tr>
                       <tr className="border-b">
                         <td className="py-2 text-gray-600 dark:text-gray-300">Coût horaire moyen</td>
@@ -673,8 +685,8 @@ const StatsReport: React.FC = () => {
             
             <Card className="p-4">
               <h3 className="text-lg font-medium mb-4">Répartition de la consommation</h3>
-              <div className="h-[300px]">
-                <ResponsiveContainer width="100%" height="100%">
+              <div className="h-[300px]" style={{ minWidth: "100px", minHeight: "200px" }}>
+                <ResponsiveContainer width="100%" height="100%" minWidth={100} minHeight={200}>
                   <PieChart>
                     <Pie
                       data={objetTypesData}
@@ -684,7 +696,7 @@ const StatsReport: React.FC = () => {
                       cy="50%"
                       outerRadius={80}
                       fill="#8884d8"
-                      label={({ name, consommation }) => `${name}: ${consommation.toFixed(1)}kW`}
+                      label={({ name, consommation }) => `${name}: ${consommation.toFixed(1)}kWh`}
                     >
                       {objetTypesData.map((entry, index) => (
                         <Cell key={`cell-${index}`} fill={COLORS[index % COLORS.length]} />
@@ -700,11 +712,11 @@ const StatsReport: React.FC = () => {
         </TabsContent>
 
         {/* Onglet Types d'objets */}
-        <TabsContent value="objets" className="space-y-4">
+        <TabsContent value="objets" className="space-y-4" style={{ minHeight: '400px' }}>
           <Card className="p-4">
             <h3 className="text-lg font-medium mb-4">Répartition des objets connectés</h3>
-            <div className="h-[300px]">
-              <ResponsiveContainer width="100%" height="100%">
+            <div className="h-[300px]" style={{ minWidth: "100px", minHeight: "200px" }}>
+              <ResponsiveContainer width="100%" height="100%" minWidth={100} minHeight={200}>
                 <PieChart>
                   <Pie
                     data={objetTypesData}
@@ -735,7 +747,7 @@ const StatsReport: React.FC = () => {
                   <tr>
                     <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-200 uppercase tracking-wider">Type d'objet</th>
                     <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-200 uppercase tracking-wider">Objets allumés</th>
-                    <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-200 uppercase tracking-wider">Consommation (kW)</th>
+                    <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-200 uppercase tracking-wider">Consommation (kWh)</th>
                     <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-200 uppercase tracking-wider">Conso. moyenne par objet</th>
                   </tr>
                 </thead>
@@ -744,9 +756,9 @@ const StatsReport: React.FC = () => {
                     <tr key={index}>
                       <td className="px-6 py-4 whitespace-nowrap">{type.name}</td>
                       <td className="px-6 py-4 whitespace-nowrap">{type.value}</td>
-                      <td className="px-6 py-4 whitespace-nowrap">{type.consommation.toFixed(1)} kW</td>
+                      <td className="px-6 py-4 whitespace-nowrap">{type.consommation.toFixed(1)} kWh</td>
                       <td className="px-6 py-4 whitespace-nowrap">
-                        {type.value > 0 ? (type.consommation / type.value).toFixed(1) : 0} kW
+                        {type.value > 0 ? (type.consommation / type.value).toFixed(1) : 0} kWh
                       </td>
                     </tr>
                   ))}
@@ -757,7 +769,7 @@ const StatsReport: React.FC = () => {
         </TabsContent>
 
         {/* Onglet Tendances */}
-        <TabsContent value="tendances" className="space-y-4">
+        <TabsContent value="tendances" className="space-y-4" style={{ minHeight: '400px' }}>
           <Card className="p-4">
             <h3 className="text-lg font-medium mb-4">Évolution du pourcentage d'objets allumés</h3>
             <div className="h-[300px]">
@@ -801,7 +813,7 @@ const StatsReport: React.FC = () => {
                   </h4>
                   <div className="mt-2 flex items-center">
                     <span className={`text-xl sm:text-2xl font-bold ${averages.consommationTrend > 0 ? 'text-red-600 dark:text-red-400' : 'text-green-600 dark:text-green-400'}`}>
-                      {averages.consommationTrend > 0 ? '↑' : '↓'} {Math.abs(averages.consommationTrend).toFixed(1)} kW
+                      {averages.consommationTrend > 0 ? '↑' : '↓'} {Math.abs(averages.consommationTrend).toFixed(1)} kWh
                     </span>
                   </div>
                   <p className="mt-1 text-xs sm:text-sm text-gray-600 dark:text-gray-300">
@@ -850,7 +862,7 @@ const StatsReport: React.FC = () => {
         </TabsContent>
 
         {/* Onglet Prison - Données des utilisateurs et objets */}
-        <TabsContent value="prison" className="space-y-4">
+        <TabsContent value="prison" className="space-y-4" style={{ minHeight: '400px' }}>
           {prisonDataLoading ? (
             <div className="flex items-center justify-center h-64">
               <div className="animate-spin rounded-full h-12 w-12 border-t-2 border-b-2 border-indigo-500"></div>
@@ -920,8 +932,8 @@ const StatsReport: React.FC = () => {
                       <UserCog className="h-4 w-4 mr-1.5 text-blue-500" />
                       Répartition par rôle
                     </h4>
-                    <div className="h-[200px]">
-                      <ResponsiveContainer width="100%" height="100%">
+                    <div className="h-[200px]" style={{ minWidth: "100px", minHeight: "200px" }}>
+                      <ResponsiveContainer width="100%" height="100%" minWidth={100} minHeight={200}>
                         <PieChart>
                           <Pie
                             data={Object.entries(countUsersByRole(prisonData.users)).map(([role, count]) => ({
@@ -953,8 +965,8 @@ const StatsReport: React.FC = () => {
                       <Layers className="h-4 w-4 mr-1.5 text-amber-500" />
                       Répartition par section
                     </h4>
-                    <div className="h-[200px]">
-                      <ResponsiveContainer width="100%" height="100%">
+                    <div className="h-[200px]" style={{ minWidth: "100px", minHeight: "200px" }}>
+                      <ResponsiveContainer width="100%" height="100%" minWidth={100} minHeight={200}>
                         <BarChart 
                           data={Object.entries(countUsersBySection(prisonData.users)).map(([section, count]) => ({
                             name: section.toUpperCase() === 'NON-DÉFINIE' ? 'Non définie' : `Section ${section.toUpperCase()}`,
@@ -977,9 +989,8 @@ const StatsReport: React.FC = () => {
                     <h4 className="text-sm font-medium text-gray-700 dark:text-gray-300 mb-3 flex items-center">
                       <Users className="h-4 w-4 mr-1.5 text-green-500" />
                       Répartition par genre
-                    </h4>
-                    <div id="gender-distribution-chart" className="h-[200px]">
-                      <ResponsiveContainer width="100%" height="100%">
+                    </h4>                      <div id="gender-distribution-chart" className="h-[200px]" style={{ minWidth: "100px", minHeight: "200px" }}>
+                      <ResponsiveContainer width="100%" height="100%" minWidth={100} minHeight={200}>
                         <PieChart>
                           <Pie
                             data={Object.entries(countUsersByGender(prisonData.users)).map(([gender, count]) => ({

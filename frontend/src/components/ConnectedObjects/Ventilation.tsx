@@ -101,7 +101,7 @@ const Ventilation: React.FC<VentilationProps> = ({ objects, onAddObject, onStatu
             
             setToggleLoading(id);
             const response = await toggleObjectState(id, currentState);
-            console.log('Toggle successful:', response);
+            // console.log('Toggle successful:', response);
 
             if (addPoints) {
                 await addPoints(4);
@@ -226,7 +226,7 @@ const Ventilation: React.FC<VentilationProps> = ({ objects, onAddObject, onStatu
         try {
             setIsDeleting(objectToDelete);
             const response = await deleteObject(objectToDelete);
-            console.log('Delete successful:', response);
+            // console.log('Delete successful:', response);
             if (onStatusChange) {
                 onStatusChange();
             }
@@ -249,7 +249,7 @@ const Ventilation: React.FC<VentilationProps> = ({ objects, onAddObject, onStatu
 
             setIsUpdating(id);
             const response = await updateObject(id, { valeur_actuelle: newLevel });
-            console.log('Ventilation level update successful:', response);
+            // console.log('Ventilation level update successful:', response);
             if (onStatusChange) {
                 onStatusChange();
             }
@@ -433,7 +433,7 @@ const Ventilation: React.FC<VentilationProps> = ({ objects, onAddObject, onStatu
                                         </div>
 
                                         <div>
-                                            <label className="block text-xs font-medium text-gray-600 dark:text-gray-400 mb-1">Consommation (kW)</label>
+                                            <label className="block text-xs font-medium text-gray-600 dark:text-gray-400 mb-1">Consommation (kWh)</label>
                                             <input
                                                 type="number"
                                                 value={newConsumption}
@@ -585,7 +585,7 @@ const Ventilation: React.FC<VentilationProps> = ({ objects, onAddObject, onStatu
                                                 </div>
                                                 <div className="space-y-1">
                                                     <p className="text-xs text-gray-500 dark:text-gray-400">Consommation</p>
-                                                    <p className="font-medium text-gray-700 dark:text-gray-300">{ventilation.consomation || 0} kW</p>
+                                                    <p className="font-medium text-gray-700 dark:text-gray-300">{ventilation.consomation || 0} kWh</p>
                                                 </div>
                                                 <div className="space-y-1">
                                                     <p className="text-xs text-gray-500 dark:text-gray-400">Maintenance</p>

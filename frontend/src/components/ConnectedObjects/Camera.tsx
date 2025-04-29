@@ -82,7 +82,7 @@ const Camera: React.FC<CameraProps> = ({ objects, onAddObject, onStatusChange, a
             
             setToggleLoading(id);
             const response = await toggleObjectState(id, currentState);
-            console.log('Toggle successful:', response);
+            // console.log('Toggle successful:', response);
 
             if (addPoints) {
                 // Attribution de 3 points pour l'interaction avec une caméra
@@ -224,7 +224,7 @@ const Camera: React.FC<CameraProps> = ({ objects, onAddObject, onStatusChange, a
             }
 
             setIsUpdating(id);
-            console.log(`Updating camera ${id} with new values`);
+            // console.log(`Updating camera ${id} with new values`);
 
             const response = await updateObject(id, {
                 nom: newName,
@@ -234,7 +234,7 @@ const Camera: React.FC<CameraProps> = ({ objects, onAddObject, onStatusChange, a
                 connection: newConnection
             });
 
-            console.log('Update successful:', response);
+            // console.log('Update successful:', response);
             if (onStatusChange) {
                 onStatusChange();
             }
@@ -259,7 +259,7 @@ const Camera: React.FC<CameraProps> = ({ objects, onAddObject, onStatusChange, a
         try {
             setIsDeleting(objectToDelete);
             const response = await deleteObject(objectToDelete);
-            console.log('Delete successful:', response);
+            // console.log('Delete successful:', response);
             if (onStatusChange) {
                 onStatusChange();
             }
@@ -362,7 +362,7 @@ const Camera: React.FC<CameraProps> = ({ objects, onAddObject, onStatusChange, a
                                         </div>
 
                                         <div>
-                                            <label className="block text-xs font-medium text-gray-600 dark:text-gray-400 mb-1">Consommation (kW)</label>
+                                            <label className="block text-xs font-medium text-gray-600 dark:text-gray-400 mb-1">Consommation (kWh)</label>
                                             <input
                                                 type="number"
                                                 value={newConsumption}
@@ -530,7 +530,7 @@ const Camera: React.FC<CameraProps> = ({ objects, onAddObject, onStatusChange, a
                                                 </div>
                                                 <div className="space-y-1">
                                                     <p className="text-xs text-gray-500 dark:text-gray-400">Consommation</p>
-                                                    <p className="font-medium text-gray-700 dark:text-gray-300">{camera.consomation || 0} kW</p>
+                                                    <p className="font-medium text-gray-700 dark:text-gray-300">{camera.consomation || 0} kWh</p>
                                                 </div>
                                                 <div className="space-y-1">
                                                     <p className="text-xs text-gray-500 dark:text-gray-400">Maintenance</p>
