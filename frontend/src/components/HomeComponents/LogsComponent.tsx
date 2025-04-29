@@ -282,6 +282,10 @@ const LogsComponent: React.FC<{ prisonId: string }> = ({ prisonId }) => {
 
     useEffect(() => {
         fetchLogs();
+        const interval = setInterval(() => {
+            fetchLogs();
+        }, 5000);
+        return () => clearInterval(interval);
     }, []);
 
     // Function to get appropriate icon color based on object type

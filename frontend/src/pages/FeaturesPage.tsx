@@ -10,11 +10,11 @@ import { useDevice } from '@/hooks/use-device';
 import Footer from '@/components/Footer.tsx';
 import Header from '@/components/Header.tsx';
 import { motion } from 'framer-motion';
-import { 
-  useScrollAnimation, 
-  fadeInVariants, 
-  slideUpVariants, 
-  slideRightVariants, 
+import {
+  useScrollAnimation,
+  fadeInVariants,
+  slideUpVariants,
+  slideRightVariants,
   slideLeftVariants,
   staggerChildrenVariants,
   staggerItemVariants,
@@ -42,8 +42,8 @@ export default function FeaturesPage() {
 
   return (
     <div className="relative min-h-screen w-full overflow-x-hidden bg-black">
-      <Squares 
-        speed={0.2} 
+      <Squares
+        speed={0.2}
         squareSize={60}
         direction='diagonal'
         borderColor='#fff'
@@ -66,7 +66,6 @@ export default function FeaturesPage() {
                 <Link to="/features" className="py-2 text-green-300/80 hover:text-green-300 transition-colors">Features</Link>
                 <Link to="/about" className="py-2 text-green-300/80 hover:text-green-300 transition-colors">About</Link>
                 <Link to="/contact" className="py-2 text-green-300/80 hover:text-green-300 transition-colors">Contact</Link>
-                <Link to="/demo" className="py-2 text-green-300/80 hover:text-green-300 transition-colors">Demo</Link>
                 <Link to="/login" className="py-2 text-green-300/80 hover:text-green-300 transition-colors">Login</Link>
               </div>
             </div>
@@ -74,7 +73,7 @@ export default function FeaturesPage() {
 
           <main className="flex-grow container mx-auto px-4 pt-32 pb-12">
             <div className="max-w-6xl mx-auto">
-              <motion.h1 
+              <motion.h1
                 className="text-4xl md:text-5xl font-bold mb-4 text-white text-center drop-shadow-glow"
                 initial={{ opacity: 0, y: -30 }}
                 animate={{ opacity: 1, y: 0 }}
@@ -82,7 +81,7 @@ export default function FeaturesPage() {
               >
                 Fonctionnalités
               </motion.h1>
-              <motion.p 
+              <motion.p
                 className="text-xl text-green-200 text-center mb-12 max-w-3xl mx-auto"
                 initial={{ opacity: 0 }}
                 animate={{ opacity: 1 }}
@@ -92,7 +91,7 @@ export default function FeaturesPage() {
               </motion.p>
 
               {/* Section Introduction */}
-              <motion.section 
+              <motion.section
                 className="mb-16 backdrop-blur-md bg-black/60 p-8 rounded-xl border border-green-900/30 shadow-2xl shadow-green-900/10 hover:shadow-green-900/20 transition-all duration-300"
                 initial={{ opacity: 0, y: 30 }}
                 whileInView={{ opacity: 1, y: 0 }}
@@ -111,7 +110,7 @@ export default function FeaturesPage() {
                       SecureSync est une plateforme intégrée qui connecte tous les aspects de la gestion pénitentiaire en un système unifié et sécurisé.
                       Notre solution offre un contrôle sans précédent, une surveillance en temps réel et une gestion efficace des ressources.
                     </p>
-                    <motion.ul 
+                    <motion.ul
                       className="space-y-3"
                       initial="hidden"
                       whileInView="visible"
@@ -144,7 +143,7 @@ export default function FeaturesPage() {
                       </motion.li>
                     </motion.ul>
                   </motion.div>
-                  <motion.div 
+                  <motion.div
                     className="relative h-64 md:h-full flex items-center justify-center"
                     initial={{ opacity: 0, x: 30 }}
                     whileInView={{ opacity: 1, x: 0 }}
@@ -152,13 +151,13 @@ export default function FeaturesPage() {
                     viewport={{ once: true }}
                   >
                     <div className="w-full h-64 bg-green-900/20 rounded-lg flex items-center justify-center p-4 backdrop-blur-sm shadow-xl shadow-green-900/10 border border-green-900/40 overflow-hidden">
-                      <img 
-                      src="/Dashboard.png" 
-                      alt="Interface du Dashboard SecureSync" 
-                      className="w-full h-full object-cover rounded opacity-80 hover:opacity-100 transition-opacity duration-300"
+                      <img
+                        src="/Dashboard.png"
+                        alt="Interface du Dashboard SecureSync"
+                        className="w-full h-full object-cover rounded opacity-80 hover:opacity-100 transition-opacity duration-300"
                       />
                       <p className="absolute bottom-4 text-sm text-green-300/90 bg-black/50 px-3 py-1 rounded">
-                      Interface du Dashboard SecureSync
+                        Interface du Dashboard SecureSync
                       </p>
                     </div>
                   </motion.div>
@@ -203,7 +202,7 @@ export default function FeaturesPage() {
 
                 <div className="backdrop-blur-md bg-black/60 p-8 rounded-b-xl border border-green-900/30 shadow-2xl shadow-green-900/10 transition-all duration-300">
                   <TabsContent value="security" className="mt-0 animate-in fade-in-50 duration-500">
-                    <motion.h3 
+                    <motion.h3
                       className="text-2xl font-semibold mb-6 text-green-300 drop-shadow-sm"
                       initial={{ opacity: 0, y: 20 }}
                       whileInView={{ opacity: 1, y: 0 }}
@@ -212,7 +211,7 @@ export default function FeaturesPage() {
                     >
                       Sécurité avancée
                     </motion.h3>
-                    <motion.div 
+                    <motion.div
                       className="grid grid-cols-1 md:grid-cols-3 gap-6 mb-8"
                       initial="hidden"
                       whileInView="visible"
@@ -272,7 +271,7 @@ export default function FeaturesPage() {
                   </TabsContent>
 
                   <TabsContent value="monitoring" className="mt-0 animate-in fade-in-50 duration-500">
-                    <motion.h3 
+                    <motion.h3
                       className="text-2xl font-semibold mb-6 text-green-300 drop-shadow-sm"
                       initial={{ opacity: 0, y: 20 }}
                       whileInView={{ opacity: 1, y: 0 }}
@@ -281,7 +280,7 @@ export default function FeaturesPage() {
                     >
                       Surveillance intelligente
                     </motion.h3>
-                    <motion.div 
+                    <motion.div
                       className="grid grid-cols-1 md:grid-cols-3 gap-6 mb-8"
                       initial="hidden"
                       whileInView="visible"
@@ -324,7 +323,7 @@ export default function FeaturesPage() {
                         </SpotlightCard>
                       </motion.div>
                     </motion.div>
-                    <motion.div 
+                    <motion.div
                       className="bg-green-900/20 p-6 rounded-lg border border-green-900/40 shadow-lg shadow-green-900/10 backdrop-blur-sm"
                       initial={{ opacity: 0, scale: 0.95 }}
                       whileInView={{ opacity: 1, scale: 1 }}
@@ -337,7 +336,7 @@ export default function FeaturesPage() {
                       <p className="text-gray-300 mb-4">
                         Interface centralisée offrant une vue d'ensemble de toutes les zones surveillées, avec possibilité de zoomer sur des secteurs spécifiques et d'accéder instantanément aux flux vidéo en direct.
                       </p>
-                      <motion.div 
+                      <motion.div
                         className="flex flex-wrap gap-2"
                         initial={{ opacity: 0 }}
                         whileInView={{ opacity: 1 }}
@@ -353,7 +352,7 @@ export default function FeaturesPage() {
                   </TabsContent>
 
                   <TabsContent value="management" className="mt-0 animate-in fade-in-50 duration-500">
-                    <motion.h3 
+                    <motion.h3
                       className="text-2xl font-semibold mb-6 text-green-300 drop-shadow-sm"
                       initial={{ opacity: 0, y: 20 }}
                       whileInView={{ opacity: 1, y: 0 }}
@@ -362,7 +361,7 @@ export default function FeaturesPage() {
                     >
                       Gestion complète
                     </motion.h3>
-                    <motion.div 
+                    <motion.div
                       className="grid grid-cols-1 md:grid-cols-3 gap-6 mb-8"
                       initial="hidden"
                       whileInView="visible"
@@ -405,7 +404,7 @@ export default function FeaturesPage() {
                         </SpotlightCard>
                       </motion.div>
                     </motion.div>
-                    <motion.div 
+                    <motion.div
                       className="bg-green-900/20 p-6 rounded-lg border border-green-900/40 shadow-lg shadow-green-900/10 backdrop-blur-sm"
                       initial={{ opacity: 0, scale: 0.95 }}
                       whileInView={{ opacity: 1, scale: 1 }}
@@ -418,7 +417,7 @@ export default function FeaturesPage() {
                       <p className="text-gray-300 mb-4">
                         Génération automatisée de rapports détaillés avec analyses statistiques, tendances et indicateurs de performance pour une prise de décision éclairée.
                       </p>
-                      <motion.div 
+                      <motion.div
                         className="flex flex-wrap gap-2"
                         initial={{ opacity: 0 }}
                         whileInView={{ opacity: 1 }}
@@ -434,7 +433,7 @@ export default function FeaturesPage() {
                   </TabsContent>
 
                   <TabsContent value="integration" className="mt-0 animate-in fade-in-50 duration-500">
-                    <motion.h3 
+                    <motion.h3
                       className="text-2xl font-semibold mb-6 text-green-300 drop-shadow-sm"
                       initial={{ opacity: 0, y: 20 }}
                       whileInView={{ opacity: 1, y: 0 }}
@@ -443,7 +442,7 @@ export default function FeaturesPage() {
                     >
                       Intégration des systèmes
                     </motion.h3>
-                    <motion.div 
+                    <motion.div
                       className="grid grid-cols-1 md:grid-cols-3 gap-6 mb-8"
                       initial="hidden"
                       whileInView="visible"
@@ -486,7 +485,7 @@ export default function FeaturesPage() {
                         </SpotlightCard>
                       </motion.div>
                     </motion.div>
-                    <motion.div 
+                    <motion.div
                       className="bg-green-900/20 p-6 rounded-lg border border-green-900/40 shadow-lg shadow-green-900/10 backdrop-blur-sm"
                       initial={{ opacity: 0, scale: 0.95 }}
                       whileInView={{ opacity: 1, scale: 1 }}
@@ -499,7 +498,7 @@ export default function FeaturesPage() {
                       <p className="text-gray-300 mb-4">
                         Plateforme centrale intégrant tous les systèmes de l'établissement en une interface unifiée, offrant un contrôle complet et une visibilité totale sur toutes les opérations.
                       </p>
-                      <motion.div 
+                      <motion.div
                         className="flex flex-wrap gap-2"
                         initial={{ opacity: 0 }}
                         whileInView={{ opacity: 1 }}
@@ -517,14 +516,14 @@ export default function FeaturesPage() {
               </Tabs>
 
               {/* Tableau comparatif des éditions */}
-              <motion.section 
+              <motion.section
                 className="mb-16"
                 initial={{ opacity: 0, y: 40 }}
                 whileInView={{ opacity: 1, y: 0 }}
                 transition={{ duration: 0.7 }}
                 viewport={{ once: true, amount: 0.1 }}
               >
-                <motion.h2 
+                <motion.h2
                   className="text-3xl font-semibold mb-8 text-center text-green-300 drop-shadow-sm"
                   initial={{ opacity: 0, y: 20 }}
                   whileInView={{ opacity: 1, y: 0 }}
@@ -534,7 +533,7 @@ export default function FeaturesPage() {
                   Éditions disponibles
                 </motion.h2>
 
-                <motion.div 
+                <motion.div
                   className="overflow-x-auto"
                   initial={{ opacity: 0, scale: 0.98 }}
                   whileInView={{ opacity: 1, scale: 1 }}
@@ -617,14 +616,14 @@ export default function FeaturesPage() {
               </motion.section>
 
               {/* Témoignages clients */}
-              <motion.section 
+              <motion.section
                 className="mb-16"
                 initial={{ opacity: 0, y: 40 }}
                 whileInView={{ opacity: 1, y: 0 }}
                 transition={{ duration: 0.7 }}
                 viewport={{ once: true, amount: 0.2 }}
               >
-                <motion.h2 
+                <motion.h2
                   className="text-3xl font-semibold mb-8 text-center text-green-300 drop-shadow-sm"
                   initial={{ opacity: 0 }}
                   whileInView={{ opacity: 1 }}
@@ -634,14 +633,14 @@ export default function FeaturesPage() {
                   Ce que nos clients disent
                 </motion.h2>
 
-                <motion.div 
+                <motion.div
                   className="grid grid-cols-1 md:grid-cols-2 gap-8"
                   initial="hidden"
                   whileInView="visible"
                   viewport={{ once: true, amount: 0.2 }}
                   variants={staggerChildrenVariants}
                 >
-                  <motion.div 
+                  <motion.div
                     className="backdrop-blur-md bg-black/60 p-6 rounded-xl border border-green-900/30 shadow-xl shadow-green-900/10 hover:shadow-green-900/20 transition-all duration-300"
                     variants={staggerItemVariants}
                   >
@@ -659,7 +658,7 @@ export default function FeaturesPage() {
                     </p>
                   </motion.div>
 
-                  <motion.div 
+                  <motion.div
                     className="backdrop-blur-md bg-black/60 p-6 rounded-xl border border-green-900/30 shadow-xl shadow-green-900/10 hover:shadow-green-900/20 transition-all duration-300"
                     variants={staggerItemVariants}
                   >
@@ -680,14 +679,14 @@ export default function FeaturesPage() {
               </motion.section>
 
               {/* FAQ */}
-              <motion.section 
+              <motion.section
                 className="mb-16 backdrop-blur-md bg-black/60 p-8 rounded-xl border border-green-900/30 shadow-2xl shadow-green-900/10"
                 initial={{ opacity: 0, y: 30 }}
                 whileInView={{ opacity: 1, y: 0 }}
                 transition={{ duration: 0.8 }}
                 viewport={{ once: true, amount: 0.1 }}
               >
-                <motion.h2 
+                <motion.h2
                   className="text-3xl font-semibold mb-8 text-center text-green-300 drop-shadow-sm"
                   initial={{ opacity: 0, scale: 0.9 }}
                   whileInView={{ opacity: 1, scale: 1 }}
@@ -697,7 +696,7 @@ export default function FeaturesPage() {
                   Questions fréquentes
                 </motion.h2>
 
-                <motion.div 
+                <motion.div
                   className="space-y-6"
                   initial="hidden"
                   whileInView="visible"
@@ -763,14 +762,14 @@ export default function FeaturesPage() {
               </motion.section>
 
               {/* Call to Action */}
-              <motion.div 
+              <motion.div
                 className="text-center backdrop-blur-md bg-black/60 p-8 rounded-xl border border-green-900/30 shadow-2xl shadow-green-900/10"
                 initial={{ opacity: 0, y: 30 }}
                 whileInView={{ opacity: 1, y: 0 }}
                 transition={{ duration: 0.7 }}
                 viewport={{ once: true, amount: 0.3 }}
               >
-                <motion.h2 
+                <motion.h2
                   className="text-2xl md:text-3xl font-bold mb-4 text-white drop-shadow-glow"
                   initial={{ opacity: 0 }}
                   whileInView={{ opacity: 1 }}
@@ -779,7 +778,7 @@ export default function FeaturesPage() {
                 >
                   Prêt à améliorer la sécurité de votre établissement ?
                 </motion.h2>
-                <motion.p 
+                <motion.p
                   className="text-lg mb-6 text-gray-300"
                   initial={{ opacity: 0 }}
                   whileInView={{ opacity: 1 }}
@@ -788,7 +787,7 @@ export default function FeaturesPage() {
                 >
                   Contactez-nous dès aujourd'hui pour une démonstration personnalisée
                 </motion.p>
-                <motion.div 
+                <motion.div
                   className="flex flex-col sm:flex-row gap-4 justify-center"
                   initial={{ opacity: 0, y: 20 }}
                   whileInView={{ opacity: 1, y: 0 }}
@@ -796,12 +795,12 @@ export default function FeaturesPage() {
                   viewport={{ once: true }}
                 >
                   <Link to="/contact">
-                    <Button size="lg" className="bg-green-600 hover:bg-green-700 text-white font-semibold px-6 shadow-md shadow-green-900/40 hover:shadow-lg hover:shadow-green-900/50 transition-all">
+                    <Button size="lg" className="bg-green-900/60 hover:bg-green-900/80 text-white font-semibold cursor-pointer border border-green-500/50">
                       Demander une démo
                     </Button>
                   </Link>
                   <Link to="/about">
-                    <Button variant="outline" size="lg" className="border-green-500 hover:bg-green-900/40 text-green-300 px-6 shadow-md shadow-green-900/30 hover:shadow-lg transition-all hover:text-white">
+                    <Button variant="outline" size="lg" className="bg-black/40 border border-white/70 text-white hover:bg-white/80 hover:border-white hover:text-black cursor-pointer">
                       En savoir plus
                     </Button>
                   </Link>

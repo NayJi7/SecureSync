@@ -6,6 +6,7 @@ import axios from 'axios';
 import { Button } from '@/components/ui/button';
 import { Building, ArrowRight, Plus, Trash2 } from 'lucide-react';
 import SpotlightCard from '@/blocks/Components/SpotlightCard/SpotlightCard';
+import Swal from 'sweetalert2';
 
 // Interface pour les prisons
 interface Prison {
@@ -180,9 +181,29 @@ export default function PrisonSelectionPage() {
       // Rafraîchir la liste des prisons
       fetchPrisons();
       
+      // Notification de succès
+      Swal.fire({
+        title: 'Succès !',
+        text: 'L\'établissement a été créé avec succès',
+        icon: 'success',
+        background: '#1a1a1a',
+        color: '#fff',
+        iconColor: '#4ade80',
+        timer: 2000,
+        timerProgressBar: true,
+        showConfirmButton: false
+      });
+      
     } catch (err) {
       console.error("Erreur lors de la création de la prison:", err);
-      setCreateError('Erreur lors de la création. Veuillez réessayer.');
+      setCreateError('');
+      Swal.fire({
+        title: 'Erreur',
+        text: 'Erreur lors de la création. Veuillez réessayer.',
+        icon: 'error',
+        background: '#1a1a1a',
+        color: '#fff'
+      });
     } finally {
       setIsCreatingPrison(false);
     }
@@ -190,7 +211,21 @@ export default function PrisonSelectionPage() {
   
   // Fonction pour supprimer une prison
   const handleDeletePrison = async (prisonId: string) => {
-    if (window.confirm(`Êtes-vous sûr de vouloir supprimer cette prison ? Cette action est irréversible.`)) {
+    const result = await Swal.fire({
+      title: 'Êtes-vous sûr ?',
+      text: "Vous êtes sur le point de supprimer cet établissement. Cette action est irréversible.",
+      icon: 'warning',
+      showCancelButton: true,
+      confirmButtonColor: '#d33',
+      cancelButtonColor: '#046c4e',
+      confirmButtonText: 'Oui, supprimer',
+      cancelButtonText: 'Annuler',
+      background: '#1a1a1a',
+      color: '#fff',
+      iconColor: '#d33'
+    });
+    
+    if (result.isConfirmed) {
       try {
         const token = localStorage.getItem('sessionToken');
         await axios.delete(`http://localhost:8000/api/prisons/${prisonId}/`, {
@@ -200,9 +235,25 @@ export default function PrisonSelectionPage() {
         // Rafraîchir la liste des prisons
         fetchPrisons();
         
+        // Message de confirmation de suppression
+        Swal.fire({
+          title: 'Supprimé !',
+          text: 'L\'établissement a été supprimé avec succès.',
+          icon: 'success',
+          background: '#1a1a1a',
+          color: '#fff',
+          iconColor: '#4ade80'
+        });
+        
       } catch (err) {
         console.error("Erreur lors de la suppression de la prison:", err);
-        alert("Erreur lors de la suppression. Il est possible que des utilisateurs soient encore associés à cet établissement.");
+        Swal.fire({
+          title: 'Erreur',
+          text: 'Erreur lors de la suppression. Il est possible que des utilisateurs soient encore associés à cet établissement.',
+          icon: 'error',
+          background: '#1a1a1a',
+          color: '#fff',
+        });
       }
     }
   };
@@ -232,6 +283,7 @@ export default function PrisonSelectionPage() {
         
         {/* Le formulaire de création de prison est maintenant intégré dans la carte */}
 
+        {/* Section des établissements et carte d'ajout dans la même grille */}
         <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-8 max-w-6xl mx-auto">          
           {/* Liste des prisons existantes */}
           {prisons.map((prison) => (
@@ -288,8 +340,8 @@ export default function PrisonSelectionPage() {
             </SpotlightCard>
           ))}
           
-          {/* Carte pour ajouter une nouvelle prison avec effet de retournement */}
-          <div className={`perspective-1000 h-full w-full ${isFlipped ? 'cursor-default' : 'cursor-pointer'}`}>
+          {/* Carte d'ajout - intégrée dans la grille */}
+          <div className="h-full min-h-[350px] perspective-1000">
             <div 
               className={`relative w-full h-full transition-transform duration-500 transform-style-preserve-3d ${isFlipped ? 'rotate-y-180' : ''}`}
               style={{
@@ -299,49 +351,51 @@ export default function PrisonSelectionPage() {
               }}
             >
               {/* Face avant - Bouton d'ajout */}
-              <SpotlightCard 
-                className="h-full w-full transition duration-300 hover:scale-105 pointer-events-auto border-2 border-dashed border-green-500/50 absolute backface-hidden"
-                spotlightColor="rgba(45, 161, 51, 0.3)"
-                onClick={() => setIsFlipped(true)}
+              <div 
+                className={`absolute inset-0 w-full h-full backface-hidden transition duration-300 hover:scale-105 rounded-lg overflow-hidden ${isFlipped ? '' : 'cursor-pointer'}`}
                 style={{
-                  backfaceVisibility: 'hidden',
-                  position: 'absolute',
-                  top: 0,
-                  left: 0,
-                  width: '100%',
-                  height: '100%'
+                  backfaceVisibility: 'hidden'
                 }}
+                onClick={() => !isFlipped && setIsFlipped(true)}
               >
-                <div className="flex flex-col h-full items-center justify-center py-10">
-                  <div className="w-20 h-20 bg-green-900/30 rounded-full flex items-center justify-center mb-6">
-                    <Plus className="h-10 w-10 text-green-400" />
+                <SpotlightCard 
+                  className="h-full w-full relative flex items-center justify-center align-middle"
+                  spotlightColor="rgba(45, 161, 51, 0.3)"
+                >
+                  {/* Bordure en pointillés séparée et bien alignée sur les bords */}
+                  <div className="absolute inset-0 border-2 border-dashed border-green-500/50 rounded-lg pointer-events-none"></div>
+                  
+                  {/* Conteneur avec un meilleur centrage */}
+                  <div className="flex flex-col h-full w-full items-center justify-center py-6 px-6">
+                    <div className="w-20 h-10 bg-green-900/30 rounded-full flex items-center justify-center mb-3">
+                      <Plus className="h-6 w-6 text-green-400" />
+                    </div>
+                    
+                    <h2 className="text-2xl font-bold text-green-300 text-center mb-6">
+                      Ajouter un nouvel établissement
+                    </h2>
+                    
+                    <p className="text-gray-400 text-center mb-0 px-4 max-w-xs mx-auto">
+                      Cliquez ici pour créer un nouveau centre pénitentiaire dans le système
+                    </p>
                   </div>
-                  
-                  <h2 className="text-2xl font-bold text-green-300 text-center mb-4">
-                    Ajouter un nouvel établissement
-                  </h2>
-                  
-                  <p className="text-gray-400 text-center mb-4 px-6">
-                    Cliquez ici pour créer un nouveau centre pénitentiaire dans le système
-                  </p>
-                </div>
-              </SpotlightCard>
+                </SpotlightCard>
+              </div>
               
               {/* Face arrière - Formulaire d'ajout */}
               <div 
-                className="h-full w-full absolute rounded-lg p-6 shadow-xl rotate-y-180 backface-hidden border-2 border-dashed border-green-500/50 bg-black/75 backdrop-blur-sm"
+                className="absolute inset-0 w-full h-full backface-hidden rounded-lg shadow-xl rotate-y-180 bg-black/75 backdrop-blur-sm overflow-hidden"
                 style={{
                   backfaceVisibility: 'hidden',
-                  position: 'absolute',
-                  top: 0,
-                  left: 0,
-                  width: '100%',
-                  height: '100%',
                   transform: 'rotateY(180deg)'
                 }}
               >
-                <div className="flex flex-col h-full justify-center">
-                  <h2 className="text-2xl font-bold text-green-400 text-center mb-6">
+                {/* Bordure en pointillés séparée et bien alignée sur les bords */}
+                <div className="absolute inset-0 border-2 border-dashed border-green-500/50 rounded-lg pointer-events-none"></div>
+                
+                {/* Contenu du formulaire mieux centré */}
+                <div className="flex flex-col h-full justify-center items-center p-8">
+                  <h2 className="text-2xl font-bold text-green-400 text-center mb-8">
                     Ajouter un nouvel établissement
                   </h2>
                   
@@ -351,21 +405,21 @@ export default function PrisonSelectionPage() {
                     </div>
                   )}
                   
-                  <div className="mb-4">
+                  <div className="mb-8 w-full max-w-xs">
                     <label className="block text-gray-200 text-sm mb-2 text-center">Nom de la ville</label>
                     <input 
                       type="text" 
                       value={newPrisonName} 
                       onChange={(e) => setNewPrisonName(e.target.value)}
-                      className="w-full bg-gray-700/70 text-white p-2 rounded border border-green-500/30 focus:border-green-400 focus:outline-none"
+                      className="w-full bg-gray-700/70 text-white p-3 rounded border border-green-500/30 focus:border-green-400 focus:outline-none"
                       placeholder="Ex: Nice"
                     />
                   </div>
                   
-                  <div className="flex justify-center gap-4">
+                  <div className="flex justify-center gap-6 mt-4">
                     <button
                       onClick={() => setIsFlipped(false)} 
-                      className="bg-gray-800/70 hover:bg-gray-700 text-white px-4 py-2 rounded border border-gray-600"
+                      className="bg-gray-800/70 hover:bg-gray-700 text-white px-6 py-3 rounded border border-gray-600 transition-colors duration-200"
                     >
                       Annuler
                     </button>
@@ -376,7 +430,7 @@ export default function PrisonSelectionPage() {
                         !newPrisonName || isCreatingPrison 
                           ? 'bg-green-800/50 cursor-not-allowed' 
                           : 'bg-green-600 hover:bg-green-700'
-                      } text-white px-4 py-2 rounded`}
+                      } text-white px-6 py-3 rounded transition-colors duration-200`}
                     >
                       {isCreatingPrison ? 'Création...' : 'Créer'}
                     </button>

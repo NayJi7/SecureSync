@@ -789,7 +789,7 @@ const ConnectedObjects: React.FC<ConnectedObjectsProps> = ({ prisonId, addPoints
             {show3D && (
                 <VideoView 
                     onClose={() => setShow3D(false)}
-                    videoUrl="https://www.youtube.com/embed/g1uriA73Bp4?autoplay=1&controls=0&modestbranding=1&rel=0&showinfo=0&mute=1&disablekb=1&fs=0&iv_load_policy=3&playsinline=1"
+                    videoUrl="https://www.youtube.com/embed/g1uriA73Bp4"
                 />
             )}
 

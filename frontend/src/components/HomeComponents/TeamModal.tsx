@@ -60,7 +60,7 @@ const StaffModal: React.FC<StaffModalProps> = ({ isOpen, onClose, prisonId }) =>
   const [loading, setLoading] = useState<boolean>(true);
   const [error, setError] = useState<string | null>(null);
   const [currentUser, setCurrentUser] = useState<CurrentUser | null>(null);
-  const currentPrisonId = prisonId || localStorage.getItem('userPrison') || localStorage.getItem('selectedPrison');
+  const currentPrisonId = prisonId || localStorage.getItem('userPrison');
   const [deleteModal, setDeleteModal] = useState<{isOpen: boolean, username: string, userId: string}>({
     isOpen: false,
     username: '',
@@ -89,7 +89,7 @@ const StaffModal: React.FC<StaffModalProps> = ({ isOpen, onClose, prisonId }) =>
     sexe: 'M',
     date_naissance: '',
     section: 'a',
-    prison: currentPrisonId || 'paris', // On utilise la prison actuelle ou 'paris' par défaut
+    prison: currentPrisonId || 'paris', // On utilise la prison actuelle ou 'paris'
     role: 'employe' // Rôle par défaut le plus bas
   });
   const [formError, setFormError] = useState<string | null>(null);
@@ -234,7 +234,7 @@ const StaffModal: React.FC<StaffModalProps> = ({ isOpen, onClose, prisonId }) =>
     e.preventDefault();
     setFormError(null);
     setFormSuccess(null);
-    
+
     // Vérifications basiques
     if (formData.password1 !== formData.password2) {
       setFormError("Les mots de passe ne correspondent pas.");
@@ -261,8 +261,8 @@ const StaffModal: React.FC<StaffModalProps> = ({ isOpen, onClose, prisonId }) =>
       });
       
       setFormSuccess("L'employé a été ajouté avec succès !");
-      
-      // Réinitialiser le formulaire
+
+      // Réinitialiser le formulaire avec la prison courante
       setFormData({
         username: '',
         email: '',
@@ -273,10 +273,10 @@ const StaffModal: React.FC<StaffModalProps> = ({ isOpen, onClose, prisonId }) =>
         sexe: 'M',
         date_naissance: '',
         section: 'a',
-        prison: 'paris',
+        prison: currentPrisonId || 'paris',
         role: 'employe'
       });
-      
+
       // Fermer le formulaire et rafraîchir la liste
       setTimeout(() => {
         setShowAddMemberForm(false);

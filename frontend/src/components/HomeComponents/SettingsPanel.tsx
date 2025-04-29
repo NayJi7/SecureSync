@@ -500,7 +500,8 @@ const SettingsPanel: React.FC = () => {
                     </div>
                     
                     {/* Bouton pour envoyer manuellement les statistiques (debug) */}
-                    {/* <div className="mt-4 flex justify-center">
+                    {/*
+                     <div className="mt-4 flex justify-center">
                       <Button
                         variant="outline"
                         size="sm"
@@ -521,7 +522,8 @@ const SettingsPanel: React.FC = () => {
                         <BarChart2 className="h-4 w-4" />
                         <span>Envoyer les statistiques maintenant (debug)</span>
                       </Button>
-                    </div> */}
+                    </div> 
+                    */}
                     
                     <div className="grid grid-cols-1 md:grid-cols-2 gap-3 items-center">
                       <Label htmlFor="frequency-select" className="flex items-center gap-2">

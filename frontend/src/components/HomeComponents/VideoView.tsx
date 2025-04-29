@@ -8,15 +8,15 @@ interface VideoViewProps {
 
 const VideoView: React.FC<VideoViewProps> = ({ onClose, videoUrl }) => {
   const [currentDateTime, setCurrentDateTime] = useState(new Date());
-  
+
   useEffect(() => {
     const timer = setInterval(() => {
       setCurrentDateTime(new Date());
     }, 1000);
-    
+
     return () => clearInterval(timer);
   }, []);
-  
+
   const formatDateTime = (date: Date) => {
     const options: Intl.DateTimeFormatOptions = {
       day: '2-digit',
@@ -29,7 +29,7 @@ const VideoView: React.FC<VideoViewProps> = ({ onClose, videoUrl }) => {
     };
     return new Intl.DateTimeFormat('fr-FR', options).format(date);
   };
-  
+
   return (
     <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/60 dark:bg-black/75">
       <div className="w-[90vw] h-[90vh] rounded-lg overflow-hidden flex flex-col relative border shadow-xl
@@ -46,7 +46,7 @@ const VideoView: React.FC<VideoViewProps> = ({ onClose, videoUrl }) => {
               VISUALISATION SÉCURISÉE
             </h1>
           </div>
-          
+
           <div className="mr-15 flex items-center gap-2 px-4 py-2 rounded-md
                           bg-red-500/10 dark:bg-red-500/20
                           border border-red-500/20 dark:border-red-500/30">
@@ -56,7 +56,7 @@ const VideoView: React.FC<VideoViewProps> = ({ onClose, videoUrl }) => {
             </span>
           </div>
         </div>
-        
+
         <button
           className="absolute top-4 right-4 z-10 p-2 rounded-full cursor-pointer
                     bg-gray-200/80 hover:bg-gray-300/90 
@@ -68,34 +68,34 @@ const VideoView: React.FC<VideoViewProps> = ({ onClose, videoUrl }) => {
         >
           <X className="h-6 w-6 text-gray-700 dark:text-gray-200" />
         </button>
-        
+
         <div className="relative flex-1 overflow-hidden">
           <iframe
             width="100%"
             height="100%"
-            src={videoUrl}
+            src={videoUrl + "?autoplay=1&controls=0&modestbranding=1&rel=0&showinfo=0&mute=1&disablekb=1&fs=0&iv_load_policy=3&playsinline=1&loop=1&playlist=" + encodeURIComponent(videoUrl.split('/').pop() || '')}
             title="Visualisation 3D Prison"
             frameBorder="0"
             allow="autoplay; accelerometer; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share"
             allowFullScreen
             className="w-full h-full min-h-[400px]"
-            style={{ 
+            style={{
               filter: 'contrast(1.05) brightness(0.98)',
               pointerEvents: 'none'
             }}
           />
-          
+
           <div className="absolute bottom-3 left-3 py-1 px-3 
-                          bg-gray-800/70 dark:bg-gray-900/80 
-                          text-sm font-bold tracking-wide text-white
-                          rounded shadow-md border border-gray-700/50">
+              bg-gray-800/70 dark:bg-gray-900/80 
+              text-sm font-bold tracking-wide text-white
+              rounded shadow-md border border-gray-700/50">
             CAMERA
           </div>
-          
+
           <div className="absolute top-3 right-3 py-1 px-3 
-                          bg-gray-800/70 dark:bg-gray-900/80
-                          text-xs font-bold tracking-wide font-mono text-white
-                          rounded shadow-md border border-gray-700/50">
+              bg-gray-800/70 dark:bg-gray-900/80
+              text-xs font-bold tracking-wide font-mono text-white
+              rounded shadow-md border border-gray-700/50">
             {formatDateTime(currentDateTime)}
           </div>
         </div>

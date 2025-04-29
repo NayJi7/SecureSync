@@ -62,7 +62,7 @@ class Object(models.Model):
         null=True,
         verbose_name="Prison ID"
     )
-    consomation = models.IntegerField(help_text="Consommation électrique de l'objet")  # Orthographe correspondant à la base de données
+    consomation = models.FloatField(help_text="Consommation électrique de l'objet")  # Orthographe correspondant à la base de données
     valeur_actuelle = models.CharField(blank=True)
     valeur_cible = models.CharField(blank=True)
     durabilité = models.IntegerField(default=100)

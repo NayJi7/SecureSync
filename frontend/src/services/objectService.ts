@@ -43,7 +43,7 @@ export const createObject = (object: Omit<ObjectType, 'id'>) => {
     
     switch(objectToCreate.type) {
       case 'porte': 
-        defaultConsumption = 1;
+        defaultConsumption = 1.0;
         break;
       case 'lumiere': 
         defaultConsumption = 0.5;
@@ -55,10 +55,10 @@ export const createObject = (object: Omit<ObjectType, 'id'>) => {
         defaultConsumption = 0.1;
         break;
       case 'ventilation': 
-        defaultConsumption = 2;
+        defaultConsumption = 2.0;
         break;
       case "paneau d'affichage": 
-        defaultConsumption = 4;
+        defaultConsumption = 4.0;
         break;
     }
     
