@@ -85,23 +85,15 @@ cd frontend
 npm install
 ```
 
-5. Lancer le frontend React avec Vite
+5. Lancer le backend Django + le frontend React avec Vite
 
 ```bash
-npm run dev
+npm run dev # dans le dossier frontend
 ```
 🌍 Accès à l'application
 
     Backend (API) : http://localhost:8000/admin
     Frontend (UI) : http://localhost:5173/
-
-📦 Scripts utiles
-```bash
-# Commande	Description
-npm run dev	# Lancer Vite en mode développement
-python manage.py makemigrations # trouver les migration 
-python manage.py migrate  # installer les migration
-```
 
 💪 Contributeur 
 
