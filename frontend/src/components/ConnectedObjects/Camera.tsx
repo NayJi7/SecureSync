@@ -44,14 +44,6 @@ const Camera: React.FC<CameraProps> = ({ objects, onAddObject, onStatusChange, a
 
     const dropdownRef = useRef<HTMLDivElement>(null);
 
-    const videoLinks = [
-        "https://www.youtube.com/embed/g1uriA73Bp4?autoplay=1&controls=0&modestbranding=1&rel=0&showinfo=0&mute=1&disablekb=1&fs=0&iv_load_policy=3&playsinline=1",
-        "https://www.youtube.com/embed/2Vv-BfVoq4g?autoplay=1&controls=0&modestbranding=1&rel=0&showinfo=0&mute=1&disablekb=1&fs=0&iv_load_policy=3&playsinline=1",
-        "https://www.youtube.com/embed/3JZ_D3ELwOQ?autoplay=1&controls=0&modestbranding=1&rel=0&showinfo=0&mute=1&disablekb=1&fs=0&iv_load_policy=3&playsinline=1",
-        "https://www.youtube.com/embed/LsoLEjrDogU?autoplay=1&controls=0&modestbranding=1&rel=0&showinfo=0&mute=1&disablekb=1&fs=0&iv_load_policy=3&playsinline=1",
-        "https://www.youtube.com/embed/ktvTqknDobU?autoplay=1&controls=0&modestbranding=1&rel=0&showinfo=0&mute=1&disablekb=1&fs=0&iv_load_policy=3&playsinline=1"
-    ];
-
     useEffect(() => {
         // Add event listener for clicks outside the dropdown
         const handleClickOutside = (event: MouseEvent) => {
@@ -443,8 +435,7 @@ const Camera: React.FC<CameraProps> = ({ objects, onAddObject, onStatusChange, a
                                                     {camera.etat === 'on' && (
                                                         <button
                                                             onClick={() => {
-                                                                const randomUrl = videoLinks[Math.floor(Math.random() * videoLinks.length)];
-                                                                setCurrentVideoUrl(randomUrl);
+                                                                setCurrentVideoUrl("https://www.youtube.com/embed/Aq5WXmQQooo?autoplay=1&controls=0&modestbranding=1&rel=0&showinfo=0&mute=1&disablekb=1&fs=0&iv_load_policy=3&playsinline=1");
                                                                 setShowVideoId(camera.id);
                                                             }}
                                                             className="ml-2 p-1.5 rounded-full hover:bg-indigo-100 dark:hover:bg-indigo-900/30 transition-colors"
