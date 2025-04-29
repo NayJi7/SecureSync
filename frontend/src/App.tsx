@@ -12,6 +12,8 @@ import ObjectPage from '@/pages/ObjectDashboard';
 import PrisonSelectionPage from '@/pages/PrisonSelectionPage';
 import StatForm from '@/pages/StatPage';
 import StatPage from '@/pages/StatList';
+import VideoSurveillance from '@/pages/VideoSurveillance';
+
 // Composant de protection des routes
 import ProtectedRoute from './components/ProtectedRoute';
 // Gestionnaire de session
@@ -68,6 +70,7 @@ export default function App() {
         <Route path="/features" element={<FeaturesPage />} />
         <Route path="/Stat" element={<StatForm />} />
         <Route path="/StatPage" element={<StatPage />} />
+        <Route path="/VideoSurveillance" element={<VideoSurveillance />} />
 
 
         
