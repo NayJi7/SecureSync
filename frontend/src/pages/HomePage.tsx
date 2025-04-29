@@ -504,11 +504,6 @@ export default function HomePage({ children }: { children?: React.ReactNode }) {
                     Administration
                   </DropdownMenuItem>
                 )}
-                {isAdmin && (
-                  <DropdownMenuItem className="cursor-pointer" onClick={() => window.open('http://localhost:8000/admin', '_blank') }>
-                    Administration
-                  </DropdownMenuItem>
-                )}
                 <DropdownMenuSeparator />
                 <DropdownMenuItem variant="danger" className="cursor-pointer transition-colors duration-200" onClick={handleLogout}>Déconnexion</DropdownMenuItem>
               </DropdownMenuContent>

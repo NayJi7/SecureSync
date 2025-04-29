@@ -73,7 +73,7 @@ const VideoView: React.FC<VideoViewProps> = ({ onClose, videoUrl }) => {
           <iframe
             width="100%"
             height="100%"
-            src={videoUrl}
+            src={videoUrl + "?autoplay=1&controls=0&modestbranding=1&rel=0&showinfo=0&mute=1&disablekb=1&fs=0&iv_load_policy=3&playsinline=1&loop=1&playlist=" + encodeURIComponent(videoUrl.split('/').pop() || '')}
             title="Visualisation 3D Prison"
             frameBorder="0"
             allow="autoplay; accelerometer; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share"
@@ -86,16 +86,16 @@ const VideoView: React.FC<VideoViewProps> = ({ onClose, videoUrl }) => {
           />
 
           <div className="absolute bottom-3 left-3 py-1 px-3 
-                          bg-gray-800/70 dark:bg-gray-900/80 
-                          text-sm font-bold tracking-wide text-white
-                          rounded shadow-md border border-gray-700/50">
+              bg-gray-800/70 dark:bg-gray-900/80 
+              text-sm font-bold tracking-wide text-white
+              rounded shadow-md border border-gray-700/50">
             CAMERA
           </div>
 
           <div className="absolute top-3 right-3 py-1 px-3 
-                          bg-gray-800/70 dark:bg-gray-900/80
-                          text-xs font-bold tracking-wide font-mono text-white
-                          rounded shadow-md border border-gray-700/50">
+              bg-gray-800/70 dark:bg-gray-900/80
+              text-xs font-bold tracking-wide font-mono text-white
+              rounded shadow-md border border-gray-700/50">
             {formatDateTime(currentDateTime)}
           </div>
         </div>

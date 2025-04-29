@@ -61,7 +61,6 @@ export default function AboutPage() {
                 <Link to="/features" className="py-2 text-green-300/80 hover:text-green-300 transition-colors">Features</Link>
                 <Link to="/about" className="py-2 text-green-300/80 hover:text-green-300 transition-colors">About</Link>
                 <Link to="/contact" className="py-2 text-green-300/80 hover:text-green-300 transition-colors">Contact</Link>
-                <Link to="/demo" className="py-2 text-green-300/80 hover:text-green-300 transition-colors">Demo</Link>
                 <Link to="/login" className="py-2 text-green-300/80 hover:text-green-300 transition-colors">Login</Link>
               </div>
             </div>
@@ -440,7 +439,7 @@ export default function AboutPage() {
                     variants={staggerChildrenVariants}
                     viewport={{ once: true }}
                   >
-                    <motion.div className="flex" variants={fadeInVariants}>
+                    <motion.div className="flex items-start" variants={fadeInVariants}>
                       <motion.div
                         className="flex-shrink-0 mr-4"
                         initial={{ scale: 0 }}
@@ -450,15 +449,15 @@ export default function AboutPage() {
                       >
                         <CheckCircle className="h-6 w-6 text-green-400" />
                       </motion.div>
+                      <div>
+                        <h3 className="text-xl font-medium mb-2 text-green-200">Sécurité</h3>
+                        <p className="text-gray-300">
+                          La sécurité est au cœur de tout ce que nous faisons, de la conception de nos produits à leur déploiement.
+                        </p>
+                      </div>
                     </motion.div>
-                    <div>
-                      <h3 className="text-xl font-medium mb-2 text-green-200">Sécurité</h3>
-                      <p className="text-gray-300">
-                        La sécurité est au cœur de tout ce que nous faisons, de la conception de nos produits à leur déploiement.
-                      </p>
-                    </div>
 
-                    <motion.div className="flex" variants={fadeInVariants}>
+                    <motion.div className="flex items-start" variants={fadeInVariants}>
                       <motion.div
                         className="flex-shrink-0 mr-4"
                         initial={{ scale: 0 }}
@@ -468,15 +467,15 @@ export default function AboutPage() {
                       >
                         <CheckCircle className="h-6 w-6 text-green-400" />
                       </motion.div>
+                      <div>
+                        <h3 className="text-xl font-medium mb-2 text-green-200">Innovation</h3>
+                        <p className="text-gray-300">
+                          Nous repoussons constamment les limites de la technologie pour créer des solutions toujours plus efficaces.
+                        </p>
+                      </div>
                     </motion.div>
-                    <div>
-                      <h3 className="text-xl font-medium mb-2 text-green-200">Innovation</h3>
-                      <p className="text-gray-300">
-                        Nous repoussons constamment les limites de la technologie pour créer des solutions toujours plus efficaces.
-                      </p>
-                    </div>
 
-                    <motion.div className="flex" variants={fadeInVariants}>
+                    <motion.div className="flex items-start" variants={fadeInVariants}>
                       <motion.div
                         className="flex-shrink-0 mr-4"
                         initial={{ scale: 0 }}
@@ -486,15 +485,15 @@ export default function AboutPage() {
                       >
                         <CheckCircle className="h-6 w-6 text-green-400" />
                       </motion.div>
+                      <div>
+                        <h3 className="text-xl font-medium mb-2 text-green-200">Intégrité</h3>
+                        <p className="text-gray-300">
+                          Nous agissons avec honnêteté et transparence dans toutes nos interactions avec nos clients et partenaires.
+                        </p>
+                      </div>
                     </motion.div>
-                    <div>
-                      <h3 className="text-xl font-medium mb-2 text-green-200">Intégrité</h3>
-                      <p className="text-gray-300">
-                        Nous agissons avec honnêteté et transparence dans toutes nos interactions avec nos clients et partenaires.
-                      </p>
-                    </div>
 
-                    <motion.div className="flex" variants={fadeInVariants}>
+                    <motion.div className="flex items-start" variants={fadeInVariants}>
                       <motion.div
                         className="flex-shrink-0 mr-4"
                         initial={{ scale: 0 }}
@@ -504,13 +503,13 @@ export default function AboutPage() {
                       >
                         <CheckCircle className="h-6 w-6 text-green-400" />
                       </motion.div>
+                      <div>
+                        <h3 className="text-xl font-medium mb-2 text-green-200">Excellence</h3>
+                        <p className="text-gray-300">
+                          Nous nous efforçons d'atteindre l'excellence dans tous les aspects de notre travail, du développement au support client.
+                        </p>
+                      </div>
                     </motion.div>
-                    <div>
-                      <h3 className="text-xl font-medium mb-2 text-green-200">Excellence</h3>
-                      <p className="text-gray-300">
-                        Nous nous efforçons d'atteindre l'excellence dans tous les aspects de notre travail, du développement au support client.
-                      </p>
-                    </div>
                   </motion.div>
                 </motion.div>
               </section>

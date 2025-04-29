@@ -107,7 +107,6 @@ export default function ContactPage() {
                 <Link to="/features" className="py-2 text-green-300/80 hover:text-green-300 transition-colors">Features</Link>
                 <Link to="/about" className="py-2 text-green-300/80 hover:text-green-300 transition-colors">About</Link>
                 <Link to="/contact" className="py-2 text-green-300/80 hover:text-green-300 transition-colors">Contact</Link>
-                <Link to="/demo" className="py-2 text-green-300/80 hover:text-green-300 transition-colors">Demo</Link>
                 <Link to="/login" className="py-2 text-green-300/80 hover:text-green-300 transition-colors">Login</Link>
               </div>
             </div>

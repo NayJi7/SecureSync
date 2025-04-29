@@ -22,7 +22,7 @@ export default function TermsPage() {
   }, []);
 
   return (
-    <div className="relative min-h-screen bg-black">
+    <div className="relative min-h-screen bg-black flex flex-col">
       <div className="absolute inset-0 overflow-hidden">
         <Particles
           particleColors={['#ffffff', '#ffffff']}
@@ -40,16 +40,13 @@ export default function TermsPage() {
         mobileMenuOpen={mobileMenuOpen} 
         setMobileMenuOpen={setMobileMenuOpen} 
       />
-      
-      <div className="relative z-10 container mx-auto px-4 py-28">
+      <main className="relative z-10 container mx-auto px-4 py-28 flex-1 flex flex-col justify-center pointer-events-none">
         <div className="mt-15 bg-black/60 backdrop-blur-md rounded-xl p-8 border border-green-900/30 max-w-4xl mx-auto">
           <h1 className="text-4xl font-bold text-white mb-6">Conditions d'utilisation</h1>
-          
           <div className="space-y-6 text-white/90">
             <p className="text-lg leading-relaxed">
               En utilisant l'application SecureSync de gestion intelligente de prison, vous acceptez les conditions suivantes :
             </p>
-            
             <ul className="list-disc pl-6 space-y-3">
               <li>L'application est réservée au personnel autorisé des établissements pénitentiaires.</li>
               <li>Chaque utilisateur est responsable de la confidentialité de ses identifiants.</li>
@@ -60,19 +57,15 @@ export default function TermsPage() {
               <li>Des mises à jour seront effectuées régulièrement pour améliorer la sécurité.</li>
               <li>L'accès peut être révoqué en cas de non-respect de ces conditions.</li>
             </ul>
-            
             <p className="text-base leading-relaxed mt-4">
-              Pour toute question, contactez <a href="mailto:email@securesync.com" className="text-green-500 hover:text-green-600">securesynccytech@gmail.com</a>
+              Pour toute question, contactez <a href="mailto:email@securesync.com" className="text-green-500 hover:text-green-600 pointer-events-auto">securesynccytech@gmail.com</a>
               <br />
               En date du : {new Date().toLocaleDateString('fr-FR')}
             </p>
           </div>
         </div>
-      </div>
-      
-      <div className="mt-16 relative z-10">
-        <Footer />
-      </div>
+      </main>
+      <Footer />
     </div>
   );
 }

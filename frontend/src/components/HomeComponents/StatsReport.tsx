@@ -138,11 +138,11 @@ const StatsReport: React.FC = () => {
     fetchStats();
     fetchPrisonData();
 
-    // Actualisation des données toutes les 5 minutes
+    // Actualisation des données toutes les 5 secondes
     const intervalId = setInterval(() => {
       fetchStats();
       fetchPrisonData();
-    }, 5 * 60 * 1000);
+    }, 3 * 60 * 1000); 
 
     return () => clearInterval(intervalId);
   }, [timeRange]); // Déclencher le useEffect lorsque la période change
@@ -916,7 +916,7 @@ const StatsReport: React.FC = () => {
                       <span className="text-xs text-amber-700">Sections</span>
                     </div>
                     <h4 className="text-2xl font-semibold text-gray-800 dark:text-white">{Object.keys(countUsersBySection(prisonData.users)).length}</h4>
-                    <p className="text-xs text-gray-500 dark:text-gray-400">Sections actives</p>
+                    <p className="text-xs text-gray-500 dark:text-gray-400">Sections surveillées</p>
                   </div>
                 </div>
 
@@ -927,7 +927,7 @@ const StatsReport: React.FC = () => {
                       <UserCog className="h-4 w-4 mr-1.5 text-blue-500" />
                       Répartition par rôle
                     </h4>
-                    <div className="h-[200px] w-full relative" style={{ minHeight: "200px" }}>
+                    <div className="h-[210px] w-full relative" style={{ minHeight: "200px" }}>
                       <ResponsiveContainer width="100%" height="100%" minWidth={100} minHeight={200}>
                         <PieChart>
                           <Pie
@@ -984,7 +984,7 @@ const StatsReport: React.FC = () => {
                     <h4 className="text-sm font-medium text-gray-700 dark:text-gray-300 mb-3 flex items-center">
                       <Users className="h-4 w-4 mr-1.5 text-green-500" />
                       Répartition par genre
-                    </h4>                      <div id="gender-distribution-chart" className="h-[200px] w-full relative" style={{ minHeight: "200px" }}>
+                    </h4>                      <div id="gender-distribution-chart" className="h-[210px] w-full relative" style={{ minHeight: "200px" }}>
                       <ResponsiveContainer width="100%" height="100%" minWidth={100} minHeight={200}>
                         <PieChart>
                           <Pie

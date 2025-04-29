@@ -435,7 +435,7 @@ const Camera: React.FC<CameraProps> = ({ objects, onAddObject, onStatusChange, a
                                                     {camera.etat === 'on' && (
                                                         <button
                                                             onClick={() => {
-                                                                setCurrentVideoUrl("https://www.youtube.com/embed/dQw4w9WgXcQ?autoplay=1&controls=0&modestbranding=1&rel=0&showinfo=0&mute=1&disablekb=1&fs=0&iv_load_policy=3&playsinline=1"); setShowVideoId(camera.id);
+                                                                setCurrentVideoUrl("https://www.youtube.com/embed/dQw4w9WgXcQ"); setShowVideoId(camera.id);
                                                             }}
                                                             className="ml-2 p-1.5 rounded-full hover:bg-indigo-100 dark:hover:bg-indigo-900/30 transition-colors"
                                                             title="Visualiser la caméra"
