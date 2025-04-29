@@ -22,6 +22,7 @@ const TeamEditModal: React.FC<TeamEditModalProps> = ({ isOpen, onClose, member, 
     section: member?.section || 'a',
     points: member?.points || 0
   });
+  const [originalUsername, setOriginalUsername] = useState<string>(member?.username || '');
   const [error, setError] = useState<string | null>(null);
   const [success, setSuccess] = useState<string | null>(null);
   const [loading, setLoading] = useState(false);
@@ -29,8 +30,13 @@ const TeamEditModal: React.FC<TeamEditModalProps> = ({ isOpen, onClose, member, 
   // Mettre à jour les données du formulaire lorsque member change
   useEffect(() => {
     if (member) {
-      console.log('Membre reçu dans TeamEditModal:', member);
-      console.log('Type de member:', typeof member, 'Clés:', Object.keys(member));
+      // console.log('Membre reçu dans TeamEditModal:', member);
+      // console.log('Type de member:', typeof member, 'Clés:', Object.keys(member));
+      
+      // Stocker l'username original pour la mise à jour
+      if (member.username) {
+        setOriginalUsername(member.username);
+      }
       
       // Récupérer les données complètes du membre
       const fetchCompleteData = async () => {
@@ -41,7 +47,7 @@ const TeamEditModal: React.FC<TeamEditModalProps> = ({ isOpen, onClose, member, 
             
             // Utiliser le nouvel endpoint spécifique pour récupérer les détails de l'utilisateur
             const usernameForFetch = member.username;
-            console.log('Récupération des détails pour le username:', usernameForFetch);
+            // console.log('Récupération des détails pour le username:', usernameForFetch);
             
             const response = await axios.get(
               `http://localhost:8000/api/staff/${usernameForFetch}/`,
@@ -117,13 +123,12 @@ const TeamEditModal: React.FC<TeamEditModalProps> = ({ isOpen, onClose, member, 
         return;
       }
       
-      console.log("Envoi de requête pour le membre:", member);
-      // Assurons-nous d'utiliser le bon username pour la mise à jour
-      const usernameToUse = memberData.username;
-      console.log("Username utilisé pour la mise à jour:", usernameToUse);
+      // console.log("Envoi de requête pour le membre:", member);
+      // Utiliser l'username original pour la requête API (et non le username modifié)
+      // console.log("Username original utilisé pour la mise à jour:", originalUsername);
       
       await axios.put(
-        `http://localhost:8000/api/staff/${usernameToUse}/update/`,
+        `http://localhost:8000/api/staff/${originalUsername}/update/`,
         memberData,
         {
           headers: {

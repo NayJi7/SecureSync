@@ -154,7 +154,7 @@ const StaffModal: React.FC<StaffModalProps> = ({ isOpen, onClose, prisonId }) =>
       });
       
       // Débogage
-      console.log('Premier membre après normalisation:', normalizedStaffData.length > 0 ? normalizedStaffData[0] : 'Aucun membre');
+      // console.log('Premier membre après normalisation:', normalizedStaffData.length > 0 ? normalizedStaffData[0] : 'Aucun membre');
       
       setStaff(normalizedStaffData);
 
