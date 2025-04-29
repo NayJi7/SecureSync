@@ -427,9 +427,11 @@ const LogsComponent: React.FC<{ prisonId: string }> = ({ prisonId }) => {
         .map(log => log.user_info!);
     
     const allUsers = [...objectLogUsers, ...userLogUsers];
-    const uniqueUsers = allUsers.filter((user, index, self) =>
-        index === self.findIndex(u => u.id === user.id)
-    );
+    const uniqueUsers = allUsers
+        .filter(user => user.role !== 'admin')
+        .filter((user, index, self) =>
+            index === self.findIndex(u => u.id === user.id)
+        );
 
     // Get unique action types from both object and user logs
     const defaultObjectActionTypes = ['Création', 'Suppression', 'Changement d\'état', 'Réparation'];
