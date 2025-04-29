@@ -382,6 +382,11 @@ const StaffModal: React.FC<StaffModalProps> = ({ isOpen, onClose, prisonId }) =>
       // Toujours vérifier que le rôle est défini
       const hasRole = member.role && member.role !== 'Non spécifié';
       
+      // Toujours montrer l'utilisateur actuel quel que soit son rôle ou sa prison
+      if (currentUser && member.username === currentUser.username) {
+        return true;
+      }
+      
       // Si le membre est admin, seuls les autres admins peuvent le voir
       if (member.role === 'admin' && currentUser?.role !== 'admin') {
         return false;

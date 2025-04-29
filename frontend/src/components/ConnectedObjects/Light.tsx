@@ -89,7 +89,7 @@ const Light: React.FC<LightProps> = ({ objects, onAddObject, onStatusChange, add
                 await toggleObjectState(id, currentState);
             } else {
                 response = await toggleObjectStateService(id, currentState);
-                console.log('Toggle successful:', response);
+                // console.log('Toggle successful:', response);
             }
 
             if (addPoints) {
@@ -178,7 +178,7 @@ const Light: React.FC<LightProps> = ({ objects, onAddObject, onStatusChange, add
             }
 
             setIsUpdating(id);
-            console.log(`Updating light ${id} with new values`);
+            // console.log(`Updating light ${id} with new values`);
 
             const response = await updateObject(id, {
                 nom: newName,
@@ -189,7 +189,7 @@ const Light: React.FC<LightProps> = ({ objects, onAddObject, onStatusChange, add
                 valeur_actuelle: newBrightness // Using valeur_actuelle to store brightness
             });
 
-            console.log('Update successful:', response);
+            // console.log('Update successful:', response);
             onStatusChange?.();
             setObjectToEdit(null);
         } catch (error: any) {
@@ -241,7 +241,7 @@ const Light: React.FC<LightProps> = ({ objects, onAddObject, onStatusChange, add
         try {
             setIsDeleting(objectToDelete);
             const response = await deleteObject(objectToDelete);
-            console.log('Delete successful:', response);
+            // console.log('Delete successful:', response);
             onStatusChange?.();
         } catch (error: any) {
             console.error('Error deleting object:', error);
@@ -423,7 +423,7 @@ const Light: React.FC<LightProps> = ({ objects, onAddObject, onStatusChange, add
                                         </div>
 
                                         <div>
-                                            <label className="block text-xs font-medium text-gray-600 dark:text-gray-400 mb-1">Consommation (kW)</label>
+                                            <label className="block text-xs font-medium text-gray-600 dark:text-gray-400 mb-1">Consommation (kWh)</label>
                                             <input
                                                 type="number"
                                                 value={newConsumption}
@@ -572,7 +572,7 @@ const Light: React.FC<LightProps> = ({ objects, onAddObject, onStatusChange, add
                                                 </div>
                                                 <div className="space-y-1">
                                                     <p className="text-xs text-gray-500 dark:text-gray-400">Consommation</p>
-                                                    <p className="font-medium text-gray-700 dark:text-gray-300">{light.consomation || 0} kW</p>
+                                                    <p className="font-medium text-gray-700 dark:text-gray-300">{light.consomation || 0} kWh</p>
                                                 </div>
                                                 <div className="space-y-1">
                                                     <p className="text-xs text-gray-500 dark:text-gray-400">Maintenance</p>

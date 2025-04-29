@@ -108,7 +108,33 @@ const ConnectedObjects: React.FC<ConnectedObjectsProps> = ({ prisonId, addPoints
         setNewObjectY(0);
         setNewObjectState('off');
         setNewConnection('wifi');
-        setNewConsumption(0);
+        
+        // Définir une consommation par défaut en fonction du type d'objet
+        let defaultConsumption = 0;
+        switch(fixedType) {
+            case 'porte': 
+        defaultConsumption = 1;
+            break;
+        case 'lumiere': 
+            defaultConsumption = 0.5;
+            break;
+        case 'camera': 
+            defaultConsumption = 0.2;
+            break;
+        case 'thermostat': 
+            defaultConsumption = 0.1;
+            break;
+        case 'ventilation': 
+            defaultConsumption = 2;
+            break;
+        case "paneau d'affichage": 
+            defaultConsumption = 4;
+            break;
+        default:
+            defaultConsumption = 1; // Valeur par défaut générale
+        }
+        setNewConsumption(defaultConsumption);
+        
         setNewDurability(100);
         setNewTargetValue(22);
         setError(null);
@@ -137,21 +163,21 @@ const ConnectedObjects: React.FC<ConnectedObjectsProps> = ({ prisonId, addPoints
         setError(null);
 
         // Debug logging
-        console.log(`Creating ${addingObjectType} with state: ${newObjectState}`);
-        console.log(`State label: ${newObjectState === 'on' ? (addingObjectType === 'porte' ? 'Fermée' : 'Activé') : (addingObjectType === 'porte' ? 'Ouverte' : 'Désactivé')}`);
+        // console.log(`Creating ${addingObjectType} with state: ${newObjectState}`);
+        // console.log(`State label: ${newObjectState === 'on' ? (addingObjectType === 'porte' ? 'Fermée' : 'Activé') : (addingObjectType === 'porte' ? 'Ouverte' : 'Désactivé')}`);
 
         try {
             // Assurons-nous que l'ID de la prison actuelle est utilisé et non écrasé
             const prisonId = currentPrisonId || '';
-            console.log('Création d\'un objet pour la prison:', prisonId);
+            // console.log('Création d\'un objet pour la prison:', prisonId);
 
             // Pour être sûr de débugger le problème
             if (localStorage.getItem('userPrison') !== prisonId || localStorage.getItem('selectedPrison') !== prisonId) {
-                console.warn('Attention: l\'ID de prison actuel ne correspond pas au localStorage:', {
-                    'currentPrisonId': prisonId,
-                    'localStorage.userPrison': localStorage.getItem('userPrison'),
-                    'localStorage.selectedPrison': localStorage.getItem('selectedPrison')
-                });
+                // console.warn('Attention: l\'ID de prison actuel ne correspond pas au localStorage:', {
+                //     'currentPrisonId': prisonId,
+                //     'localStorage.userPrison': localStorage.getItem('userPrison'),
+                //     'localStorage.selectedPrison': localStorage.getItem('selectedPrison')
+                // });
 
                 // Forcer la mise à jour du localStorage pour éviter des conflits futurs
                 if (prisonId) {
@@ -227,7 +253,7 @@ const ConnectedObjects: React.FC<ConnectedObjectsProps> = ({ prisonId, addPoints
     const handleToggleState = async (id: number, currentState: 'on' | 'off') => {
         try {
             const response = await toggleObjectState(id, currentState);
-            console.log('Toggle successful:', response);
+            // console.log('Toggle successful:', response);
 
             // Ajouter des points à l'utilisateur pour chaque interaction
             if (addPoints) {
