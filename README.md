@@ -52,7 +52,7 @@ Bienvenue dans ce projet de développement web combinant **Django** pour le back
 
 - Python 3.10+
 - Node.js + npm
-- `virtualenv` (ou équivalent)
+- Virtualenv (venv pour python)
 - Git
 
 ---
