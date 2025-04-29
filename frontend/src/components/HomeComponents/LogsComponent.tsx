@@ -1,6 +1,6 @@
 import React, { useEffect, useState } from 'react';
 import axios from 'axios';
-import { LayoutGrid, Activity, RefreshCw, ClipboardList, Filter, Calendar, ChevronLeft, ChevronRight, ArrowUpDown, ArrowUp, ArrowDown, User } from 'lucide-react';
+import { LayoutGrid, Activity, RefreshCw, ClipboardList, Filter, Calendar, ChevronLeft, ChevronRight, ArrowUpDown, ArrowUp, ArrowDown, User, Search } from 'lucide-react';
 
 interface ObjetLog {
     id: number;
@@ -64,6 +64,7 @@ const LogsComponent: React.FC<{ prisonId: string }> = ({ prisonId }) => {
     const [filterObject, setFilterObject] = useState<string>('');
     const [filterAction, setFilterAction] = useState<string>('');
     const [filterUser, setFilterUser] = useState<string>('');
+    const [searchTerm, setSearchTerm] = useState<string>('');
     
     const fetchLogs = async () => {
         try {
@@ -168,6 +169,19 @@ const LogsComponent: React.FC<{ prisonId: string }> = ({ prisonId }) => {
             } else if (filterUser === 'system') {
                 objectLogsFiltered = objectLogsFiltered.filter(log => !log.user);
             }
+            
+            // Appliquer le filtre de recherche globale si présent
+            if (searchTerm) {
+                const searchLower = searchTerm.toLowerCase();
+                objectLogsFiltered = objectLogsFiltered.filter(log => 
+                    (log.nom && log.nom.toLowerCase().includes(searchLower)) ||
+                    (log.type && log.type.toLowerCase().includes(searchLower)) ||
+                    (log.etat && log.etat.toLowerCase().includes(searchLower)) ||
+                    (log.commentaire && log.commentaire.toLowerCase().includes(searchLower)) ||
+                    (log.user_info?.username && log.user_info.username.toLowerCase().includes(searchLower)) ||
+                    (log.user_info?.full_name && log.user_info.full_name.toLowerCase().includes(searchLower))
+                );
+            }
 
             result = [...result, ...objectLogsFiltered];
         }
@@ -201,6 +215,17 @@ const LogsComponent: React.FC<{ prisonId: string }> = ({ prisonId }) => {
             if (filterUser && filterUser !== 'system') {
                 userLogsFiltered = userLogsFiltered.filter(log => 
                     log.user_info?.id.toString() === filterUser
+                );
+            }
+            
+            // Appliquer le filtre de recherche globale si présent
+            if (searchTerm) {
+                const searchLower = searchTerm.toLowerCase();
+                userLogsFiltered = userLogsFiltered.filter(log => 
+                    (log.action && log.action.toLowerCase().includes(searchLower)) ||
+                    (log.user_info?.username && log.user_info.username.toLowerCase().includes(searchLower)) ||
+                    (log.user_info?.full_name && log.user_info.full_name.toLowerCase().includes(searchLower)) ||
+                    (translateUserAction(log.action).toLowerCase().includes(searchLower))
                 );
             }
 
@@ -253,7 +278,7 @@ const LogsComponent: React.FC<{ prisonId: string }> = ({ prisonId }) => {
         setFilteredLogs(result);
         // Reset to first page when filters change
         setCurrentPage(1);
-    }, [objectLogs, userLogs, activeLogType, sortColumn, sortDirection, filterType, filterObject, filterAction, filterUser, prisonId]);
+    }, [objectLogs, userLogs, activeLogType, sortColumn, sortDirection, filterType, filterObject, filterAction, filterUser, prisonId, searchTerm]);
 
     useEffect(() => {
         fetchLogs();
@@ -491,6 +516,28 @@ const LogsComponent: React.FC<{ prisonId: string }> = ({ prisonId }) => {
 
             {/* Filter section */}
             <div className="mb-6 p-3 bg-gray-50 dark:bg-gray-800/50 border border-gray-200 dark:border-gray-700 rounded-lg shadow-sm">
+                {/* Barre de recherche globale */}
+                <div className="mb-3 w-full">
+                    <div className="relative">
+                        <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-gray-500 dark:text-gray-400" />
+                        <input
+                            type="text"
+                            placeholder="Rechercher dans les logs..."
+                            value={searchTerm}
+                            onChange={(e) => setSearchTerm(e.target.value)}
+                            className="w-full pl-10 pr-4 py-2 text-sm text-gray-800 dark:text-gray-200 bg-white dark:bg-gray-700 border border-gray-300 dark:border-gray-600 rounded-md shadow-sm focus:outline-none focus:ring-indigo-500 focus:border-indigo-500"
+                        />
+                        {searchTerm && (
+                            <button
+                                onClick={() => setSearchTerm('')}
+                                className="absolute right-3 top-1/2 transform -translate-y-1/2 text-gray-400 hover:text-gray-600 dark:hover:text-gray-300"
+                            >
+                                ×
+                            </button>
+                        )}
+                    </div>
+                </div>
+                
                 <div className="flex flex-wrap items-center gap-2 w-full">
                     <div className="flex items-center mr-2 whitespace-nowrap">
                         <Filter className="h-4 w-4 text-indigo-500 mr-1" />
@@ -589,7 +636,8 @@ const LogsComponent: React.FC<{ prisonId: string }> = ({ prisonId }) => {
                         ))}
                     </select>
 
-                    {(filterType || filterObject || filterAction || filterUser) && (
+                    {/* Bouton de réinitialisation des filtres */}
+                    {(filterType || filterObject || filterAction || filterUser || searchTerm) && (
                         <button
                             onClick={() => {
                                 // Ne réinitialiser que les filtres pertinents pour la vue active
@@ -599,16 +647,19 @@ const LogsComponent: React.FC<{ prisonId: string }> = ({ prisonId }) => {
                                     setFilterObject('');
                                     setFilterAction('');
                                     setFilterUser('');
+                                    setSearchTerm('');
                                 } else if (activeLogType === 'user') {
                                     // Pour la vue utilisateurs, réinitialiser uniquement les filtres d'utilisateurs
                                     setFilterAction('');
                                     setFilterUser('');
+                                    setSearchTerm('');
                                 } else {
                                     // Pour la vue "tous", réinitialiser tous les filtres
                                     setFilterType('');
                                     setFilterObject('');
                                     setFilterAction('');
                                     setFilterUser('');
+                                    setSearchTerm('');
                                 }
                             }}
                             className="whitespace-nowrap px-3 py-1.5 text-sm text-red-600 dark:text-red-400 bg-red-50 dark:bg-red-900/20 border border-red-200 dark:border-red-800/30 rounded-md hover:bg-red-100 dark:hover:bg-red-900/30 transition-colors"
