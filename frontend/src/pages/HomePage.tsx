@@ -292,16 +292,33 @@ export default function HomePage({ children }: { children?: React.ReactNode }) {
     };
   }, [prisonId]);
 
-  const handleLogout = () => {
-    // Nettoyer les données de session
-    localStorage.removeItem('sessionToken');
-    localStorage.removeItem('authToken');
-    localStorage.removeItem('userRole');
-    localStorage.removeItem('userPrison');
-    localStorage.removeItem('selectedPrison');
-
-    navigate('/login');
-  };
+  const handleLogout = async () => {
+    try {
+        // Récupérer le token d'authentification
+        const token = localStorage.getItem('sessionToken');
+        
+        // Appeler l'API pour enregistrer la déconnexion si un token existe
+        if (token) {
+            await fetch('http://localhost:8000/api/logout/', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                    'Authorization': `Bearer ${token}`
+                }
+            });
+        }
+    } catch (error) {
+        console.error("Erreur lors de l'enregistrement de la déconnexion:", error);
+    } finally {
+        // Nettoyer les données de session
+        localStorage.removeItem('sessionToken');
+        localStorage.removeItem('authToken');
+        localStorage.removeItem('userRole');
+        localStorage.removeItem('userPrison');
+        localStorage.removeItem('selectedPrison');
+        navigate('/login');
+    }
+};
 
   const handleChangePrison = () => {
     navigate('/prison-selection');

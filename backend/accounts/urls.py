@@ -3,7 +3,7 @@ from rest_framework.routers import DefaultRouter
 from .views import CustomUserViewSet, register
 from . import views
 from .views import RegisterView
-from .views import StaffView , add_point
+from .views import StaffView , add_point , log_logout
 from .utils import send_contact_email
 
 router = DefaultRouter()
@@ -29,6 +29,7 @@ urlpatterns = [
     path('update-user-prison/', views.update_user_prison, name='update-user-prison'),
     path('Userslogs/', UserActivityLogListView.as_view(), name='api_logs'),
     path('contact/', send_contact_email, name='contact_email'),
+    path('logout/', views.log_logout, name='api_logout'),
     
     # Routes pour la gestion des prisons
     path('prisons/', PrisonListView.as_view(), name='prison-list'),

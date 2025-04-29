@@ -625,3 +625,13 @@ class PrisonDetailView(APIView):
         # Suppression de la prison
         prison.delete()
         return Response(status=status.HTTP_204_NO_CONTENT)
+
+@api_view(['POST'])
+@permission_classes([IsAuthenticated])
+def log_logout(request):
+    """Endpoint pour enregistrer la déconnexion d'un utilisateur"""
+    UserActivityLog.objects.create(
+        user=request.user,
+        action='logout'
+    )
+    return Response({'detail': 'Déconnexion enregistrée avec succès'})
