@@ -181,7 +181,7 @@ export default function ContactPage() {
                         <div>
                           <h3 className="font-medium text-green-200">Téléphone</h3>
                           <a href="tel:+33123456789" className="text-gray-300 hover:text-green-300 transition-colors">
-                            +33 1 23 45 67 89
+                            +212 6 11 21 43 18
                           </a>
                         </div>
                       </motion.div>
@@ -196,8 +196,8 @@ export default function ContactPage() {
                         <div>
                           <h3 className="font-medium text-green-200">Adresse</h3>
                           <address className="not-italic text-gray-300">
-                            123 Avenue de la Sécurité<br />
-                            75008 Paris<br />
+                            Avenue du Parc<br />
+                            95000 Cergy-Pontoise<br />
                             France
                           </address>
                         </div>

@@ -62,7 +62,7 @@ export default function TermsPage() {
             </ul>
             
             <p className="text-base leading-relaxed mt-4">
-              Pour toute question, contactez <a href="mailto:email@securesync.com" className="text-green-500 hover:text-green-600">email@securesync.com</a>
+              Pour toute question, contactez <a href="mailto:email@securesync.com" className="text-green-500 hover:text-green-600">securesynccytech@gmail.com</a>
               <br />
               En date du : {new Date().toLocaleDateString('fr-FR')}
             </p>
