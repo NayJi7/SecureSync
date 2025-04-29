@@ -14,37 +14,33 @@ Bienvenue dans ce projet de développement web combinant **Django** pour le back
 
 ## 📁 Structure du projet
 
-.
-└── SecureSync
-    ├── backend
-    │   ├── accounts
-    │   ├── backend
-    │   ├── db.sqlite3
-    │   ├── manage.py
-    │   ├── media
-    │   ├── object
-    │   ├── requirements.txt
-    │   └── statistique
-    ├── frontend
-    │   ├── components.json
-    │   ├── index.html
-    │   ├── jsrepo.json
-    │   ├── node_modules
-    │   ├── package.json
-    │   ├── public
-    │   ├── src
-    │   ├── tailwind.config.ts
-    │   ├── tsconfig.app.json
-    │   ├── tsconfig.json
-    │   ├── tsconfig.node.json
-    │   └── vite.config.ts
-    ├── node_modules
-    ├── package.json
-    ├── README.md
-    └── venv
+SecureSync/
+├── backend/           
+│   ├── manage.py
+│   ├── db.sqlite3
+│   ├── requirements.txt
+│   ├── media/
+│   ├── object/
+│   ├── statistique/
+│   ├── accounts/
+│   └── backend/        
+│
+├── frontend/          
+│   ├── src/
+│   ├── public/
+│   ├── index.html
+│   ├── package.json
+│   ├── tailwind.config.ts
+│   ├── tsconfig*.json
+│   ├── vite.config.ts
+│   └── node_modules/   
+│
+├── node_modules
+├── package.json
+├── README.md
+└── venv/    
 
 70 directories, 20 files
-
 
 ---
 
