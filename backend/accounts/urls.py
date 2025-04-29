@@ -15,7 +15,6 @@ from .views import LoginAPIView, VerifyOTPView, ResendOTPView, UserActivityLogLi
 
 urlpatterns = [
     path('login/', LoginAPIView.as_view(), name='login'),
-    path('register/', register, name='register'),  # Celle-ci n'a pas de préfixe 'api/', on la garde telle quelle
     path('verify-otp/', VerifyOTPView.as_view(), name='verify-otp'),
     path('resend-otp/', ResendOTPView.as_view(), name='resend-otp'),
     path('register/', RegisterView.as_view(), name='register'),
