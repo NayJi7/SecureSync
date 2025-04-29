@@ -2,20 +2,17 @@
 
 Bienvenue dans ce projet de développement web combinant **Django** pour le backend et **React + Vite + TypeScript** pour le frontend.
 
----
-
 ## 🚀 Stack Technique
 
 - 🐍 **Backend** : Django (Python)
-- ⚛️ **Frontend** : React (avec TypeScript) 
+- ⚛️ **Frontend** : React (avec TypeScript)
 - ⚙️ **Bundler** : Vite
-
----
 
 ## 📁 Structure du projet
 
+```
 SecureSync/
-├── backend/           
+├── backend/
 │   ├── manage.py
 │   ├── db.sqlite3
 │   ├── requirements.txt
@@ -23,9 +20,9 @@ SecureSync/
 │   ├── object/
 │   ├── statistique/
 │   ├── accounts/
-│   └── backend/        
+│   └── backend/
 │
-├── frontend/          
+├── frontend/
 │   ├── src/
 │   ├── public/
 │   ├── index.html
@@ -33,16 +30,13 @@ SecureSync/
 │   ├── tailwind.config.ts
 │   ├── tsconfig*.json
 │   ├── vite.config.ts
-│   └── node_modules/   
+│   └── node_modules/
 │
 ├── node_modules
 ├── package.json
 ├── README.md
-└── venv/    
-
-70 directories, 20 files
-
----
+└── venv/
+```
 
 ## 🔧 Pré-requis
 
@@ -50,8 +44,6 @@ SecureSync/
 - Node.js + npm
 - Virtualenv (venv pour python)
 - Git
-
----
 
 ## 🛠 Installation & Lancement
 
@@ -62,38 +54,49 @@ git clone https://github.com/ton-utilisateur/ton-projet.git
 cd SecureSync
 ```
 
-2. Activer l'environnement virtuel Python
+### 2. Activer l'environnement virtuel Python
+
 ```bash
 source env/bin/activate
 # ou sous Windows
 env\Scripts\activate
 ```
-3. Installer les dépendances Python (avec pip)
+
+### 3. Installer les dépendances Python (avec pip)
 
 ```bash
-cd backend 
+cd backend
 pip install -r requirements.txt
 cd ..
 ```
-4. Installer les dépendances Node (avec npm)
+
+### 4. Installer les dépendances Node (avec npm)
+
 ```bash
 cd frontend
 npm install
 ```
 
-5. Lancer le backend Django + le frontend React avec Vite
+### 5. Lancer le backend Django + le frontend React avec Vite
 
 ```bash
-npm run dev # dans le dossier frontend
+# Démarrer le backend (dans un terminal)
+cd backend
+python manage.py runserver
+
+# Démarrer le frontend (dans un autre terminal)
+cd frontend
+npm run dev
 ```
-🌍 Accès à l'application
 
-    Backend (API) : http://localhost:8000/admin
-    Frontend (UI) : http://localhost:5173/
+## 🌍 Accès à l'application
 
-💪 Contributeur 
+- Backend (API) : http://localhost:8000/admin
+- Frontend (UI) : http://localhost:5173/
 
-Anthony Voisin
-Adam Terrak
-Mehdi Sekkat
-Firas Benmansour
+## 💪 Contributeurs
+
+- Anthony Voisin
+- Adam Terrak
+- Mehdi Sekkat
+- Firas Benmansour
