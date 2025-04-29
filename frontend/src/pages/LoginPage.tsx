@@ -460,280 +460,386 @@ export default function LoginPage() {
 
 
   return (
-    <div className="relative w-full h-screen overflow-hidden bg-black flex flex-col md:flex-row items-center justify-center">
-      {/* Squares Background Section */}
-      <div className="absolute inset-0 w-full h-full z-0">
-        <Squares
-          speed={0.3}
-          squareSize={50}
-          direction='diagonal' // up, down, left, right, diagonal
+    <div className="relative w-full min-h-screen overflow-y-auto bg-black flex items-center justify-center">
+      {/* Main content container with fixed padding */}
+      <div className="w-full py-16 px-4 flex flex-col md:flex-row items-center justify-center">
+        {/* Squares Background Section */}
+        <div className="absolute inset-0 w-full h-full z-0">
+          <Squares
+            speed={0.3}
+            squareSize={50}
+            direction='diagonal' // up, down, left, right, diagonal
+          />
+        </div>
 
-        />
-      </div>
-
-      {/* Title and Subtitle Section */}
-      <div className="w-full md:w-1/2 lg:w-2/5 flex items-center justify-center p-8 md:p-12 order-2 md:order-1 z-10">
-        <div className="max-w-xl relative">
-          {/* Decorative element */}
-          <div className="absolute -left-6 top-0 w-1 h-20 bg-gradient-to-b from-green-400 to-green-700 rounded-full"></div>
-
-          <motion.div
-            initial={{ opacity: 0 }}
-            animate={{ opacity: 1 }}
-            transition={{ duration: 1 }}
-          >
-            <motion.h1
-              initial={{ opacity: 0, y: 30 }}
-              animate={{ opacity: 1, y: 0 }}
-              transition={{
-                duration: 0.7,
-                delay: 0.2,
-                ease: [0.25, 0.1, 0.25, 1.0]
-              }}
-              className="text-5xl md:text-6xl lg:text-7xl font-bold text-white leading-tight mb-6"
-            >
-              <span className="inline-block mb-2">
-                <span className="bg-clip-text text-transparent bg-gradient-to-r from-white to-green-300">SecureSync</span>
-              </span>
-              <br />
-              <span className="inline-block text-[2.5rem] md:text-5xl lg:text-6xl text-neutral-200 font-semibold mt-1">
-                Gestion Pénitentiaire
-              </span>
-            </motion.h1>
+        {/* Title and Subtitle Section */}
+        <div className="w-full md:w-1/2 lg:w-2/5 flex items-center justify-center p-8 md:p-12 order-1 z-10 my-6 md:my-0">
+          <div className="max-w-xl relative">
+            {/* Decorative element */}
+            <div className="absolute -left-6 top-0 w-1 h-20 bg-gradient-to-b from-green-400 to-green-700 rounded-full"></div>
 
             <motion.div
-              initial={{ width: 0 }}
-              animate={{ width: '40%' }}
-              transition={{ duration: 0.8, delay: 0.9 }}
-              className="h-1 bg-gradient-to-r from-green-500 to-green-900 rounded-full mb-8"
-            />
-
-            <motion.p
-              initial={{ opacity: 0, y: 20 }}
-              animate={{ opacity: 1, y: 0 }}
-              transition={{
-                duration: 0.7,
-                delay: 1.0,
-                ease: "easeOut"
-              }}
-              className="text-base md:text-xl text-neutral-300 leading-relaxed max-w-lg"
+              initial={{ opacity: 0 }}
+              animate={{ opacity: 1 }}
+              transition={{ duration: 1 }}
             >
-              <span className="text-green-300 font-medium">Contrôle complet</span> et surveillance des établissements pénitentiaires avec protocoles de sécurité renforcés.
-              <br /><br />
-              <span className="opacity-90">Une solution moderne pour une gestion efficace et sécurisée.</span>
-            </motion.p>
-          </motion.div>
+              <motion.h1
+                initial={{ opacity: 0, y: 30 }}
+                animate={{ opacity: 1, y: 0 }}
+                transition={{
+                  duration: 0.7,
+                  delay: 0.2,
+                  ease: [0.25, 0.1, 0.25, 1.0]
+                }}
+                className="text-5xl md:text-6xl lg:text-7xl font-bold text-white leading-tight mb-6"
+              >
+                <span className="inline-block mb-2">
+                  <span className="bg-clip-text text-transparent bg-gradient-to-r from-white to-green-300">SecureSync</span>
+                </span>
+                <br />
+                <span className="inline-block text-[2.5rem] md:text-5xl lg:text-6xl text-neutral-200 font-semibold mt-1">
+                  Gestion Pénitentiaire
+                </span>
+              </motion.h1>
+
+              <motion.div
+                initial={{ width: 0 }}
+                animate={{ width: '40%' }}
+                transition={{ duration: 0.8, delay: 0.9 }}
+                className="h-1 bg-gradient-to-r from-green-500 to-green-900 rounded-full mb-8"
+              />
+
+              <motion.p
+                initial={{ opacity: 0, y: 20 }}
+                animate={{ opacity: 1, y: 0 }}
+                transition={{
+                  duration: 0.7,
+                  delay: 1.0,
+                  ease: "easeOut"
+                }}
+                className="text-base md:text-xl text-neutral-300 leading-relaxed max-w-lg"
+              >
+                <span className="text-green-300 font-medium">Contrôle complet</span> et surveillance des établissements pénitentiaires avec protocoles de sécurité renforcés.
+                <br /><br />
+                <span className="opacity-90">Une solution moderne pour une gestion efficace et sécurisée.</span>
+              </motion.p>
+            </motion.div>
+          </div>
         </div>
-      </div>
 
-      <div className="absolute top-4 right-4 z-50">
-        <motion.button
-          onClick={() => navigate('/')}
-          className="cursor-pointer p-3 rounded-full bg-black/50 transition-all duration-300 ease-in-out transform hover:bg-black/70 hover:scale-110 hover:rotate-12 hover:shadow-[0_0_15px_rgba(255,255,255,0.3)] group"
-          whileHover={{ scale: 1.1, rotate: 12 }}
-          whileTap={{ scale: 0.95 }}
-        >
-          <Home className="w-6 h-6 text-white transition-transform duration-300 group-hover:-rotate-12" />
-        </motion.button>
-      </div>
+        <div className="absolute top-4 right-4 z-50">
+          <motion.button
+            onClick={() => navigate('/')}
+            className="cursor-pointer p-3 rounded-full bg-black/50 transition-all duration-300 ease-in-out transform hover:bg-black/70 hover:scale-110 hover:rotate-12 hover:shadow-[0_0_15px_rgba(255,255,255,0.3)] group"
+            whileHover={{ scale: 1.1, rotate: 12 }}
+            whileTap={{ scale: 0.95 }}
+          >
+            <Home className="w-6 h-6 text-white transition-transform duration-300 group-hover:-rotate-12" />
+          </motion.button>
+        </div>
 
-      {/* Login Form Section - Adjusted for responsiveness */}
-      <div className="relative w-full md:w-1/2 lg:w-3/5 h-full flex items-center justify-center z-40 order-1 md:order-2">
-        <div className="relative h-full flex items-center justify-center w-full">
-          <div className="w-full max-w-2xl mx-8">
-            <AnimatePresence mode="wait">
-              {authStep === 'login' ? (
-                <motion.div
-                  key="login"
-                  initial={{ opacity: 0 }}
-                  animate={{ opacity: 1 }}
-                  exit={{ opacity: 0 }}
-                  transition={{ duration: 0.3, ease: "easeInOut" }}
-                  className="w-full"
-                >
-                  <SpotlightCard
-                    className="w-full bg-black/40 border border-green-900/30 shadow-[0_0_30px_rgba(45,161,51,0.1)]"
-                    spotlightColor="rgba(45, 161, 51, 0.2)"
+        {/* Login Form Section - Adjusted for responsiveness */}
+        <div className="relative w-full md:w-1/2 lg:w-3/5 h-full flex items-center justify-center z-40 order-2 my-6 md:my-0">
+          <div className="relative h-full flex items-center justify-center w-full">
+            <div className="w-full max-w-2xl mx-8">
+              <AnimatePresence mode="wait">
+                {authStep === 'login' ? (
+                  <motion.div
+                    key="login"
+                    initial={{ opacity: 0 }}
+                    animate={{ opacity: 1 }}
+                    exit={{ opacity: 0 }}
+                    transition={{ duration: 0.3, ease: "easeInOut" }}
+                    className="w-full"
                   >
-                    <motion.form
-                      className="flex flex-col gap-6 w-[90%] mx-auto py-8"
-                      onSubmit={handleSubmit}
-                      variants={formVariants}
-                      initial="hidden"
-                      animate="visible"
+                    <SpotlightCard
+                      className="w-full bg-black/40 border border-green-900/30 shadow-[0_0_30px_rgba(45,161,51,0.1)]"
+                      spotlightColor="rgba(45, 161, 51, 0.2)"
                     >
-                      <div className="text-center space-y-2">
-                        <h2 className="text-4x4 md:text-4xl mb-6 text-white/85 font-bold ">
-                          Connexion
-                        </h2>
-                      </div>
+                      <motion.form
+                        className="flex flex-col gap-6 w-[90%] mx-auto py-8"
+                        onSubmit={handleSubmit}
+                        variants={formVariants}
+                        initial="hidden"
+                        animate="visible"
+                      >
+                        <div className="text-center space-y-2">
+                          <h2 className="text-4x4 md:text-4xl mb-6 text-white/85 font-bold ">
+                            Connexion
+                          </h2>
+                        </div>
 
-                      <Separator className="bg-green-900/50" />
+                        <Separator className="bg-green-900/50" />
 
-                      {apiError && (
-                        <motion.div
-                          initial={{ opacity: 0, y: -10 }}
-                          animate={{ opacity: 1, y: 0 }}
-                          className="bg-red-500/20 border border-red-500 text-red-100 px-4 py-2 rounded-md"
-                        >
-                          {apiError}
+                        {apiError && (
+                          <motion.div
+                            initial={{ opacity: 0, y: -10 }}
+                            animate={{ opacity: 1, y: 0 }}
+                            className="bg-red-500/20 border border-red-500 text-red-100 px-4 py-2 rounded-md"
+                          >
+                            {apiError}
+                          </motion.div>
+                        )}
+
+                        <motion.div variants={inputVariants}>
+                          <div className="relative z-0 w-full mb-2 group">
+                            <input
+                              type="text"
+                              id="username"
+                              className="block py-2.5 px-0 w-full text-sm bg-transparent border-0 border-b-2 border-green-900/50 appearance-none text-white dark:border-green-600 focus:border-green-500 focus:outline-none focus:ring-0 peer"
+                              placeholder=" "
+                              value={username}
+                              onChange={(e) => setUsername(e.target.value)}
+                              required
+                            />
+                            <label
+                              htmlFor="username"
+                              className="peer-focus:font-medium absolute text-sm text-white/80 duration-300 transform -translate-y-6 scale-75 top-3 -z-10 origin-[0] peer-focus:start-0 peer-focus:text-green-500 peer-placeholder-shown:scale-100 peer-placeholder-shown:translate-y-0 peer-focus:scale-75 peer-focus:-translate-y-6"
+                            >
+                              Nom d'utilisateur
+                            </label>
+                            {usernameError && (
+                              <motion.p
+                                initial={{ opacity: 0, y: -5 }}
+                                animate={{ opacity: 1, y: 0 }}
+                                className="text-red-500 text-sm mt-1"
+                              >
+                                {usernameError}
+                              </motion.p>
+                            )}
+                          </div>
                         </motion.div>
-                      )}
 
-                      <motion.div variants={inputVariants}>
-                        <div className="relative z-0 w-full mb-2 group">
-                          <input
-                            type="text"
-                            id="username"
-                            className="block py-2.5 px-0 w-full text-sm bg-transparent border-0 border-b-2 border-green-900/50 appearance-none text-white dark:border-green-600 focus:border-green-500 focus:outline-none focus:ring-0 peer"
-                            placeholder=" "
-                            value={username}
-                            onChange={(e) => setUsername(e.target.value)}
-                            required
-                          />
-                          <label
-                            htmlFor="username"
-                            className="peer-focus:font-medium absolute text-sm text-white/80 duration-300 transform -translate-y-6 scale-75 top-3 -z-10 origin-[0] peer-focus:start-0 peer-focus:text-green-500 peer-placeholder-shown:scale-100 peer-placeholder-shown:translate-y-0 peer-focus:scale-75 peer-focus:-translate-y-6"
-                          >
-                            Nom d'utilisateur
-                          </label>
-                          {usernameError && (
-                            <motion.p
-                              initial={{ opacity: 0, y: -5 }}
-                              animate={{ opacity: 1, y: 0 }}
-                              className="text-red-500 text-sm mt-1"
+                        <motion.div variants={inputVariants}>
+                          <div className="relative z-0 w-full mb-2 group">
+                            <input
+                              type="email"
+                              id="email"
+                              className="block py-2.5 px-0 w-full text-sm bg-transparent border-0 border-b-2 border-green-900/50 appearance-none text-white dark:border-green-600 focus:border-green-500 focus:outline-none focus:ring-0 peer"
+                              placeholder=" "
+                              value={email}
+                              onChange={(e) => setEmail(e.target.value)}
+                              required
+                            />
+                            <label
+                              htmlFor="email"
+                              className="peer-focus:font-medium absolute text-sm text-white/80 duration-300 transform -translate-y-6 scale-75 top-3 -z-10 origin-[0] peer-focus:start-0 peer-focus:text-green-500 peer-placeholder-shown:scale-100 peer-placeholder-shown:translate-y-0 peer-focus:scale-75 peer-focus:-translate-y-6"
                             >
-                              {usernameError}
-                            </motion.p>
-                          )}
-                        </div>
-                      </motion.div>
+                              Votre email
+                            </label>
+                            {emailError && (
+                              <motion.p
+                                initial={{ opacity: 0, y: -5 }}
+                                animate={{ opacity: 1, y: 0 }}
+                                className="text-red-500 text-sm mt-1"
+                              >
+                                {emailError}
+                              </motion.p>
+                            )}
+                          </div>
+                        </motion.div>
 
-                      <motion.div variants={inputVariants}>
-                        <div className="relative z-0 w-full mb-2 group">
-                          <input
-                            type="email"
-                            id="email"
-                            className="block py-2.5 px-0 w-full text-sm bg-transparent border-0 border-b-2 border-green-900/50 appearance-none text-white dark:border-green-600 focus:border-green-500 focus:outline-none focus:ring-0 peer"
-                            placeholder=" "
-                            value={email}
-                            onChange={(e) => setEmail(e.target.value)}
-                            required
-                          />
-                          <label
-                            htmlFor="email"
-                            className="peer-focus:font-medium absolute text-sm text-white/80 duration-300 transform -translate-y-6 scale-75 top-3 -z-10 origin-[0] peer-focus:start-0 peer-focus:text-green-500 peer-placeholder-shown:scale-100 peer-placeholder-shown:translate-y-0 peer-focus:scale-75 peer-focus:-translate-y-6"
-                          >
-                            Votre email
-                          </label>
-                          {emailError && (
-                            <motion.p
-                              initial={{ opacity: 0, y: -5 }}
-                              animate={{ opacity: 1, y: 0 }}
-                              className="text-red-500 text-sm mt-1"
+                        <motion.div variants={inputVariants}>
+                          <div className="relative z-0 w-full mb-2 group">
+                            <input
+                              type={showPassword ? "text" : "password"}
+                              id="password2"
+                              className="block py-2.5 px-0 w-full text-sm bg-transparent border-0 border-b-2 border-green-900/50 appearance-none text-white dark:border-green-600 focus:border-green-500 focus:outline-none focus:ring-0 peer"
+                              placeholder=" "
+                              value={password}
+                              onChange={(e) => setPassword(e.target.value)}
+                              required
+                            />
+                            <label
+                              htmlFor="password2"
+                              className="peer-focus:font-medium absolute text-sm text-white/80 duration-300 transform -translate-y-6 scale-75 top-3 -z-10 origin-[0] peer-focus:start-0 peer-focus:text-green-500 peer-placeholder-shown:scale-100 peer-placeholder-shown:translate-y-0 peer-focus:scale-75 peer-focus:-translate-y-6"
                             >
-                              {emailError}
-                            </motion.p>
-                          )}
-                        </div>
-                      </motion.div>
-
-                      <motion.div variants={inputVariants}>
-                        <div className="relative z-0 w-full mb-2 group">
-                          <input
-                            type={showPassword ? "text" : "password"}
-                            id="password2"
-                            className="block py-2.5 px-0 w-full text-sm bg-transparent border-0 border-b-2 border-green-900/50 appearance-none text-white dark:border-green-600 focus:border-green-500 focus:outline-none focus:ring-0 peer"
-                            placeholder=" "
-                            value={password}
-                            onChange={(e) => setPassword(e.target.value)}
-                            required
-                          />
-                          <label
-                            htmlFor="password2"
-                            className="peer-focus:font-medium absolute text-sm text-white/80 duration-300 transform -translate-y-6 scale-75 top-3 -z-10 origin-[0] peer-focus:start-0 peer-focus:text-green-500 peer-placeholder-shown:scale-100 peer-placeholder-shown:translate-y-0 peer-focus:scale-75 peer-focus:-translate-y-6"
-                          >
-                            Votre mot de passe
-                          </label>
-                          <motion.button
-                            type="button"
-                            className="absolute right-0 top-2 text-gray-400 hover:text-gray-100 cursor-pointer transition-colors duration-300"
-                            onClick={() => setShowPassword(!showPassword)}
-                            whileHover={{ scale: 1.1 }}
-                            whileTap={{ scale: 0.95 }}
-                            tabIndex={-1}
-                          >
-                            {showPassword ? <LuEye className="pointer-events-none" size={18} /> : <LuEyeClosed className="pointer-events-none" size={18} />}
-                          </motion.button>
-                        </div>
-                      </motion.div>
-
-                      <motion.div variants={inputVariants}>
-                        <div className="relative z-0 w-full mb-2 group">
-                          <input
-                            type={showRepeatPassword ? "text" : "password"}
-                            id="repeat-password"
-                            className="block py-2.5 px-0 w-full text-sm bg-transparent border-0 border-b-2 border-green-900/50 appearance-none text-white dark:border-green-600 focus:border-green-500 focus:outline-none focus:ring-0 peer"
-                            placeholder=" "
-                            value={repeatPassword}
-                            onChange={(e) => setRepeatPassword(e.target.value)}
-                            required
-                          />
-                          <label
-                            htmlFor="repeat-password"
-                            className="peer-focus:font-medium absolute text-sm text-white/80 duration-300 transform -translate-y-6 scale-75 top-3 -z-10 origin-[0] peer-focus:start-0 peer-focus:text-green-500 peer-placeholder-shown:scale-100 peer-placeholder-shown:translate-y-0 peer-focus:scale-75 peer-focus:-translate-y-6"
-                          >
-                            Répéter le mot de passe
-                          </label>
-                          <motion.button
-                            type="button"
-                            className="absolute right-0 top-2 text-gray-400 hover:text-gray-100 cursor-pointer transition-colors duration-300"
-                            onClick={() => setShowRepeatPassword(!showRepeatPassword)}
-                            whileHover={{ scale: 1.1 }}
-                            whileTap={{ scale: 0.95 }}
-                            tabIndex={-1}
-                          >
-                            {showRepeatPassword ? <LuEye className="pointer-events-none" size={18} /> : <LuEyeClosed className="pointer-events-none" size={18} />}
-                          </motion.button>
-                          {passwordError && (
-                            <motion.p
-                              initial={{ opacity: 0, y: -5 }}
-                              animate={{ opacity: 1, y: 0 }}
-                              className="text-red-500 text-sm mt-1"
+                              Votre mot de passe
+                            </label>
+                            <motion.button
+                              type="button"
+                              className="absolute right-0 top-2 text-gray-400 hover:text-gray-100 cursor-pointer transition-colors duration-300"
+                              onClick={() => setShowPassword(!showPassword)}
+                              whileHover={{ scale: 1.1 }}
+                              whileTap={{ scale: 0.95 }}
+                              tabIndex={-1}
                             >
-                              {passwordError}
-                            </motion.p>
-                          )}
-                        </div>
-                      </motion.div>
+                              {showPassword ? <LuEye className="pointer-events-none" size={18} /> : <LuEyeClosed className="pointer-events-none" size={18} />}
+                            </motion.button>
+                          </div>
+                        </motion.div>
 
-                      <motion.div variants={inputVariants} className="flex items-center gap-2 pt-4 w-full justify-center">
-                        <div className="flex items-center gap-2 whitespace-nowrap min-w-max">
-                          {acceptedTerms && (
-                            <motion.div whileHover={{ scale: 1.1 }} whileTap={{ scale: 0.95 }}>
-                              <Check className="w-4 h-4 text-green-500" />
-                            </motion.div>
-                          )}
-                          <motion.button
-                            type="button"
-                            className="text-sm text-green-400 hover:text-green-300 hover:underline transition-colors duration-300"
-                            onClick={() => setOpenModal(true)}
-                            whileHover={{ scale: 1.05 }}
+                        <motion.div variants={inputVariants}>
+                          <div className="relative z-0 w-full mb-2 group">
+                            <input
+                              type={showRepeatPassword ? "text" : "password"}
+                              id="repeat-password"
+                              className="block py-2.5 px-0 w-full text-sm bg-transparent border-0 border-b-2 border-green-900/50 appearance-none text-white dark:border-green-600 focus:border-green-500 focus:outline-none focus:ring-0 peer"
+                              placeholder=" "
+                              value={repeatPassword}
+                              onChange={(e) => setRepeatPassword(e.target.value)}
+                              required
+                            />
+                            <label
+                              htmlFor="repeat-password"
+                              className="peer-focus:font-medium absolute text-sm text-white/80 duration-300 transform -translate-y-6 scale-75 top-3 -z-10 origin-[0] peer-focus:start-0 peer-focus:text-green-500 peer-placeholder-shown:scale-100 peer-placeholder-shown:translate-y-0 peer-focus:scale-75 peer-focus:-translate-y-6"
+                            >
+                              Répéter le mot de passe
+                            </label>
+                            <motion.button
+                              type="button"
+                              className="absolute right-0 top-2 text-gray-400 hover:text-gray-100 cursor-pointer transition-colors duration-300"
+                              onClick={() => setShowRepeatPassword(!showRepeatPassword)}
+                              whileHover={{ scale: 1.1 }}
+                              whileTap={{ scale: 0.95 }}
+                              tabIndex={-1}
+                            >
+                              {showRepeatPassword ? <LuEye className="pointer-events-none" size={18} /> : <LuEyeClosed className="pointer-events-none" size={18} />}
+                            </motion.button>
+                            {passwordError && (
+                              <motion.p
+                                initial={{ opacity: 0, y: -5 }}
+                                animate={{ opacity: 1, y: 0 }}
+                                className="text-red-500 text-sm mt-1"
+                              >
+                                {passwordError}
+                              </motion.p>
+                            )}
+                          </div>
+                        </motion.div>
+
+                        <motion.div variants={inputVariants} className="flex items-center gap-2 pt-4 w-full justify-center">
+                          <div className="flex items-center gap-2 whitespace-nowrap min-w-max">
+                            {acceptedTerms && (
+                              <motion.div whileHover={{ scale: 1.1 }} whileTap={{ scale: 0.95 }}>
+                                <Check className="w-4 h-4 text-green-500" />
+                              </motion.div>
+                            )}
+                            <motion.button
+                              type="button"
+                              className="text-sm text-green-400 hover:text-green-300 hover:underline transition-colors duration-300"
+                              onClick={() => setOpenModal(true)}
+                              whileHover={{ scale: 1.05 }}
+                            >
+                              Conditions d'utilisation
+                            </motion.button>
+                          </div>
+                        </motion.div>
+
+                        <motion.div variants={inputVariants}>
+                          <motion.div
+                            whileHover={{ scale: 1.02 }}
+                            whileTap={{ scale: 0.98 }}
                           >
-                            Conditions d'utilisation
-                          </motion.button>
+                            <Button
+                              className={`w-full bg-green-600 hover:bg-green-700 text-white font-semibold cursor-pointer transition-all duration-300 ${(!acceptedTerms || !username || !password || !repeatPassword || !email || isLoading) ? 'opacity-50 cursor-not-allowed' : ''}`}
+                              type="submit"
+                              disabled={!acceptedTerms || !username || !password || !repeatPassword || !email || isLoading}
+                            >
+                              {isLoading ? (
+                                <div className="flex items-center justify-center">
+                                  <div className="w-5 h-5 border-2 border-white border-t-transparent rounded-full animate-spin mr-2"></div>
+                                  <span>Chargement...</span>
+                                </div>
+                              ) : (
+                                <span className="flex items-center justify-center">
+                                  <MdOutlineLogin className="mr-2" /> Se connecter
+                                </span>
+                              )}
+                            </Button>
+                          </motion.div>
+                        </motion.div>
+                      </motion.form>
+                    </SpotlightCard>
+                  </motion.div>
+                ) : (
+                  <motion.div
+                    key="verify"
+                    initial={{ opacity: 0 }}
+                    animate={{ opacity: 1 }}
+                    exit={{ opacity: 0 }}
+                    transition={{ duration: 0.3, ease: "easeInOut" }}
+                    className="w-full"
+                  >
+                    <SpotlightCard
+                      className="w-full bg-black/40 border border-green-900/30 shadow-[0_0_30px_rgba(45,161,51,0.1)]"
+                      spotlightColor="rgba(45, 161, 51, 0.2)"
+                    >
+                      <motion.form
+                        className="flex flex-col gap-6 w-[90%] mx-auto py-8"
+                        onSubmit={(e) => {
+                          e.preventDefault();
+                          if (otpCode.length === 6 && !isLoading) {
+                            handleVerifyOTP();
+                          }
+                        }}
+                        initial="hidden"
+                        animate="visible"
+                        variants={formVariants}
+                      >
+                        <div className="text-center space-y-2">
+                          <h2 className="text-2xl md:text-4xl mb-6 text-white/85 font-bold">
+                            Vérification
+                          </h2>
                         </div>
-                      </motion.div>
 
-                      <motion.div variants={inputVariants}>
-                        <motion.div
-                          whileHover={{ scale: 1.02 }}
-                          whileTap={{ scale: 0.98 }}
-                        >
+                        <Separator className="bg-green-900/50" />
+
+                        {apiError && (
+                          <motion.div
+                            initial={{ opacity: 0, y: -10 }}
+                            animate={{ opacity: 1, y: 0 }}
+                            className="bg-red-500/20 border border-red-500 text-red-100 px-4 py-2 rounded-md"
+                          >
+                            {apiError}
+                          </motion.div>
+                        )}
+
+                        <motion.div variants={inputVariants}>
+                          <div className="text-center text-white text-base md:text-lg mb-4">
+                            Un code de vérification a été envoyé à <span className='font-bold'>{email}</span>
+                          </div>
+                          <div className="flex justify-center w-full">
+                            <InputOTP
+                              maxLength={6}
+                              className="gap-2"
+                              value={otpCode}
+                              onChange={handleOTPChange}
+                              onKeyDown={(e) => {
+                                if (e.key === 'Enter' && otpCode.length === 6 && !isLoading) {
+                                  e.preventDefault();
+                                  handleVerifyOTP();
+                                }
+                              }}
+                            >
+                              <InputOTPGroup>
+                                <InputOTPSlot index={0} />
+                                <InputOTPSlot index={1} />
+                                <InputOTPSlot index={2} />
+                              </InputOTPGroup>
+                              <InputOTPSeparator />
+                              <InputOTPGroup>
+                                <InputOTPSlot index={3} />
+                                <InputOTPSlot index={4} />
+                                <InputOTPSlot index={5} />
+                              </InputOTPGroup>
+                            </InputOTP>
+                          </div>
+                        </motion.div>
+
+                        <motion.div className="flex flex-col items-center gap-4">
+                          <button
+                            className={`text-green-400 text-sm ${resendDisabled ? 'opacity-50 cursor-not-allowed' : 'cursor-pointer hover:underline hover:text-green-300'}`}
+                            onClick={handleResendCode}
+                            disabled={resendDisabled}
+                          >
+                            {resendDisabled ? `Veuillez patienter avant de réessayer (${countdown}s)` : 'Renvoyer le code'}
+                          </button>
                           <Button
-                            className={`w-full bg-green-600 hover:bg-green-700 text-white font-semibold cursor-pointer transition-all duration-300 ${(!acceptedTerms || !username || !password || !repeatPassword || !email || isLoading) ? 'opacity-50 cursor-not-allowed' : ''}`}
+                            className={`w-full bg-green-600 hover:bg-green-700 text-white font-semibold cursor-pointer transition-all duration-300 ${(otpCode.length !== 6 || isLoading) ? 'opacity-50 cursor-not-allowed' : ''}`}
+                            onClick={handleVerifyOTP}
+                            disabled={otpCode.length !== 6 || isLoading}
                             type="submit"
-                            disabled={!acceptedTerms || !username || !password || !repeatPassword || !email || isLoading}
                           >
                             {isLoading ? (
                               <div className="flex items-center justify-center">
@@ -742,210 +848,106 @@ export default function LoginPage() {
                               </div>
                             ) : (
                               <span className="flex items-center justify-center">
-                                <MdOutlineLogin className="mr-2" /> Se connecter
+                                <ArrowRight className="mr-2 text-white" /> <p className='text-white'>Vérifier</p>
                               </span>
                             )}
                           </Button>
                         </motion.div>
-                      </motion.div>
-                    </motion.form>
-                  </SpotlightCard>
-                </motion.div>
-              ) : (
-                <motion.div
-                  key="verify"
-                  initial={{ opacity: 0 }}
-                  animate={{ opacity: 1 }}
-                  exit={{ opacity: 0 }}
-                  transition={{ duration: 0.3, ease: "easeInOut" }}
-                  className="w-full"
-                >
-                  <SpotlightCard
-                    className="w-full bg-black/40 border border-green-900/30 shadow-[0_0_30px_rgba(45,161,51,0.1)]"
-                    spotlightColor="rgba(45, 161, 51, 0.2)"
-                  >
-                    <motion.form
-                      className="flex flex-col gap-6 w-[90%] mx-auto py-8"
-                      onSubmit={(e) => {
-                        e.preventDefault();
-                        if (otpCode.length === 6 && !isLoading) {
-                          handleVerifyOTP();
-                        }
-                      }}
-                      initial="hidden"
-                      animate="visible"
-                      variants={formVariants}
-                    >
-                      <div className="text-center space-y-2">
-                        <h2 className="text-2xl md:text-4xl mb-6 text-white/85 font-bold">
-                          Vérification
-                        </h2>
-                      </div>
-
-                      <Separator className="bg-green-900/50" />
-
-                      {apiError && (
-                        <motion.div
-                          initial={{ opacity: 0, y: -10 }}
-                          animate={{ opacity: 1, y: 0 }}
-                          className="bg-red-500/20 border border-red-500 text-red-100 px-4 py-2 rounded-md"
-                        >
-                          {apiError}
-                        </motion.div>
-                      )}
-
-                      <motion.div variants={inputVariants}>
-                        <div className="text-center text-white text-base md:text-lg mb-4">
-                          Un code de vérification a été envoyé à <span className='font-bold'>{email}</span>
-                        </div>
-                        <div className="flex justify-center w-full">
-                          <InputOTP
-                            maxLength={6}
-                            className="gap-2"
-                            value={otpCode}
-                            onChange={handleOTPChange}
-                            onKeyDown={(e) => {
-                              if (e.key === 'Enter' && otpCode.length === 6 && !isLoading) {
-                                e.preventDefault();
-                                handleVerifyOTP();
-                              }
-                            }}
-                          >
-                            <InputOTPGroup>
-                              <InputOTPSlot index={0} />
-                              <InputOTPSlot index={1} />
-                              <InputOTPSlot index={2} />
-                            </InputOTPGroup>
-                            <InputOTPSeparator />
-                            <InputOTPGroup>
-                              <InputOTPSlot index={3} />
-                              <InputOTPSlot index={4} />
-                              <InputOTPSlot index={5} />
-                            </InputOTPGroup>
-                          </InputOTP>
-                        </div>
-                      </motion.div>
-
-                      <motion.div className="flex flex-col items-center gap-4">
-                        <button
-                          className={`text-green-400 text-sm ${resendDisabled ? 'opacity-50 cursor-not-allowed' : 'cursor-pointer hover:underline hover:text-green-300'}`}
-                          onClick={handleResendCode}
-                          disabled={resendDisabled}
-                        >
-                          {resendDisabled ? `Veuillez patienter avant de réessayer (${countdown}s)` : 'Renvoyer le code'}
-                        </button>
-                        <Button
-                          className={`w-full bg-green-600 hover:bg-green-700 text-white font-semibold cursor-pointer transition-all duration-300 ${(otpCode.length !== 6 || isLoading) ? 'opacity-50 cursor-not-allowed' : ''}`}
-                          onClick={handleVerifyOTP}
-                          disabled={otpCode.length !== 6 || isLoading}
-                          type="submit"
-                        >
-                          {isLoading ? (
-                            <div className="flex items-center justify-center">
-                              <div className="w-5 h-5 border-2 border-white border-t-transparent rounded-full animate-spin mr-2"></div>
-                              <span>Chargement...</span>
-                            </div>
-                          ) : (
-                            <span className="flex items-center justify-center">
-                              <ArrowRight className="mr-2 text-white" /> <p className='text-white'>Vérifier</p>
-                            </span>
-                          )}
-                        </Button>
-                      </motion.div>
-                    </motion.form>
-                  </SpotlightCard>
-                </motion.div>
-              )}
-            </AnimatePresence>
+                      </motion.form>
+                    </SpotlightCard>
+                  </motion.div>
+                )}
+              </AnimatePresence>
+            </div>
           </div>
         </div>
-      </div>
 
-      {/* Terms and Conditions */}
-      {openModal && (
-        <motion.div
-          initial={{ opacity: 0 }}
-          animate={{ opacity: 1 }}
-          exit={{ opacity: 0 }}
-          onClick={() => setOpenModal(false)}
-          className="fixed inset-0 z-[100] flex items-center justify-center bg-black/40 backdrop-blur-md p-4 overflow-y-auto"
-          style={{ pointerEvents: 'auto' }}
-        >
+        {/* Terms and Conditions */}
+        {openModal && (
           <motion.div
-            initial={{ scale: 0.9, opacity: 0, y: 20 }}
-            animate={{ scale: 1, opacity: 1, y: 0 }}
-            exit={{ scale: 0.95, opacity: 0, y: 10 }}
-            transition={{ type: "spring", bounce: 0.25 }}
-            onClick={(e) => e.stopPropagation()}
-            className="w-full max-w-2xl relative z-[110]"
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            exit={{ opacity: 0 }}
+            onClick={() => setOpenModal(false)}
+            className="fixed inset-0 z-[100] flex items-center justify-center bg-black/40 backdrop-blur-md p-4 overflow-y-auto"
+            style={{ pointerEvents: 'auto' }}
           >
-            <SpotlightCard
-              className="w-full bg-black/40 border border-green-900/30 shadow-[0_0_30px_rgba(45,161,51,0.1)]"
-              spotlightColor="rgba(45, 161, 51, 0.2)"
+            <motion.div
+              initial={{ scale: 0.9, opacity: 0, y: 20 }}
+              animate={{ scale: 1, opacity: 1, y: 0 }}
+              exit={{ scale: 0.95, opacity: 0, y: 10 }}
+              transition={{ type: "spring", bounce: 0.25 }}
+              onClick={(e) => e.stopPropagation()}
+              className="w-full max-w-2xl relative z-[110]"
             >
-              <div className="flex flex-col w-full">
-                {/* Header */}
-                <div className="flex items-start justify-between px-5 pt-5 border-b border-green-900/30">
-                  <h3 className="text-xl font-semibold text-white/70 mb-2 ">Conditions d'utilisation</h3>
-                  <button
-                    className="text-gray-400 hover:text-white"
-                    onClick={() => setOpenModal(false)}
-                  >
-                    <X className="w-5 h-5" />
-                  </button>
-                </div>
+              <SpotlightCard
+                className="w-full bg-black/40 border border-green-900/30 shadow-[0_0_30px_rgba(45,161,51,0.1)]"
+                spotlightColor="rgba(45, 161, 51, 0.2)"
+              >
+                <div className="flex flex-col w-full">
+                  {/* Header */}
+                  <div className="flex items-start justify-between px-5 pt-5 border-b border-green-900/30">
+                    <h3 className="text-xl font-semibold text-white/70 mb-2 ">Conditions d'utilisation</h3>
+                    <button
+                      className="text-gray-400 hover:text-white"
+                      onClick={() => setOpenModal(false)}
+                    >
+                      <X className="w-5 h-5" />
+                    </button>
+                  </div>
 
-                {/* Body */}
-                <div className="p-6 space-y-6">
-                  <div className="space-y-6">
-                    <p className="text-base leading-relaxed text-gray-300">
-                      En utilisant l'application SecureSync de gestion intelligente de prison, vous acceptez les conditions suivantes :
-                    </p>
-                    <ul className="list-disc pl-6 space-y-2 text-gray-300">
-                      <li>L'application est réservée au personnel autorisé des établissements pénitentiaires.</li>
-                      <li>Chaque utilisateur est responsable de la confidentialité de ses identifiants.</li>
-                      <li>L'utilisation des données doit respecter le RGPD et les lois sur la protection des données.</li>
-                      <li>Les données des détenus sont strictement confidentielles.</li>
-                      <li>Nous vous informerons immédiatement de toute violation de données conformément au RGPD.</li>
-                      <li>L'application est fournie "telle quelle" sans garantie d'absence d'erreurs.</li>
-                      <li>Des mises à jour seront effectuées régulièrement pour améliorer la sécurité.</li>
-                      <li>L'accès peut être révoqué en cas de non-respect de ces conditions.</li>
-                    </ul>
-                    <p className="text-base leading-relaxed text-gray-300 mt-4">
-                      Pour toute question, contactez <a href="mailto:securesynccytech@gmail.com" className="text-green-500 hover:text-green-400 transition-colors duration-300">securesynccytech@gmail.com</a>
-                      <br />
-                      En date du : {new Date().toLocaleDateString('fr-FR')}
-                    </p>
+                  {/* Body */}
+                  <div className="p-6 space-y-6">
+                    <div className="space-y-6">
+                      <p className="text-base leading-relaxed text-gray-300">
+                        En utilisant l'application SecureSync de gestion intelligente de prison, vous acceptez les conditions suivantes :
+                      </p>
+                      <ul className="list-disc pl-6 space-y-2 text-gray-300">
+                        <li>L'application est réservée au personnel autorisé des établissements pénitentiaires.</li>
+                        <li>Chaque utilisateur est responsable de la confidentialité de ses identifiants.</li>
+                        <li>L'utilisation des données doit respecter le RGPD et les lois sur la protection des données.</li>
+                        <li>Les données des détenus sont strictement confidentielles.</li>
+                        <li>Nous vous informerons immédiatement de toute violation de données conformément au RGPD.</li>
+                        <li>L'application est fournie "telle quelle" sans garantie d'absence d'erreurs.</li>
+                        <li>Des mises à jour seront effectuées régulièrement pour améliorer la sécurité.</li>
+                        <li>L'accès peut être révoqué en cas de non-respect de ces conditions.</li>
+                      </ul>
+                      <p className="text-base leading-relaxed text-gray-300 mt-4">
+                        Pour toute question, contactez <a href="mailto:securesynccytech@gmail.com" className="text-green-500 hover:text-green-400 transition-colors duration-300">securesynccytech@gmail.com</a>
+                        <br />
+                        En date du : {new Date().toLocaleDateString('fr-FR')}
+                      </p>
+                    </div>
+                  </div>
+
+                  {/* Footer */}
+                  <div className="flex items-center space-x-2 px-5 py-4 border-t border-green-900/30">
+                    <Button
+                      className='bg-green-900/60 hover:bg-green-900/80 text-white font-semibold cursor-pointer border border-green-500/50'
+                      onClick={() => {
+                        setAcceptedTerms(true);
+                        setOpenModal(false);
+                      }}
+                    >
+                      J'accepte
+                    </Button>
+                    <Button
+                      className='bg-black/40 border border-white/70 text-white hover:bg-white/80 hover:border-white hover:text-black cursor-pointer'
+                      variant="outline"
+                      onClick={() => {
+                        setAcceptedTerms(false);
+                        setOpenModal(false);
+                      }}
+                    >
+                      Je refuse
+                    </Button>
                   </div>
                 </div>
-
-                {/* Footer */}
-                <div className="flex items-center space-x-2 px-5 py-4 border-t border-green-900/30">
-                  <Button
-                    className='bg-green-900/60 hover:bg-green-900/80 text-white font-semibold cursor-pointer border border-green-500/50'
-                    onClick={() => {
-                      setAcceptedTerms(true);
-                      setOpenModal(false);
-                    }}
-                  >
-                    J'accepte
-                  </Button>
-                  <Button
-                    className='bg-black/40 border border-white/70 text-white hover:bg-white/80 hover:border-white hover:text-black cursor-pointer'
-                    variant="outline"
-                    onClick={() => {
-                      setAcceptedTerms(false);
-                      setOpenModal(false);
-                    }}
-                  >
-                    Je refuse
-                  </Button>
-                </div>
-              </div>
-            </SpotlightCard>
+              </SpotlightCard>
+            </motion.div>
           </motion.div>
-        </motion.div>
-      )}
+        )}
+      </div>
     </div>
   );
 }

@@ -327,205 +327,196 @@ export default function AboutPage() {
                         <p className="mt-2 text-gray-300">Objectif d'expansion internationale et développement de nouvelles solutions</p>
                       </div>
                     </motion.div>
+                  </div>
                 </motion.div>
-            </div>
-          </motion.div>
-        </motion.div>
-      </section>
+              </section>
 
-      {/* Section Mission et Valeurs */}
-      <section className="mb-20">
-        <motion.div
-          className="grid grid-cols-1 md:grid-cols-2 gap-8"
-          initial={{ opacity: 0, y: 30 }}
-          whileInView={{ opacity: 1, y: 0 }}
-          transition={{ duration: 0.7 }}
-          viewport={{ once: true, amount: 0.1 }}
-        >
-          <motion.div
-            className="backdrop-blur-md bg-black/40 p-8 rounded-lg border border-green-900/30"
-            initial={{ opacity: 0, x: -30 }}
-            whileInView={{ opacity: 1, x: 0 }}
-            transition={{ duration: 0.6, delay: 0.2 }}
-            viewport={{ once: true }}
-          >
-            <motion.div
-              className="w-12 h-12 bg-green-900/30 rounded-full flex items-center justify-center mb-4"
-              initial={{ scale: 0 }}
-              whileInView={{ scale: 1, rotate: [0, 360] }}
-              transition={{ duration: 0.6, delay: 0.4 }}
-              viewport={{ once: true }}
-            >
-              <Landmark className="h-6 w-6 text-green-400" />
-            </motion.div>
-            <motion.h2
-              className="text-2xl font-semibold mb-4 text-green-300"
-              initial={{ opacity: 0 }}
-              whileInView={{ opacity: 1 }}
-              transition={{ duration: 0.5, delay: 0.5 }}
-              viewport={{ once: true }}
-            >
-              Notre Mission
-            </motion.h2>
-            <motion.p
-              className="text-gray-300"
-              initial={{ opacity: 0 }}
-              whileInView={{ opacity: 1 }}
-              transition={{ duration: 0.6, delay: 0.6 }}
-              viewport={{ once: true }}
-            >
-              Transformer la gestion des établissements pénitentiaires grâce à des technologies de pointe,
-              en améliorant la sécurité, l'efficacité opérationnelle et les conditions de travail du personnel,
-              tout en contribuant à un environnement plus sûr pour tous.
-            </motion.p>
-          </motion.div>
+              {/* Section Mission et Valeurs */}
+              <section className="mb-20">
+                <motion.div
+                  className="grid grid-cols-1 md:grid-cols-2 gap-8"
+                  initial={{ opacity: 0, y: 30 }}
+                  whileInView={{ opacity: 1, y: 0 }}
+                  transition={{ duration: 0.7 }}
+                  viewport={{ once: true, amount: 0.1 }}
+                >
+                  <motion.div
+                    className="backdrop-blur-md bg-black/40 p-8 rounded-lg border border-green-900/30"
+                    initial={{ opacity: 0, x: -30 }}
+                    whileInView={{ opacity: 1, x: 0 }}
+                    transition={{ duration: 0.6, delay: 0.2 }}
+                    viewport={{ once: true }}
+                  >
+                    <motion.div
+                      className="w-12 h-12 bg-green-900/30 rounded-full flex items-center justify-center mb-4"
+                      initial={{ scale: 0 }}
+                      whileInView={{ scale: 1, rotate: [0, 360] }}
+                      transition={{ duration: 0.6, delay: 0.4 }}
+                      viewport={{ once: true }}
+                    >
+                      <Landmark className="h-6 w-6 text-green-400" />
+                    </motion.div>
+                    <motion.h2
+                      className="text-2xl font-semibold mb-4 text-green-300"
+                      initial={{ opacity: 0 }}
+                      whileInView={{ opacity: 1 }}
+                      transition={{ duration: 0.5, delay: 0.5 }}
+                      viewport={{ once: true }}
+                    >
+                      Notre Mission
+                    </motion.h2>
+                    <motion.p
+                      className="text-gray-300"
+                      initial={{ opacity: 0 }}
+                      whileInView={{ opacity: 1 }}
+                      transition={{ duration: 0.6, delay: 0.6 }}
+                      viewport={{ once: true }}
+                    >
+                      Transformer la gestion des établissements pénitentiaires grâce à des technologies de pointe,
+                      en améliorant la sécurité, l'efficacité opérationnelle et les conditions de travail du personnel,
+                      tout en contribuant à un environnement plus sûr pour tous.
+                    </motion.p>
+                  </motion.div>
 
-          <motion.div
-            className="backdrop-blur-md bg-black/40 p-8 rounded-lg border border-green-900/30"
-            initial={{ opacity: 0, x: 30 }}
-            whileInView={{ opacity: 1, x: 0 }}
-            transition={{ duration: 0.6, delay: 0.3 }}
-            viewport={{ once: true }}
-          >
-            <motion.div
-              className="w-12 h-12 bg-green-900/30 rounded-full flex items-center justify-center mb-4"
-              initial={{ scale: 0 }}
-              whileInView={{ scale: 1, rotate: [0, 360] }}
-              transition={{ duration: 0.6, delay: 0.5 }}
-              viewport={{ once: true }}
-            >
-              <Award className="h-6 w-6 text-green-400" />
-            </motion.div>
-            <motion.h2
-              className="text-2xl font-semibold mb-4 text-green-300"
-              initial={{ opacity: 0 }}
-              whileInView={{ opacity: 1 }}
-              transition={{ duration: 0.5, delay: 0.6 }}
-              viewport={{ once: true }}
-            >
-              Notre Vision
-            </motion.h2>
-            <motion.p
-              className="text-gray-300"
-              initial={{ opacity: 0 }}
-              whileInView={{ opacity: 1 }}
-              transition={{ duration: 0.6, delay: 0.7 }}
-              viewport={{ once: true }}
-            >
-              Devenir le leader mondial des solutions technologiques pour établissements pénitentiaires,
-              en établissant de nouvelles normes en matière de sécurité numérique, d'innovation et de
-              gestion efficace des établissements correctionnels.
-            </motion.p>
-          </motion.div>
-        </motion.div>
+                  <motion.div
+                    className="backdrop-blur-md bg-black/40 p-8 rounded-lg border border-green-900/30"
+                    initial={{ opacity: 0, x: 30 }}
+                    whileInView={{ opacity: 1, x: 0 }}
+                    transition={{ duration: 0.6, delay: 0.3 }}
+                    viewport={{ once: true }}
+                  >
+                    <motion.div
+                      className="w-12 h-12 bg-green-900/30 rounded-full flex items-center justify-center mb-4"
+                      initial={{ scale: 0 }}
+                      whileInView={{ scale: 1, rotate: [0, 360] }}
+                      transition={{ duration: 0.6, delay: 0.5 }}
+                      viewport={{ once: true }}
+                    >
+                      <Award className="h-6 w-6 text-green-400" />
+                    </motion.div>
+                    <motion.h2
+                      className="text-2xl font-semibold mb-4 text-green-300"
+                      initial={{ opacity: 0 }}
+                      whileInView={{ opacity: 1 }}
+                      transition={{ duration: 0.5, delay: 0.6 }}
+                      viewport={{ once: true }}
+                    >
+                      Notre Vision
+                    </motion.h2>
+                    <motion.p
+                      className="text-gray-300"
+                      initial={{ opacity: 0 }}
+                      whileInView={{ opacity: 1 }}
+                      transition={{ duration: 0.6, delay: 0.7 }}
+                      viewport={{ once: true }}
+                    >
+                      Devenir le leader mondial des solutions technologiques pour établissements pénitentiaires,
+                      en établissant de nouvelles normes en matière de sécurité numérique, d'innovation et de
+                      gestion efficace des établissements correctionnels.
+                    </motion.p>
+                  </motion.div>
+                </motion.div>
 
-        <motion.div
-          className="backdrop-blur-md bg-black/40 p-8 rounded-lg border border-green-900/30 mt-8"
-          initial={{ opacity: 0, y: 30 }}
-          whileInView={{ opacity: 1, y: 0 }}
-          transition={{ duration: 0.7, delay: 0.4 }}
-          viewport={{ once: true, amount: 0.1 }}
-        >
-          <motion.h2
-            className="text-2xl font-semibold mb-6 text-green-300"
-            initial={{ opacity: 0 }}
-            whileInView={{ opacity: 1 }}
-            transition={{ duration: 0.4, delay: 0.6 }}
-            viewport={{ once: true }}
-          >
-            Nos Valeurs
-          </motion.h2>
-          <motion.div
-            className="grid grid-cols-1 md:grid-cols-2 gap-x-12 gap-y-8"
-            initial="hidden"
-            whileInView="visible"
-            variants={staggerChildrenVariants}
-            viewport={{ once: true }}
-          >
-            <motion.div className="flex" variants={fadeInVariants}>
-              <motion.div
-                className="flex-shrink-0 mr-4"
-                initial={{ scale: 0 }}
-                whileInView={{ scale: 1 }}
-                transition={{ duration: 0.4, delay: 0.7 }}
-                viewport={{ once: true }}
-              >
-                <CheckCircle className="h-6 w-6 text-green-400" />
-              </motion.div>
-            </motion.div>
-            <div>
-              <h3 className="text-xl font-medium mb-2 text-green-200">Sécurité</h3>
-              <p className="text-gray-300">
-                La sécurité est au cœur de tout ce que nous faisons, de la conception de nos produits à leur déploiement.
-              </p>
-            </div>
-          </motion.div>
+                <motion.div
+                  className="backdrop-blur-md bg-black/40 p-8 rounded-lg border border-green-900/30 mt-8"
+                  initial={{ opacity: 0, y: 30 }}
+                  whileInView={{ opacity: 1, y: 0 }}
+                  transition={{ duration: 0.7, delay: 0.4 }}
+                  viewport={{ once: true, amount: 0.1 }}
+                >
+                  <motion.h2
+                    className="text-2xl font-semibold mb-6 text-green-300"
+                    initial={{ opacity: 0 }}
+                    whileInView={{ opacity: 1 }}
+                    transition={{ duration: 0.4, delay: 0.6 }}
+                    viewport={{ once: true }}
+                  >
+                    Nos Valeurs
+                  </motion.h2>
+                  <motion.div
+                    className="grid grid-cols-1 md:grid-cols-2 gap-x-12 gap-y-8"
+                    initial="hidden"
+                    whileInView="visible"
+                    variants={staggerChildrenVariants}
+                    viewport={{ once: true }}
+                  >
+                    <motion.div className="flex" variants={fadeInVariants}>
+                      <motion.div
+                        className="flex-shrink-0 mr-4"
+                        initial={{ scale: 0 }}
+                        whileInView={{ scale: 1 }}
+                        transition={{ duration: 0.4, delay: 0.7 }}
+                        viewport={{ once: true }}
+                      >
+                        <CheckCircle className="h-6 w-6 text-green-400" />
+                      </motion.div>
+                    </motion.div>
+                    <div>
+                      <h3 className="text-xl font-medium mb-2 text-green-200">Sécurité</h3>
+                      <p className="text-gray-300">
+                        La sécurité est au cœur de tout ce que nous faisons, de la conception de nos produits à leur déploiement.
+                      </p>
+                    </div>
 
-          <motion.div className="flex" variants={fadeInVariants}>
-            <motion.div
-              className="flex-shrink-0 mr-4"
-              initial={{ scale: 0 }}
-              whileInView={{ scale: 1 }}
-              transition={{ duration: 0.4, delay: 0.8 }}
-              viewport={{ once: true }}
-            >
-              <CheckCircle className="h-6 w-6 text-green-400" />
-            </motion.div>
-          </motion.div>
-          <div>
-            <h3 className="text-xl font-medium mb-2 text-green-200">Innovation</h3>
-            <p className="text-gray-300">
-              Nous repoussons constamment les limites de la technologie pour créer des solutions toujours plus efficaces.
-            </p>
-          </div>
-        </motion.div>
+                    <motion.div className="flex" variants={fadeInVariants}>
+                      <motion.div
+                        className="flex-shrink-0 mr-4"
+                        initial={{ scale: 0 }}
+                        whileInView={{ scale: 1 }}
+                        transition={{ duration: 0.4, delay: 0.8 }}
+                        viewport={{ once: true }}
+                      >
+                        <CheckCircle className="h-6 w-6 text-green-400" />
+                      </motion.div>
+                    </motion.div>
+                    <div>
+                      <h3 className="text-xl font-medium mb-2 text-green-200">Innovation</h3>
+                      <p className="text-gray-300">
+                        Nous repoussons constamment les limites de la technologie pour créer des solutions toujours plus efficaces.
+                      </p>
+                    </div>
 
-        <motion.div className="flex" variants={fadeInVariants}>
-          <motion.div
-            className="flex-shrink-0 mr-4"
-            initial={{ scale: 0 }}
-            whileInView={{ scale: 1 }}
-            transition={{ duration: 0.4, delay: 0.9 }}
-            viewport={{ once: true }}
-          >
-            <CheckCircle className="h-6 w-6 text-green-400" />
-          </motion.div>
-        </motion.div>
-        <div>
-          <h3 className="text-xl font-medium mb-2 text-green-200">Intégrité</h3>
-          <p className="text-gray-300">
-            Nous agissons avec honnêteté et transparence dans toutes nos interactions avec nos clients et partenaires.
-          </p>
-        </div>
-      </motion.div>
+                    <motion.div className="flex" variants={fadeInVariants}>
+                      <motion.div
+                        className="flex-shrink-0 mr-4"
+                        initial={{ scale: 0 }}
+                        whileInView={{ scale: 1 }}
+                        transition={{ duration: 0.4, delay: 0.9 }}
+                        viewport={{ once: true }}
+                      >
+                        <CheckCircle className="h-6 w-6 text-green-400" />
+                      </motion.div>
+                    </motion.div>
+                    <div>
+                      <h3 className="text-xl font-medium mb-2 text-green-200">Intégrité</h3>
+                      <p className="text-gray-300">
+                        Nous agissons avec honnêteté et transparence dans toutes nos interactions avec nos clients et partenaires.
+                      </p>
+                    </div>
 
-      <motion.div className="flex" variants={fadeInVariants}>
-        <motion.div
-          className="flex-shrink-0 mr-4"
-          initial={{ scale: 0 }}
-          whileInView={{ scale: 1 }}
-          transition={{ duration: 0.4, delay: 1.0 }}
-          viewport={{ once: true }}
-        >
-          <CheckCircle className="h-6 w-6 text-green-400" />
-        </motion.div>
-      </motion.div>
-      <div>
-        <h3 className="text-xl font-medium mb-2 text-green-200">Excellence</h3>
-        <p className="text-gray-300">
-          Nous nous efforçons d'atteindre l'excellence dans tous les aspects de notre travail, du développement au support client.
-        </p>
-      </div>
-    </motion.div>
-                  </motion.div >
-                </motion.div >
-                    </motion.div >
-                  </motion.div >
-                </motion.div >
-              </section >
+                    <motion.div className="flex" variants={fadeInVariants}>
+                      <motion.div
+                        className="flex-shrink-0 mr-4"
+                        initial={{ scale: 0 }}
+                        whileInView={{ scale: 1 }}
+                        transition={{ duration: 0.4, delay: 1.0 }}
+                        viewport={{ once: true }}
+                      >
+                        <CheckCircle className="h-6 w-6 text-green-400" />
+                      </motion.div>
+                    </motion.div>
+                    <div>
+                      <h3 className="text-xl font-medium mb-2 text-green-200">Excellence</h3>
+                      <p className="text-gray-300">
+                        Nous nous efforçons d'atteindre l'excellence dans tous les aspects de notre travail, du développement au support client.
+                      </p>
+                    </div>
+                  </motion.div>
+                </motion.div>
+              </section>
 
-    {/* Section Équipe */ }
-    < section className = "mb-20" >
+              {/* Section Équipe */}
+              <section className="mb-20">
                 <motion.h2
                   className="text-3xl font-semibold mb-8 text-green-300 text-center"
                   initial={{ opacity: 0, y: -20 }}
@@ -723,16 +714,15 @@ export default function AboutPage() {
                     </motion.p>
                   </motion.div>
                 </motion.div>
-              </section >
+              </section>
 
-    {/* Call to Action */ }
-    < motion.div
-  className = "text-center backdrop-blur-md bg-black/40 p-8 rounded-lg border border-green-900/30"
-  initial = {{ opacity: 0, y: 40 }
-}
-whileInView = {{ opacity: 1, y: 0 }}
-transition = {{ duration: 0.8 }}
-viewport = {{ once: true, amount: 0.1 }}
+              {/* Call to Action */}
+              <motion.div
+                className="text-center backdrop-blur-md bg-black/40 p-8 rounded-lg border border-green-900/30"
+                initial={{ opacity: 0, y: 40 }}
+                whileInView={{ opacity: 1, y: 0 }}
+                transition={{ duration: 0.8 }}
+                viewport={{ once: true, amount: 0.1 }}
               >
                 <motion.h2
                   className="text-2xl md:text-3xl font-bold mb-4 text-white"
@@ -774,15 +764,13 @@ viewport = {{ once: true, amount: 0.1 }}
                     </motion.div>
                   </Link>
                 </motion.div>
-              </motion.div >
-                </motion.div >
-              </motion.div >
-            </div >
-          </main >
+              </motion.div>
+            </div>
+          </main>
 
-  <Footer />
-        </div >
-      </div >
-    </div >
+          <Footer />
+        </div>
+      </div>
+    </div>
   );
 }

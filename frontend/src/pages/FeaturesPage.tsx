@@ -48,8 +48,6 @@ export default function FeaturesPage() {
         direction='diagonal'
         borderColor='#fff'
         hoverFillColor='#222'
-        borderColor='#fff'
-        hoverFillColor='#222'
       />
 
       <div className="absolute inset-0 z-10 pointer-events-none">
@@ -92,7 +90,6 @@ export default function FeaturesPage() {
               >
                 SecureSync offre une suite complète de fonctionnalités conçues pour optimiser la gestion et la sécurité des établissements pénitentiaires
               </motion.p>
-              </motion.p>
 
               {/* Section Introduction */}
               <motion.section
@@ -103,12 +100,6 @@ export default function FeaturesPage() {
                 viewport={{ once: true, amount: 0.2 }}
               >
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-12 items-center">
-                  <motion.div
-                    initial={{ opacity: 0, x: -30 }}
-                    whileInView={{ opacity: 1, x: 0 }}
-                    transition={{ duration: 0.6, delay: 0.2 }}
-                    viewport={{ once: true }}
-                  >
                   <motion.div
                     initial={{ opacity: 0, x: -30 }}
                     whileInView={{ opacity: 1, x: 0 }}
@@ -134,22 +125,16 @@ export default function FeaturesPage() {
                         <span className="text-gray-300">Interface unifiée pour toutes les opérations</span>
                       </motion.li>
                       <motion.li className="flex items-start" variants={staggerItemVariants}>
-                      </motion.li>
-                      <motion.li className="flex items-start" variants={staggerItemVariants}>
                         <div className="flex-shrink-0 h-6 w-6 rounded-full bg-green-900/40 flex items-center justify-center mr-3 mt-0.5 shadow-sm shadow-green-900/50">
                           <Check className="h-4 w-4 text-green-400" />
                         </div>
                         <span className="text-gray-300">Architecture évolutive adaptée à tous types d'établissements</span>
                       </motion.li>
                       <motion.li className="flex items-start" variants={staggerItemVariants}>
-                      </motion.li>
-                      <motion.li className="flex items-start" variants={staggerItemVariants}>
                         <div className="flex-shrink-0 h-6 w-6 rounded-full bg-green-900/40 flex items-center justify-center mr-3 mt-0.5 shadow-sm shadow-green-900/50">
                           <Check className="h-4 w-4 text-green-400" />
                         </div>
                         <span className="text-gray-300">Conformité aux normes de sécurité les plus strictes</span>
-                      </motion.li>
-                      <motion.li className="flex items-start" variants={staggerItemVariants}>
                       </motion.li>
                       <motion.li className="flex items-start" variants={staggerItemVariants}>
                         <div className="flex-shrink-0 h-6 w-6 rounded-full bg-green-900/40 flex items-center justify-center mr-3 mt-0.5 shadow-sm shadow-green-900/50">
@@ -177,9 +162,7 @@ export default function FeaturesPage() {
                       </p>
                     </div>
                   </motion.div>
-                  </motion.div>
                 </div>
-              </motion.section>
               </motion.section>
 
               {/* Onglets des fonctionnalités */}
@@ -190,7 +173,6 @@ export default function FeaturesPage() {
                 className="mb-16"
               >
                 <div className="backdrop-blur-md bg-black/60 p-6 rounded-t-xl border border-green-900/30 border-b-0 shadow-lg shadow-green-900/10">
-                  <TabsList className="grid grid-cols-2 md:grid-cols-4 gap-4 mx-auto w-full max-w-3xl h-fit">
                   <TabsList className="grid grid-cols-2 md:grid-cols-4 gap-4 mx-auto w-full max-w-3xl h-fit">
                     <TabsTrigger
                       value="security"
@@ -260,30 +242,7 @@ export default function FeaturesPage() {
                           </p>
                         </SpotlightCard>
                       </motion.div>
-                      <motion.div variants={staggerItemVariants}>
-                        <SpotlightCard className="h-full" spotlightColor="rgba(45, 161, 51, 0.2)">
-                          <div className="w-12 h-12 bg-green-900/40 rounded-full flex items-center justify-center mb-4 shadow-md shadow-green-900/20">
-                            <Shield className="h-6 w-6 text-green-400" />
-                          </div>
-                          <h4 className="text-xl font-semibold mb-2 text-green-300">Authentification multi-facteurs</h4>
-                          <p className="text-gray-300">
-                            Sécurité renforcée avec identification biométrique, cartes à puce et codes PIN pour un accès sécurisé à tous les niveaux.
-                          </p>
-                        </SpotlightCard>
-                      </motion.div>
 
-                      <motion.div variants={staggerItemVariants}>
-                        <SpotlightCard className="h-full" spotlightColor="rgba(45, 161, 51, 0.2)">
-                          <div className="w-12 h-12 bg-green-900/40 rounded-full flex items-center justify-center mb-4 shadow-md shadow-green-900/20">
-                            <Database className="h-6 w-6 text-green-400" />
-                          </div>
-                          <h4 className="text-xl font-semibold mb-2 text-green-300">Chiffrement de bout en bout</h4>
-                          <p className="text-gray-300">
-                            Protection des données sensibles avec les dernières technologies de chiffrement et conformité aux normes internationales.
-                          </p>
-                        </SpotlightCard>
-                      </motion.div>
-                    </motion.div>
                       <motion.div variants={staggerItemVariants}>
                         <SpotlightCard className="h-full" spotlightColor="rgba(45, 161, 51, 0.2)">
                           <div className="w-12 h-12 bg-green-900/40 rounded-full flex items-center justify-center mb-4 shadow-md shadow-green-900/20">
@@ -352,17 +311,6 @@ export default function FeaturesPage() {
                           </p>
                         </SpotlightCard>
                       </motion.div>
-                      <motion.div variants={staggerItemVariants}>
-                        <SpotlightCard className="h-full" spotlightColor="rgba(45, 161, 51, 0.2)">
-                          <div className="w-12 h-12 bg-green-900/40 rounded-full flex items-center justify-center mb-4 shadow-md shadow-green-900/20">
-                            <Cpu className="h-6 w-6 text-green-400" />
-                          </div>
-                          <h4 className="text-xl font-semibold mb-2 text-green-300">Détection d'anomalies par IA</h4>
-                          <p className="text-gray-300">
-                            Algorithmes d'intelligence artificielle qui identifient les comportements suspects et les situations potentiellement dangereuses.
-                          </p>
-                        </SpotlightCard>
-                      </motion.div>
 
                       <motion.div variants={staggerItemVariants}>
                         <SpotlightCard className="h-full" spotlightColor="rgba(45, 161, 51, 0.2)">
@@ -402,8 +350,6 @@ export default function FeaturesPage() {
                         <Badge className="bg-green-900/60 text-green-300 hover:bg-green-800/80 shadow-sm">Zones d'intérêt</Badge>
                       </motion.div>
                     </motion.div>
-                      </motion.div>
-                    </motion.div>
                   </TabsContent>
 
                   <TabsContent value="management" className="mt-0 animate-in fade-in-50 duration-500">
@@ -435,17 +381,6 @@ export default function FeaturesPage() {
                         </SpotlightCard>
                       </motion.div>
 
-                      <motion.div variants={staggerItemVariants}>
-                        <SpotlightCard className="h-full" spotlightColor="rgba(45, 161, 51, 0.2)">
-                          <div className="w-12 h-12 bg-green-900/40 rounded-full flex items-center justify-center mb-4 shadow-md shadow-green-900/20">
-                            <FolderOpen className="h-6 w-6 text-green-400" />
-                          </div>
-                          <h4 className="text-xl font-semibold mb-2 text-green-300">Gestion des dossiers</h4>
-                          <p className="text-gray-300">
-                            Système complet de gestion des dossiers des détenus, incluant données personnelles, historique médical et juridique.
-                          </p>
-                        </SpotlightCard>
-                      </motion.div>
                       <motion.div variants={staggerItemVariants}>
                         <SpotlightCard className="h-full" spotlightColor="rgba(45, 161, 51, 0.2)">
                           <div className="w-12 h-12 bg-green-900/40 rounded-full flex items-center justify-center mb-4 shadow-md shadow-green-900/20">
@@ -496,8 +431,6 @@ export default function FeaturesPage() {
                         <Badge className="bg-green-900/60 text-green-300 hover:bg-green-800/80 shadow-sm">Exportation multi-formats</Badge>
                       </motion.div>
                     </motion.div>
-                      </motion.div>
-                    </motion.div>
                   </TabsContent>
 
                   <TabsContent value="integration" className="mt-0 animate-in fade-in-50 duration-500">
@@ -529,17 +462,6 @@ export default function FeaturesPage() {
                         </SpotlightCard>
                       </motion.div>
 
-                      <motion.div variants={staggerItemVariants}>
-                        <SpotlightCard className="h-full" spotlightColor="rgba(45, 161, 51, 0.2)">
-                          <div className="w-12 h-12 bg-green-900/40 rounded-full flex items-center justify-center mb-4 shadow-md shadow-green-900/20">
-                            <Database className="h-6 w-6 text-green-400" />
-                          </div>
-                          <h4 className="text-xl font-semibold mb-2 text-green-300">Intégration des bases de données</h4>
-                          <p className="text-gray-300">
-                            Connexion sécurisée avec les bases de données juridiques et administratives externes pour un accès simplifié aux informations.
-                          </p>
-                        </SpotlightCard>
-                      </motion.div>
                       <motion.div variants={staggerItemVariants}>
                         <SpotlightCard className="h-full" spotlightColor="rgba(45, 161, 51, 0.2)">
                           <div className="w-12 h-12 bg-green-900/40 rounded-full flex items-center justify-center mb-4 shadow-md shadow-green-900/20">
@@ -590,20 +512,17 @@ export default function FeaturesPage() {
                         <Badge className="bg-green-900/60 text-green-300 hover:bg-green-800/80 shadow-sm">Personnalisation</Badge>
                       </motion.div>
                     </motion.div>
-                      </motion.div>
-                    </motion.div >
-                  </TabsContent >
-                </div >
-              </Tabs >
+                  </TabsContent>
+                </div>
+              </Tabs>
 
-    {/* Tableau comparatif des éditions */ }
-    < motion.section
-  className = "mb-16"
-  initial = {{ opacity: 0, y: 40 }
-}
-whileInView = {{ opacity: 1, y: 0 }}
-transition = {{ duration: 0.7 }}
-viewport = {{ once: true, amount: 0.1 }}
+              {/* Tableau comparatif des éditions */}
+              <motion.section
+                className="mb-16"
+                initial={{ opacity: 0, y: 40 }}
+                whileInView={{ opacity: 1, y: 0 }}
+                transition={{ duration: 0.7 }}
+                viewport={{ once: true, amount: 0.1 }}
               >
                 <motion.h2
                   className="text-3xl font-semibold mb-8 text-center text-green-300 drop-shadow-sm"
@@ -695,17 +614,15 @@ viewport = {{ once: true, amount: 0.1 }}
                     </tbody>
                   </table>
                 </motion.div>
-              </motion.section >
-                </motion.div >
-              </motion.section >
+              </motion.section>
 
-  {/* Témoignages clients */ }
-  < motion.section
-className = "mb-16"
-initial = {{ opacity: 0, y: 40 }}
-whileInView = {{ opacity: 1, y: 0 }}
-transition = {{ duration: 0.7 }}
-viewport = {{ once: true, amount: 0.2 }}
+              {/* Témoignages clients */}
+              <motion.section
+                className="mb-16"
+                initial={{ opacity: 0, y: 40 }}
+                whileInView={{ opacity: 1, y: 0 }}
+                transition={{ duration: 0.7 }}
+                viewport={{ once: true, amount: 0.2 }}
               >
                 <motion.h2
                   className="text-3xl font-semibold mb-8 text-center text-green-300 drop-shadow-sm"
@@ -741,7 +658,6 @@ viewport = {{ once: true, amount: 0.2 }}
                       "SecureSync a complètement transformé notre approche de la sécurité. La détection d'anomalies par IA nous a permis d'identifier et de prévenir plusieurs incidents potentiels avant qu'ils ne surviennent."
                     </p>
                   </motion.div>
-                  </motion.div>
 
                   <motion.div
                     className="backdrop-blur-md bg-black/60 p-6 rounded-xl border border-green-900/30 shadow-xl shadow-green-900/10 hover:shadow-green-900/20 transition-all duration-300"
@@ -760,19 +676,16 @@ viewport = {{ once: true, amount: 0.2 }}
                       "L'intégration multi-sites de SecureSync nous permet de superviser efficacement plusieurs établissements avec une équipe réduite. Les outils de reporting avancés facilitent la prise de décision stratégique."
                     </p>
                   </motion.div>
-                </motion.div >
-              </motion.section >
-                  </motion.div >
-                </motion.div >
-              </motion.section >
+                </motion.div>
+              </motion.section>
 
-  {/* FAQ */ }
-  < motion.section
-className = "mb-16 backdrop-blur-md bg-black/60 p-8 rounded-xl border border-green-900/30 shadow-2xl shadow-green-900/10"
-initial = {{ opacity: 0, y: 30 }}
-whileInView = {{ opacity: 1, y: 0 }}
-transition = {{ duration: 0.8 }}
-viewport = {{ once: true, amount: 0.1 }}
+              {/* FAQ */}
+              <motion.section
+                className="mb-16 backdrop-blur-md bg-black/60 p-8 rounded-xl border border-green-900/30 shadow-2xl shadow-green-900/10"
+                initial={{ opacity: 0, y: 30 }}
+                whileInView={{ opacity: 1, y: 0 }}
+                transition={{ duration: 0.8 }}
+                viewport={{ once: true, amount: 0.1 }}
               >
                 <motion.h2
                   className="text-3xl font-semibold mb-8 text-center text-green-300 drop-shadow-sm"
@@ -810,14 +723,7 @@ viewport = {{ once: true, amount: 0.1 }}
                       Le déploiement complet prend généralement entre 2 et 4 mois, selon la taille de l'établissement et la complexité des systèmes à intégrer. Notre équipe assure une transition fluide avec un minimum de perturbations.
                     </p>
                   </motion.div>
-                  </motion.div>
 
-                  <motion.div
-                    variants={{
-                      hidden: { opacity: 0, x: -20 },
-                      visible: { opacity: 1, x: 0, transition: { duration: 0.6 } }
-                    }}
-                  >
                   <motion.div
                     variants={{
                       hidden: { opacity: 0, x: -20 },
@@ -829,14 +735,7 @@ viewport = {{ once: true, amount: 0.1 }}
                       Oui, SecureSync est conçu pour fonctionner en mode autonome en cas de perte de connectivité. Toutes les fonctions critiques restent opérationnelles et les données sont synchronisées automatiquement lorsque la connexion est rétablie.
                     </p>
                   </motion.div>
-                  </motion.div>
 
-                  <motion.div
-                    variants={{
-                      hidden: { opacity: 0, x: -20 },
-                      visible: { opacity: 1, x: 0, transition: { duration: 0.6 } }
-                    }}
-                  >
                   <motion.div
                     variants={{
                       hidden: { opacity: 0, x: -20 },
@@ -848,14 +747,7 @@ viewport = {{ once: true, amount: 0.1 }}
                       Nous proposons des formations complètes pour tous les niveaux d'utilisateurs, des administrateurs système aux agents de sécurité. Les programmes sont personnalisés selon les besoins spécifiques de chaque établissement.
                     </p>
                   </motion.div>
-                  </motion.div>
 
-                  <motion.div
-                    variants={{
-                      hidden: { opacity: 0, x: -20 },
-                      visible: { opacity: 1, x: 0, transition: { duration: 0.6 } }
-                    }}
-                  >
                   <motion.div
                     variants={{
                       hidden: { opacity: 0, x: -20 },
@@ -868,18 +760,15 @@ viewport = {{ once: true, amount: 0.1 }}
                     </p>
                   </motion.div>
                 </motion.div>
-              </motion.section >
-                  </motion.div >
-                </motion.div >
-              </motion.section >
+              </motion.section>
 
-  {/* Call to Action */ }
-  < motion.div
-className = "text-center backdrop-blur-md bg-black/60 p-8 rounded-xl border border-green-900/30 shadow-2xl shadow-green-900/10"
-initial = {{ opacity: 0, y: 30 }}
-whileInView = {{ opacity: 1, y: 0 }}
-transition = {{ duration: 0.7 }}
-viewport = {{ once: true, amount: 0.3 }}
+              {/* Call to Action */}
+              <motion.div
+                className="text-center backdrop-blur-md bg-black/60 p-8 rounded-xl border border-green-900/30 shadow-2xl shadow-green-900/10"
+                initial={{ opacity: 0, y: 30 }}
+                whileInView={{ opacity: 1, y: 0 }}
+                transition={{ duration: 0.7 }}
+                viewport={{ once: true, amount: 0.3 }}
               >
                 <motion.h2
                   className="text-2xl md:text-3xl font-bold mb-4 text-white drop-shadow-glow"
@@ -917,25 +806,22 @@ viewport = {{ once: true, amount: 0.3 }}
                     </Button>
                   </Link>
                 </motion.div>
-              </motion.div >
-                </motion.div >
-              </motion.div >
-            </div >
-          </main >
+              </motion.div>
+            </div>
+          </main>
 
-  <Footer />
-        </div >
-      </div >
+          <Footer />
+        </div>
+      </div>
 
-  {/* Add a style tag for custom drop shadow */ }
-  <style>
-{
-  `
+      {/* Add a style tag for custom drop shadow */}
+      <style>
+        {`
           .drop-shadow-glow {
             filter: drop-shadow(0 0 8px rgba(34, 197, 94, 0.2));
           }
         `}
-      </style >
-    </div >
+      </style>
+    </div>
   );
 }
