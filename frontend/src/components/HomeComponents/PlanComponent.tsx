@@ -496,7 +496,7 @@ const PlanComponent: React.FC<PlanComponentProps> = ({ prisonId }) => {
 
             {/* Conteneur du plan avec les objets superposés */}
             <div 
-                className="relative w-full overflow-hidden cursor-crosshair" 
+                className="relative w-full overflow-hidden" 
                 style={{ 
                     width: '100%', 
                     paddingTop: `${100 / PLAN_ASPECT_RATIO}%`,
