@@ -5,6 +5,7 @@ import { defineConfig } from "vite"
 import flowbiteReact from "flowbite-react/plugin/vite"
 
 export default defineConfig({
+  base: "/static/", // <-- essentiel pour Django
   plugins: [react(), tailwindcss(), flowbiteReact()],
   resolve: {
     alias: {
@@ -12,17 +13,18 @@ export default defineConfig({
     },
   },
   build: {
+    outDir: "../backend/static", // <-- où Django va chercher les fichiers
+    emptyOutDir: true,
     sourcemap: false,
     rollupOptions: {
       output: {
         manualChunks: {
-          // Tu peux adapter ces groupes selon tes libs
-          react: ['react', 'react-dom'],
-          chart: ['chart.js', 'react-chartjs-2'],
-          radix: ['@radix-ui/react-avatar', '@radix-ui/react-dialog'],
+          react: ["react", "react-dom"],
+          chart: ["chart.js", "react-chartjs-2"],
+          radix: ["@radix-ui/react-avatar", "@radix-ui/react-dialog"],
         },
       },
     },
-    chunkSizeWarningLimit: 1000, // optionnel : désactive l’avertissement à 1 Mo
+    chunkSizeWarningLimit: 1000,
   },
 })
