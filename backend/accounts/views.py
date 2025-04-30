@@ -291,6 +291,10 @@ def update_profile_api_view(request):
     
     # Mise à jour du profil
     serializer = ProfileSerializer(request.user, data=request.data, partial=True)
+    UserActivityLog.objects.create(
+        user=request.user,
+        action='Modification du profil'
+    )
     if serializer.is_valid():
         serializer.save()
         return Response(serializer.data)
