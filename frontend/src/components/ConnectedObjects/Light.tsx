@@ -375,7 +375,7 @@ const Light: React.FC<LightProps> = ({ objects, onAddObject, onStatusChange, add
                     </button>
                 </div>
             ) : (
-                <div className="space-y-2">
+                <div className="space-y-2 max-h-[260px] overflow-y-auto pr-2 scrollbar-thin scrollbar-thumb-gray-300 dark:scrollbar-thumb-gray-600 scrollbar-track-transparent hover:scrollbar-thumb-gray-400 dark:hover:scrollbar-thumb-gray-500">
                     {objects.map(light => (
                         <div key={light.id} className="relative">
                             {objectToEdit && objectToEdit.id === light.id ? (

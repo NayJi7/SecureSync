@@ -311,11 +311,11 @@ const PanneauAffichage: React.FC<PanneauAffichageProps> = ({ objects, onStatusCh
 
     return (
         <div
-            className="bg-white dark:bg-gray-800 p-6 rounded-lg shadow-lg border border-gray-100 dark:border-gray-700 hover:shadow-xl transition-shadow relative"
+            className="bg-white dark:bg-gray-800 p-6 rounded-lg shadow-lg border border-gray-100 dark:border-gray-700 hover:shadow-xl transition-shadow relative overflow-hidden"
             onMouseEnter={() => setIsHovering(true)}
             onMouseLeave={() => setIsHovering(false)}
         >
-            <div className="flex justify-between items-center mb-4">
+            <div className="flex justify-between items-center mb-4 sticky top-0 bg-white dark:bg-gray-800 z-10 pb-4">
                 <div className="flex items-center">
                     <div className="bg-indigo-100 dark:bg-indigo-900/30 p-2 rounded-lg mr-3">
                         <MonitorPlay className="h-5 w-5 text-indigo-600 dark:text-indigo-400" />
@@ -350,7 +350,7 @@ const PanneauAffichage: React.FC<PanneauAffichageProps> = ({ objects, onStatusCh
                     </button>
                 </div>
             ) : (
-                <div className="space-y-4">
+                <div className="space-y-4 overflow-y-auto max-h-[30vh] pr-2 -mr-2">
                     {objects.map((panneau) => (
                         <div
                             key={panneau.id}
@@ -742,4 +742,4 @@ const PanneauAffichage: React.FC<PanneauAffichageProps> = ({ objects, onStatusCh
     );
 };
 
-export default PanneauAffichage; 
+export default PanneauAffichage;

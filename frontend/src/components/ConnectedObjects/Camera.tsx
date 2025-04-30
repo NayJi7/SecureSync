@@ -314,7 +314,7 @@ const Camera: React.FC<CameraProps> = ({ objects, onAddObject, onStatusChange, a
                     </button>
                 </div>
             ) : (
-                <div className="space-y-2">
+                <div className="space-y-2 max-h-[30vh] overflow-y-auto pr-2 scrollbar-thin scrollbar-track-gray-200 dark:scrollbar-track-gray-700 scrollbar-thumb-purple-600 dark:scrollbar-thumb-purple-400 scrollbar-thumb-rounded-full">
                     {objects.map(camera => (
                         <div key={camera.id} className="relative">
                             {objectToEdit && objectToEdit.id === camera.id ? (
