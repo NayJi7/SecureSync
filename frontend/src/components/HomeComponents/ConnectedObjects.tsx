@@ -521,16 +521,6 @@ const ConnectedObjects: React.FC<ConnectedObjectsProps> = ({ prisonId, addPoints
                             }
                             return '';
                         })()}
-                        <button
-                            title="Visualiser la prison en 3D"
-                            className={`${isMobile ? 'mr-4' : 'ml-3'} inline-flex items-center px-2 py-1 rounded-full bg-indigo-100 dark:bg-indigo-900/40 border border-indigo-300 dark:border-indigo-700 text-indigo-700 dark:text-indigo-200 hover:bg-indigo-200 dark:hover:bg-indigo-800 transition-colors shadow-sm focus:outline-none focus:ring-2 focus:ring-indigo-400`}
-                            onClick={() => setShow3D(true)}
-                        >
-                            <svg xmlns="http://www.w3.org/2000/svg" className="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth="2">
-                                <path strokeLinecap="round" strokeLinejoin="round" d="M1.5 12s4-7.5 10.5-7.5S22.5 12 22.5 12s-4 7.5-10.5 7.5S1.5 12 1.5 12z" />
-                                <circle cx="12" cy="12" r="3" />
-                            </svg>
-                        </button>
                     </h2>
                 </div>
                 <div className="flex items-center space-x-2">
