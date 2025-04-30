@@ -28,6 +28,8 @@ import { HiAdjustments, HiClipboardList, HiDotsVertical, HiTrash } from "react-i
 import { MdDashboard, MdSecurity, MdOutlinePersonAdd } from "react-icons/md"
 import { Settings, BarChart2, Map } from 'lucide-react';
 import PlanComponent from "@/components/HomeComponents/PlanComponent";
+import logobandinverted from "@/assets/logo-band-inverted.png";
+import logoband from "@/assets/logo-band.png";
 
 // Interface pour le profil utilisateur
 interface UserProfile {
@@ -388,7 +390,7 @@ export default function HomePage({ children }: { children?: React.ReactNode }) {
           <div className="bg-white dark:bg-gray-800 p-4 w-full flex-1 flex gap-4 h-20 z-10">
             <div className={`flex items-center justify-center z-10 h-full ${isSmallScreen ? 'w-1/2' : ''}`}>
               <a href="/landing" className="flex items-center">
-                <img src={darkMode ? "/static/logo-band-inverted.png" : "/static/logo-band.png"} alt="SmartHub Logo" className={`${isSmallScreen ? 'w-32' : 'w-38'}`} />
+                <img src={darkMode ? logobandinverted : logoband} alt="SmartHub Logo" className={`${isSmallScreen ? 'w-32' : 'w-38'}`} />
               </a>
             </div>
             {children}

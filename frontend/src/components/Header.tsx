@@ -2,6 +2,7 @@ import { Link } from 'react-router-dom';
 import { Button } from '@/components/ui/button';
 import { Menu, X } from 'lucide-react';
 import { useDevice } from '@/hooks/use-device';
+import logobandinverted from '@/assets/logo-band-inverted.png';
 
 interface HeaderProps {
   isScrolled: boolean;
@@ -38,7 +39,7 @@ export default function Header({ isScrolled, mobileMenuOpen, setMobileMenuOpen }
           : 'p-4 md:p-6 backdrop-blur-sm bg-black/20'
         } transition-all duration-300 flex justify-between items-center`}>
         <Link to="/">
-          <img src="/static/logo-band-inverted.png" alt="Logo" className={`${isScrolled ? 'w-25' : 'w-28'} transition-all duration-300`} />
+          <img src={logobandinverted} alt="Logo" className={`${isScrolled ? 'w-25' : 'w-28'} transition-all duration-300`} />
         </Link>
 
         <div className="hidden md:flex items-center gap-8">

@@ -23,6 +23,8 @@ import {
 } from "@/components/ui/dialog";
 import { Button } from "@/components/ui/button";
 
+import planpng from '@/assets/plan.png';
+
 interface PlanComponentProps {
     prisonId?: string;
     addPoints?: (points: number) => Promise<void>;
@@ -658,7 +660,7 @@ const PlanComponent: React.FC<PlanComponentProps> = ({ prisonId }) => {
             >
                         {/* Image du plan en arrière-plan */}
                         <img 
-                            src="/plan.png" 
+                            src={planpng}
                             alt="Plan de la prison" 
                             className="absolute top-0 left-0 w-full h-full object-contain"
                         />

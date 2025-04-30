@@ -1,6 +1,9 @@
 import React, { useState, useEffect } from 'react';
 import { Modal, ModalBody, ModalHeader } from "flowbite-react";
 import axios from 'axios';
+import confirmelogo from '@/assets/CONFIRME.png'
+import juniorlogo from '@/assets/JUNIOR.png'
+import seniorlogo from '@/assets/SENIOR.png'
 
 // Types pour le profil utilisateur
 interface UserProfile {
@@ -28,21 +31,21 @@ const UserLevelProgressBar: React.FC<ProgressBarProps> = ({ points }) => {
       minPoints: 0, 
       maxPoints: 100, 
       color: "bg-blue-500",
-      badgeImg: "/JUNIOR.png" 
+      badgeImg: juniorlogo
     },
     { 
       name: "Confirmé", 
       minPoints: 100, 
       maxPoints: 1000, 
       color: "bg-green-500",
-      badgeImg: "/CONFIRME.png" 
+      badgeImg: confirmelogo
     },
     { 
       name: "Senior", 
       minPoints: 1000, 
       maxPoints: Infinity, 
       color: "bg-yellow-600",
-      badgeImg: "/SENIOR.png" 
+      badgeImg: seniorlogo
     }
   ];
   

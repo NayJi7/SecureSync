@@ -16,6 +16,7 @@ import { format } from 'date-fns';
 import { fr } from 'date-fns/locale';
 import html2canvas from 'html2canvas';
 import { countUsersByRole, countUsersBySection, countUsersByGender, calculateAverageAge, calculateAveragePoints, calculatePointsByRole, PrisonData } from './prisonService';
+import logosquare from '@/assets/logo-square.png';
 
 interface Stat {
   id: number;
@@ -150,7 +151,7 @@ export const generateStatsPDF = async (
     // Logo SecureSync
     try {
       // Importer le logo depuis les assets
-      const logoPath = new URL('/static/logo-square.png', import.meta.url).href;
+      const logoPath = new URL(logosquare, import.meta.url).href;
       doc.addImage(logoPath, 'PNG', 85, 15, 40, 40); // x, y, width, height
     } catch (error) {
       console.error("Erreur lors de l'ajout du logo:", error);

@@ -20,6 +20,7 @@ import {
   staggerItemVariants,
   scaleUpVariants
 } from '@/hooks/useScrollAnimation';
+import dashboardimg from '@/assets/dashboard.png';
 
 export default function FeaturesPage() {
   const [activeTab, setActiveTab] = useState('security');
@@ -152,7 +153,7 @@ export default function FeaturesPage() {
                   >
                     <div className="w-full h-64 bg-green-900/20 rounded-lg flex items-center justify-center p-4 backdrop-blur-sm shadow-xl shadow-green-900/10 border border-green-900/40 overflow-hidden">
                       <img
-                        src="/Dashboard.png"
+                        src={dashboardimg}
                         alt="Interface du Dashboard SecureSync"
                         className="w-full h-full object-cover rounded opacity-80 hover:opacity-100 transition-opacity duration-300"
                       />
