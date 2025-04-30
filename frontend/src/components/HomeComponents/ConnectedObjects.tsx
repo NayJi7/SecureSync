@@ -89,6 +89,14 @@ const ConnectedObjects: React.FC<ConnectedObjectsProps> = ({ prisonId, addPoints
         fetchObjects();
     }, [currentPrisonId]);
 
+    // Auto-refresh every 5 seconds
+    useEffect(() => {
+        const interval = setInterval(() => {
+            fetchObjects();
+        }, 5000);
+        return () => clearInterval(interval);
+    }, [currentPrisonId]);
+
     // Group objects by type using type assertions for type safety
     const grouped = {
         porte: objects.filter(obj => obj.type === 'porte') as DoorObject[],

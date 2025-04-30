@@ -26,7 +26,8 @@ import StatsReport from '../components/HomeComponents/StatsReport'
 // Icônes
 import { HiAdjustments, HiClipboardList, HiDotsVertical, HiTrash } from "react-icons/hi"
 import { MdDashboard, MdSecurity, MdOutlinePersonAdd } from "react-icons/md"
-import { Settings, BarChart2 } from 'lucide-react';
+import { Settings, BarChart2, Map } from 'lucide-react';
+import PlanComponent from "@/components/HomeComponents/PlanComponent";
 
 // Interface pour le profil utilisateur
 interface UserProfile {
@@ -253,6 +254,15 @@ export default function HomePage({ children }: { children?: React.ReactNode }) {
         </div>
       </div>
     ),
+    plan: (
+      <div className="relative h-full">
+
+        {/* ConnectedObjects always visible - passing prison ID and addPoints function */}
+        <div className="my-8">
+          <PlanComponent prisonId={currentPrison} addPoints={addPoints} />
+        </div>
+      </div>
+    ),
     settings: (
       <div className="relative h-full">
         <div className="my-6">
@@ -388,8 +398,8 @@ export default function HomePage({ children }: { children?: React.ReactNode }) {
                 <div className="flex justify-between items-center">
                   <h2 className="text-lg font-medium z-10 ml-2 text-gray-800 dark:text-white">
                     {activeTab === "dashboard" ? "Tableau de Bord" :
-                      activeTab === "settings" ? "Paramètres" :
-                        activeTab === "logs" ? "Historique" : ""}
+                        activeTab === "settings" ? "Paramètres" :
+                          activeTab === "logs" ? "Historique" : ""}
                   </h2>
 
                   <DropdownMenu>
@@ -459,6 +469,9 @@ export default function HomePage({ children }: { children?: React.ReactNode }) {
               >
                 <TabItem title="Tableau de Bord" icon={MdDashboard}>
                   {tabContents.dashboard}
+                </TabItem>
+                <TabItem title="Plan" icon={Map}>
+                  {tabContents.plan}
                 </TabItem>
                 <TabItem disabled={!hasLogsRights} title="Historique" icon={HiClipboardList}>
                   {tabContents.logs}
