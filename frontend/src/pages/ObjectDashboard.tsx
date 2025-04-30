@@ -62,8 +62,8 @@ export default function ObjectDashboard() {
 
         // Construire l'URL de l'API en incluant l'identifiant de prison si disponible
         const apiUrl = selectedPrison
-          ? `http://localhost:8000/api/objects/?prison_id=${selectedPrison}`
-          : "http://localhost:8000/api/objects/";
+          ? `${import.meta.env.VITE_API_URL}/objects/?prison_id=${selectedPrison}`
+          : `${import.meta.env.VITE_API_URL}/objects/`;
 
         const response = await fetch(apiUrl);
         const rawText = await response.text();
@@ -93,7 +93,7 @@ export default function ObjectDashboard() {
       const accessToken = localStorage.getItem('sessionToken');
       if (!accessToken) return;
 
-      const response = await fetch("http://localhost:8000/api/user/add_point/", {
+      const response = await fetch(`${import.meta.env.VITE_API_URL}/user/add_point/`, {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
@@ -141,7 +141,7 @@ export default function ObjectDashboard() {
       // Si la durabilité atteint 0, on le passe en panne
       const newMaintenance: MaintenanceState = newDurability <= 0 ? "en panne" : objectToUpdate.maintenance;
 
-      const response = await fetch(`http://localhost:8000/api/objects/${id}/`, {
+      const response = await fetch(`${import.meta.env.VITE_API_URL}/objects/${id}/`, {
         method: "PATCH",
         headers: {
           "Content-Type": "application/json",
@@ -155,7 +155,7 @@ export default function ObjectDashboard() {
 
       if (!response.ok) throw new Error(`Erreur mise à jour: ${response.status}`);
 
-      const updatedRes = await fetch(`http://localhost:8000/api/objects/${id}/`);
+      const updatedRes = await fetch(`${import.meta.env.VITE_API_URL}/objects/${id}/`);
       const updatedObject: SmartObject = await updatedRes.json();
 
       setObjects(prev =>
@@ -174,7 +174,7 @@ export default function ObjectDashboard() {
       const objectToRepair = objects.find(obj => obj.id === id);
       if (!objectToRepair) return;
 
-      const response = await fetch(`http://localhost:8000/api/objects/${id}/`, {
+      const response = await fetch(`${import.meta.env.VITE_API_URL}/objects/${id}/`, {
         method: "PATCH",
         headers: {
           "Content-Type": "application/json",
@@ -187,7 +187,7 @@ export default function ObjectDashboard() {
 
       if (!response.ok) throw new Error(`Erreur réparation: ${response.status}`);
 
-      const updatedRes = await fetch(`http://localhost:8000/api/objects/${id}/`);
+      const updatedRes = await fetch(`${import.meta.env.VITE_API_URL}/objects/${id}/`);
       const updatedObject: SmartObject = await updatedRes.json();
 
       setObjects(prev =>
@@ -207,7 +207,7 @@ export default function ObjectDashboard() {
     if (!confirmDelete) return;
 
     try {
-      const response = await fetch(`http://localhost:8000/api/objects/${id}/`, {
+      const response = await fetch(`${import.meta.env.VITE_API_URL}/objects/${id}/`, {
         method: "DELETE",
       });
 

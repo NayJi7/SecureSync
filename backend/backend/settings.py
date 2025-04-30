@@ -63,6 +63,7 @@ MIDDLEWARE = [
 CORS_ALLOW_ALL_ORIGINS = False  # Ne pas autoriser toutes les origines en production
 CORS_ALLOWED_ORIGINS = [
     "http://localhost:5173",  # Frontend React Vite par défaut
+    "https://securesync-apvc.onrender.com",  # URL de votre frontend déployé
 ]
 
 ROOT_URLCONF = "backend.urls"

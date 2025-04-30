@@ -176,7 +176,7 @@ export default function HomePage({ children }: { children?: React.ReactNode }) {
       const accessToken = localStorage.getItem('sessionToken');
       if (!accessToken) return;
 
-      const response = await fetch("http://localhost:8000/api/user/add_point/", {
+      const response = await fetch(`${import.meta.env.VITE_API_URL}/user/add_point/`, {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
@@ -218,7 +218,7 @@ export default function HomePage({ children }: { children?: React.ReactNode }) {
     const fetchProfile = async () => {
       try {
         const token = localStorage.getItem('sessionToken');
-        const response = await axios.get('http://localhost:8000/api/profile/', {
+        const response = await axios.get(`${import.meta.env.VITE_API_URL}/profile/`, {
           headers: {
             'Authorization': `Bearer ${token}`
           }
@@ -309,7 +309,7 @@ export default function HomePage({ children }: { children?: React.ReactNode }) {
         
         // Appeler l'API pour enregistrer la déconnexion si un token existe
         if (token) {
-            await fetch('http://localhost:8000/api/logout/', {
+            await fetch(`${import.meta.env.VITE_API_URL}/logout/`, {
                 method: 'POST',
                 headers: {
                     'Content-Type': 'application/json',
@@ -388,7 +388,7 @@ export default function HomePage({ children }: { children?: React.ReactNode }) {
           <div className="bg-white dark:bg-gray-800 p-4 w-full flex-1 flex gap-4 h-20 z-10">
             <div className={`flex items-center justify-center z-10 h-full ${isSmallScreen ? 'w-1/2' : ''}`}>
               <a href="/landing" className="flex items-center">
-                <img src={darkMode ? "/src/assets/logo-band-inverted.png" : "/src/assets/logo-band.png"} alt="SmartHub Logo" className={`${isSmallScreen ? 'w-32' : 'w-38'}`} />
+                <img src={darkMode ? "/public/logo-band-inverted.png" : "/public/logo-band.png"} alt="SmartHub Logo" className={`${isSmallScreen ? 'w-32' : 'w-38'}`} />
               </a>
             </div>
             {children}
@@ -513,7 +513,7 @@ export default function HomePage({ children }: { children?: React.ReactNode }) {
                   </DropdownMenuItem>
                 )}
                 {isAdmin && (
-                  <DropdownMenuItem className="cursor-pointer" onClick={() => window.open('http://localhost:8000/admin', '_blank') }>
+                  <DropdownMenuItem className="cursor-pointer" onClick={() => window.open(`${import.meta.env.VITE_ADMIN_URL}`, '_blank') }>
                     Administration
                   </DropdownMenuItem>
                 )}

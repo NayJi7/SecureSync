@@ -72,7 +72,7 @@ const LogsComponent: React.FC<{ prisonId: string }> = ({ prisonId }) => {
             setError(null);
             
             // Récupérer les logs d'objets
-            const objectLogsResponse = await axios.get('http://localhost:8000/api/logs/', {
+            const objectLogsResponse = await axios.get(`${import.meta.env.VITE_API_URL}/logs/`, {
                 headers: {
                     Authorization: `Bearer ${localStorage.getItem('sessionToken')}`,
                 },
@@ -80,7 +80,7 @@ const LogsComponent: React.FC<{ prisonId: string }> = ({ prisonId }) => {
             setObjectLogs(objectLogsResponse.data);
 
             // Récupérer les logs utilisateurs
-            const userLogsResponse = await axios.get('http://localhost:8000/api/Userslogs/', {
+            const userLogsResponse = await axios.get(`${import.meta.env.VITE_API_URL}/Userslogs/`, {
                 headers: {
                     Authorization: `Bearer ${localStorage.getItem('sessionToken')}`,
                 },

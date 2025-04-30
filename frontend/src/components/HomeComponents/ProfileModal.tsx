@@ -133,7 +133,7 @@ const ProfileModal: React.FC<ProfileModalProps> = ({
         const fetchProfile = async () => {
           try {
             const token = localStorage.getItem('sessionToken');
-            const response = await axios.get('http://localhost:8000/api/profile/', {
+            const response = await axios.get(`${import.meta.env.VITE_API_URL}/profile/`, {
               headers: {
                 'Authorization': `Bearer ${token}` 
               }
@@ -221,7 +221,7 @@ const ProfileModal: React.FC<ProfileModalProps> = ({
       
       // Utilisation d'un endpoint spécifique pour vérifier le mot de passe sans déclencher de connexion
       try {
-        const response = await axios.post('http://localhost:8000/api/verify-password/', 
+        const response = await axios.post(`${import.meta.env.VITE_API_URL}/verify-password/`, 
           { 
             password: authPassword 
           },
@@ -317,7 +317,7 @@ const ProfileModal: React.FC<ProfileModalProps> = ({
       
       // Utilisation de l'URL complète
       console.log('Envoi de la requête PUT au backend...');
-      const response = await axios.put('http://localhost:8000/api/profile/update/', formData, {
+      const response = await axios.put(`${import.meta.env.VITE_API_URL}/profile/update/`, formData, {
         headers: {
           'Authorization': `Bearer ${token}`,
           'Content-Type': 'multipart/form-data'

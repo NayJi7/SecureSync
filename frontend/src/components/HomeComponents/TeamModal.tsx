@@ -117,10 +117,10 @@ const StaffModal: React.FC<StaffModalProps> = ({ isOpen, onClose, prisonId }) =>
       }
 
       const [staffResponse, userResponse] = await Promise.all([
-        axios.get('http://localhost:8000/api/staff/', {
+        axios.get(`${import.meta.env.VITE_API_URL}/staff/`, {
           headers: { Authorization: `Bearer ${token}` }
         }),
-        axios.get('http://localhost:8000/api/profile/', {
+        axios.get(`${import.meta.env.VITE_API_URL}/profile/`, {
           headers: { Authorization: `Bearer ${token}` }
         })
       ]);
@@ -253,7 +253,7 @@ const StaffModal: React.FC<StaffModalProps> = ({ isOpen, onClose, prisonId }) =>
         return;
       }
       
-      await axios.post('http://localhost:8000/api/register/', formData, {
+      await axios.post(`${import.meta.env.VITE_API_URL}/register/`, formData, {
         headers: { 
           Authorization: `Bearer ${token}`,
           'Content-Type': 'application/json'
@@ -907,7 +907,7 @@ const StaffModal: React.FC<StaffModalProps> = ({ isOpen, onClose, prisonId }) =>
                       return;
                     }
 
-                    await axios.delete(`http://localhost:8000/api/account/delete/${deleteModal.username}/`, {
+                    await axios.delete(`${import.meta.env.VITE_API_URL}/account/delete/${deleteModal.username}/`, {
                       headers: { Authorization: `Bearer ${token}` }
                     });
 

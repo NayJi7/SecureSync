@@ -38,7 +38,7 @@ export default function Header({ isScrolled, mobileMenuOpen, setMobileMenuOpen }
           : 'p-4 md:p-6 backdrop-blur-sm bg-black/20'
         } transition-all duration-300 flex justify-between items-center`}>
         <Link to="/">
-          <img src="/src/assets/logo-band-inverted.png" alt="Logo" className={`${isScrolled ? 'w-25' : 'w-28'} transition-all duration-300`} />
+          <img src="/public/logo-band-inverted.png" alt="Logo" className={`${isScrolled ? 'w-25' : 'w-28'} transition-all duration-300`} />
         </Link>
 
         <div className="hidden md:flex items-center gap-8">

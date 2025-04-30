@@ -50,7 +50,7 @@ const TeamEditModal: React.FC<TeamEditModalProps> = ({ isOpen, onClose, member, 
             // console.log('Récupération des détails pour le username:', usernameForFetch);
 
             const response = await axios.get(
-              `http://localhost:8000/api/staff/${usernameForFetch}/`,
+              `${import.meta.env.VITE_API_URL}/staff/${usernameForFetch}/`,
               {
                 headers: {
                   Authorization: `Bearer ${token}`,
@@ -128,7 +128,7 @@ const TeamEditModal: React.FC<TeamEditModalProps> = ({ isOpen, onClose, member, 
       // console.log("Username original utilisé pour la mise à jour:", originalUsername);
 
       await axios.put(
-        `http://localhost:8000/api/staff/${originalUsername}/update/`,
+        `${import.meta.env.VITE_API_URL}/staff/${originalUsername}/update/`,
         memberData,
         {
           headers: {

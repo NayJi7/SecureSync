@@ -78,7 +78,7 @@ const StatsReport: React.FC = () => {
         const token = localStorage.getItem('sessionToken');
 
         // Récupérer toutes les statistiques (nous filtrerons côté client)
-        const response = await axios.get<Stat[]>('http://localhost:8000/api/stats/', {
+        const response = await axios.get<Stat[]>(`${import.meta.env.VITE_API_URL}/stats/`, {
           headers: {
             'Authorization': `Bearer ${token}`
           }

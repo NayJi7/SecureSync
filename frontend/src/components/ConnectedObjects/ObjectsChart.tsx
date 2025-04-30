@@ -66,12 +66,11 @@ const ObjectsChart: React.FC<{ onAddObject?: AddObjectCallback }> = ({ onAddObje
             const token = localStorage.getItem('sessionToken');
             
             // Envoi des statistiques à l'API
-            await axios.post('http://localhost:8000/api/stats/', statsData, {
-                headers: {
-                    'Authorization': `Bearer ${token}`
-                }
+           await axios.post(`${import.meta.env.VITE_API_URL}/stats/`, statsData, {
+            headers: {
+                'Authorization': `Bearer ${token}`
+            }
             });
-            
             console.log('Statistiques envoyées avec succès:', new Date().toLocaleString());
         } catch (error) {
             console.error('Erreur lors de l\'envoi des statistiques:', error);

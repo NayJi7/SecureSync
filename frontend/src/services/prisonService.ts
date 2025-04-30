@@ -67,13 +67,13 @@ export const getPrisonData = async (): Promise<PrisonData> => {
   };
   
   // Récupérer les logs des utilisateurs
-  const userLogsResponse = await axios.get<UserActivityLog[]>('http://localhost:8000/api/Userslogs/', config);
+  const userLogsResponse = await axios.get<UserActivityLog[]>(`${import.meta.env.VITE_API_URL}/Userslogs/`, config);
   
   // Récupérer les logs des objets
-  const objectLogsResponse = await axios.get<ObjectLog[]>('http://localhost:8000/api/logs/', config);
+  const objectLogsResponse = await axios.get<ObjectLog[]>(`${import.meta.env.VITE_API_URL}/logs/`, config);
   
   // Récupérer les utilisateurs
-  const usersResponse = await axios.get<PrisonUser[]>('http://localhost:8000/api/staff/', config);
+  const usersResponse = await axios.get<PrisonUser[]>(`${import.meta.env.VITE_API_URL}/staff/`, config);
   
   // Filtrer les données par prison_id et exclure les logs créés par les admins
   const filteredObjectLogs = objectLogsResponse.data.filter(

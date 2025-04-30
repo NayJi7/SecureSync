@@ -65,7 +65,7 @@ export default function PrisonSelectionPage() {
       const token = localStorage.getItem('sessionToken');
       
       // Récupérer les prisons depuis l'API
-      const response = await axios.get('http://localhost:8000/api/prisons/', {
+      const response = await axios.get(`${import.meta.env.VITE_API_URL}/prisons/`, {
         headers: { 'Authorization': `Bearer ${token}` }
       });
       
@@ -94,7 +94,7 @@ export default function PrisonSelectionPage() {
         const token = localStorage.getItem('sessionToken');
         
         // Utiliser POST au lieu de PUT
-        await axios.post('http://localhost:8000/api/update-user-prison/', 
+        await axios.post(`${import.meta.env.VITE_API_URL}/update-user-prison/`, 
         {
             prison_id: prisonId,
         },
@@ -165,7 +165,7 @@ export default function PrisonSelectionPage() {
     try {
       const token = localStorage.getItem('sessionToken');
       await axios.post(
-        'http://localhost:8000/api/prisons/', 
+        `${import.meta.env.VITE_API_URL}/prisons/`, 
         { 
           nom: newPrisonName, 
           detainees_count: detaineesCount 
@@ -228,7 +228,7 @@ export default function PrisonSelectionPage() {
     if (result.isConfirmed) {
       try {
         const token = localStorage.getItem('sessionToken');
-        await axios.delete(`http://localhost:8000/api/prisons/${prisonId}/`, {
+        await axios.delete(`${import.meta.env.VITE_API_URL}/prisons/${prisonId}/`, {
           headers: { 'Authorization': `Bearer ${token}` }
         });
         

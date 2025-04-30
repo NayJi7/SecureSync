@@ -104,7 +104,7 @@ const SettingsPanel: React.FC = () => {
         setError(null);
         const token = localStorage.getItem('sessionToken');
         
-        const response = await axios.get('http://localhost:8000/api/profile/', {
+        const response = await axios.get(`${import.meta.env.VITE_API_URL}/profile/`, {
           headers: {
             'Authorization': `Bearer ${token}`
           }
