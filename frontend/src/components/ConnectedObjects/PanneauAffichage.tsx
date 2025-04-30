@@ -394,10 +394,14 @@ const PanneauAffichage: React.FC<PanneauAffichageProps> = ({ objects, onStatusCh
                                         onClick={() => handleToggleState(panneau.id, panneau.etat)}
                                         disabled={toggleLoading === panneau.id}
                                         className={`p-1.5 rounded-full hover:bg-indigo-100 dark:hover:bg-indigo-900/30 transition-colors ${toggleLoading === panneau.id ? 'opacity-50 cursor-not-allowed' : ''}`}
-                                        title="Changer état"
+                                        title={panneau.etat === 'on' ? 'Eteindre' : 'Allumer'}
                                     >
-                                        <ToggleLeft className="h-4 w-4 text-indigo-600 dark:text-indigo-400" />
-                                    </button>
+                                        {toggleLoading === panneau.id ? (
+                                        <div className="h-4 w-4 border-2 border-gray-500 border-t-transparent rounded-full animate-spin"></div>
+                                    ) : (
+                                        <ToggleLeft className={`h-4 w-4 ${panneau.etat === 'on' ? 'transform rotate-180' : ''} text-indigo-600 dark:text-indigo-400`} />
+                                    )}
+                                </button>
                                     <button
                                         onClick={() => handleMenuToggle(panneau.id)}
                                         className="p-1.5 rounded-full hover:bg-gray-200 dark:hover:bg-gray-600 transition-colors"

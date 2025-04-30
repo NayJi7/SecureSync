@@ -599,9 +599,13 @@ const Thermostat: React.FC<ThermostatProps> = ({ objects, onAddObject, onStatusC
                                                 <button onClick={() => handleInfoToggle(thermostat.id)} className="p-1.5 rounded-full hover:bg-blue-100 dark:hover:bg-blue-900/30 transition-colors" title="Informations">
                                                     <Info className="h-4 w-4 text-blue-600 dark:text-blue-400" />
                                                 </button>
-                                                <button onClick={() => handleToggleState(thermostat.id, thermostat.etat)} disabled={toggleLoading === thermostat.id} className={`p-1.5 rounded-full hover:bg-blue-100 dark:hover:bg-blue-900/30 transition-colors ${toggleLoading === thermostat.id ? 'opacity-50 cursor-not-allowed' : ''}`} title="Changer état">
-                                                    <ToggleLeft className="h-4 w-4 text-blue-600 dark:text-blue-400" />
-                                                </button>
+                                                <button onClick={() => handleToggleState(thermostat.id, thermostat.etat)} disabled={toggleLoading === thermostat.id} className={`p-1.5 rounded-full hover:bg-blue-100 dark:hover:bg-blue-900/30 transition-colors ${toggleLoading === thermostat.id ? 'opacity-50 cursor-not-allowed' : ''}`} title={thermostat.etat === "on" ? 'Éteindre' : 'Allumer'}>
+                                                    {toggleLoading === thermostat.id ? (
+                                                    <div className="h-4 w-4 border-2 border-gray-500 border-t-transparent rounded-full animate-spin"></div>
+                                                ) : (
+                                                    <ToggleLeft className={`h-4 w-4 ${thermostat.etat === 'on' ? 'transform rotate-180' : ''} text-blue-600 dark:text-blue-400`} />
+                                                )}
+                                            </button>
                                                 <button onClick={() => handleMenuToggle(thermostat.id)} className="p-1.5 rounded-full hover:bg-gray-200 dark:hover:bg-gray-600 transition-colors" title="Options">
                                                     <MoreVertical className="h-4 w-4 text-gray-600 dark:text-gray-400" />
                                                 </button>

@@ -518,9 +518,13 @@ const Ventilation: React.FC<VentilationProps> = ({ objects, onAddObject, onStatu
                                                 <button onClick={() => handleInfoToggle(ventilation.id)} className="p-1.5 rounded-full hover:bg-green-100 dark:hover:bg-green-900/30 transition-colors" title="Informations">
                                                     <Info className="h-4 w-4 text-green-600 dark:text-green-400" />
                                                 </button>
-                                                <button onClick={() => handleToggleState(ventilation.id, ventilation.etat)} disabled={toggleLoading === ventilation.id} className={`p-1.5 rounded-full hover:bg-green-100 dark:hover:bg-green-900/30 transition-colors ${toggleLoading === ventilation.id ? 'opacity-50 cursor-not-allowed' : ''}`} title="Changer état">
-                                                    <ToggleLeft className="h-4 w-4 text-green-600 dark:text-white" />
-                                                </button>
+                                                <button onClick={() => handleToggleState(ventilation.id, ventilation.etat)} disabled={toggleLoading === ventilation.id} className={`p-1.5 rounded-full hover:bg-green-100 dark:hover:bg-green-900/30 transition-colors ${toggleLoading === ventilation.id ? 'opacity-50 cursor-not-allowed' : ''}`} title={ventilation.etat === "on" ? 'Eteindre' : 'Allumer'}>
+                                                    {toggleLoading === ventilation.id ? (
+                                                    <div className="h-4 w-4 border-2 border-gray-500 border-t-transparent rounded-full animate-spin"></div>
+                                                ) : (
+                                                    <ToggleLeft className={`h-4 w-4 ${ventilation.etat === 'on' ? 'transform rotate-180' : ''} text-green-600 dark:text-green-400`} />
+                                                )}
+                                            </button>
                                                 <button onClick={() => handleMenuToggle(ventilation.id)} className="p-1.5 rounded-full hover:bg-gray-200 dark:hover:bg-gray-600 transition-colors" title="Options">
                                                     <MoreVertical className="h-4 w-4 text-gray-600 dark:text-gray-400" />
                                                 </button>

@@ -294,7 +294,7 @@ const LogsComponent: React.FC<{ prisonId: string }> = ({ prisonId }) => {
             case 'porte': return 'text-blue-600 dark:text-blue-400';
             case 'lumiere': return 'text-yellow-600 dark:text-yellow-400';
             case 'camera': return 'text-purple-600 dark:text-purple-400';
-            case 'chauffage': return 'text-orange-600 dark:text-orange-400';
+            case 'thermostat': return 'text-orange-600 dark:text-orange-400';
             default: return 'text-gray-600 dark:text-gray-400';
         }
     };
@@ -305,7 +305,7 @@ const LogsComponent: React.FC<{ prisonId: string }> = ({ prisonId }) => {
             case 'porte': return 'bg-blue-100 dark:bg-blue-900/30';
             case 'lumiere': return 'bg-yellow-100 dark:bg-yellow-900/30';
             case 'camera': return 'bg-purple-100 dark:bg-purple-900/30';
-            case 'chauffage': return 'bg-orange-100 dark:bg-orange-900/30';
+            case 'thermostat': return 'bg-orange-100 dark:bg-orange-900/30';
             default: return 'bg-gray-100 dark:bg-gray-900/30';
         }
     };
@@ -350,7 +350,7 @@ const LogsComponent: React.FC<{ prisonId: string }> = ({ prisonId }) => {
             case 'porte': return 'Porte';
             case 'lumiere': return 'Lumière';
             case 'camera': return 'Caméra';
-            case 'chauffage': return 'Chauffage';
+            case 'thermostat': return 'Thermostat';
             default: return type;
         }
     };
@@ -565,7 +565,7 @@ const LogsComponent: React.FC<{ prisonId: string }> = ({ prisonId }) => {
                                     {type === 'porte' ? 'Type: Porte' :
                                         type === 'lumiere' ? 'Type: Lumière' :
                                             type === 'camera' ? 'Type: Caméra' :
-                                                type === 'chauffage' ? 'Type: Chauffage' : `Type: ${type}`}
+                                                type === 'thermostat' ? 'Type: Thermostat' : `Type: ${type}`}
                                 </option>
                             ))}
                         </select>

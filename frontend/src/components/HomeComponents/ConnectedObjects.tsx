@@ -315,7 +315,7 @@ const ConnectedObjects: React.FC<ConnectedObjectsProps> = ({ prisonId, addPoints
             case 'porte': return 'Porte';
             case 'lumiere': return 'Éclairage';
             case 'camera': return 'Caméra';
-            case 'thermostat': return 'Chauffage';
+            case 'thermostat': return 'Thermostat';
             case 'ventilation': return 'Ventilation';
             case "paneau d'affichage": return 'Panneau d\'affichage';
             default: return 'Objet';
