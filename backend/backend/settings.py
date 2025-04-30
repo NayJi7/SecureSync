@@ -26,7 +26,7 @@ SECRET_KEY = "django-insecure-k0937=g%ue0zqcx*e$c*)y6hi^u$3+znm#dpjx#tyvr$3!(sx2
 # SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = True
 
-ALLOWED_HOSTS = []
+ALLOWED_HOSTS = ["https://securesync-apvc.onrender.com"]
 AUTH_USER_MODEL = 'accounts.CustomUser'
 
 # Application definition
