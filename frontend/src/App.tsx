@@ -11,6 +11,7 @@ import HomePage from '@/pages/HomePage';
 import ObjectPage from '@/pages/ObjectDashboard';
 import PrisonSelectionPage from '@/pages/PrisonSelectionPage';
 import TermsPage from '@/pages/TermsPage';
+import NotFoundPage from '@/pages/NotFoundPage';
 
 // Composant de protection des routes
 import ProtectedRoute from './components/ProtectedRoute';
@@ -89,13 +90,8 @@ export default function App() {
           </ProtectedRoute>
         } />
 
-        {/* Composant de secours pour les autres routes */}
-        <Route path="*" element={
-          <div style={{ padding: '20px' }}>
-            <h1>Page de test</h1>
-            <p>Cette route est temporaire pendant le débogage.</p>
-          </div>
-        } />
+        {/* Page d'erreur 404 pour toutes les routes non définies */}
+        <Route path="*" element={<NotFoundPage />} />
       </Routes>
     </Router>
   );
