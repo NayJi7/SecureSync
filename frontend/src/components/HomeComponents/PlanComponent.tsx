@@ -1,10 +1,11 @@
 import React, { useEffect, useState, useRef } from 'react';
-import { Map, MapPin, X, PencilIcon, Save, ToggleLeft, ArrowLeft, MoveIcon } from 'lucide-react';
+import { Map, MapPin, X, PencilIcon, Save, ToggleLeft, ArrowLeft, MoveIcon, Trash2, AlertTriangle, Wrench } from 'lucide-react';
 import { DoorClosed, Lightbulb, Video, Thermometer, Wind, MonitorPlay } from 'lucide-react';
 import VideoView from './VideoView';
 import { useDevice } from '../../hooks/use-device';
 import { ObjectType, ObjectTypeName } from '../ConnectedObjects/types';
-import { getObjects, createObject, updateObject, toggleObjectState } from '../../services/objectService';
+import { getObjects, createObject, updateObject, toggleObjectState, deleteObject } from '../../services/objectService';
+import { DotLottieReact } from '@lottiefiles/dotlottie-react';
 import {
   ContextMenu,
   ContextMenuContent,
@@ -12,6 +13,15 @@ import {
   ContextMenuSeparator,
   ContextMenuTrigger,
 } from "@/components/ui/context-menu";
+import {
+  Dialog,
+  DialogContent,
+  DialogDescription,
+  DialogFooter,
+  DialogHeader,
+  DialogTitle,
+} from "@/components/ui/dialog";
+import { Button } from "@/components/ui/button";
 
 interface PlanComponentProps {
     prisonId?: string;
@@ -29,6 +39,13 @@ const PlanComponent: React.FC<PlanComponentProps> = ({ prisonId }) => {
     const [isEditing, setIsEditing] = useState(false);
     const [isUpdating, setIsUpdating] = useState(false);
     const [toggleLoading, setToggleLoading] = useState<number | null>(null);
+    const [deleteDialogOpen, setDeleteDialogOpen] = useState(false);
+    const [objectToDelete, setObjectToDelete] = useState<ObjectType | null>(null);
+    // États pour la réparation des objets en panne
+    const [repairModalObject, setRepairModalObject] = useState<ObjectType | null>(null);
+    const [repairInProgress, setRepairInProgress] = useState<number | null>(null);
+    const [repairProgress, setRepairProgress] = useState(0);
+    const [repairCountdown, setRepairCountdown] = useState(5);
     const popupRef = useRef<HTMLDivElement>(null);
     const planRef = useRef<HTMLDivElement>(null);
     
@@ -40,8 +57,8 @@ const PlanComponent: React.FC<PlanComponentProps> = ({ prisonId }) => {
     // États pour le formulaire d'édition
     const [editForm, setEditForm] = useState({
         name: '',
-        x: 0,
-        y: 0,
+        x: 50,
+        y: 50,
         consumption: 0,
         connection: 'wifi' as 'wifi' | 'filaire'
     });
@@ -55,15 +72,14 @@ const PlanComponent: React.FC<PlanComponentProps> = ({ prisonId }) => {
 
     // Fonction pour récupérer les objets connectés
     useEffect(() => {
+        let interval: NodeJS.Timeout;
+
         const fetchObjects = async () => {
             try {
                 const response = await getObjects(currentPrisonId || undefined);
-                // Filtrage supplémentaire côté client pour assurer que seuls les objets 
-                // de la prison actuelle sont affichés
                 const filteredObjects = currentPrisonId
                     ? response.data.filter(obj => obj.Prison_id === currentPrisonId)
                     : response.data;
-                
                 setObjects(filteredObjects);
                 setLoading(false);
             } catch (error) {
@@ -73,6 +89,9 @@ const PlanComponent: React.FC<PlanComponentProps> = ({ prisonId }) => {
         };
 
         fetchObjects();
+        interval = setInterval(fetchObjects, 5000);
+
+        return () => clearInterval(interval);
     }, [currentPrisonId]);
 
     // Fonction pour obtenir l'icône correspondant au type d'objet
@@ -272,6 +291,16 @@ const PlanComponent: React.FC<PlanComponentProps> = ({ prisonId }) => {
         e.stopPropagation(); // Empêcher la propagation du clic
         
         try {
+            // Vérifier si l'objet est en panne ou a une durabilité à 0
+            if (obj.etat === 'off' && (
+                (obj.durabilité !== undefined && obj.durabilité <= 0) || 
+                obj.maintenance === 'en panne')
+            ) {
+                // Afficher le dialogue de réparation au lieu de basculer l'état
+                setRepairModalObject(obj);
+                return;
+            }
+            
             setToggleLoading(obj.id);
             
             await toggleObjectState(obj.id, obj.etat);
@@ -289,10 +318,114 @@ const PlanComponent: React.FC<PlanComponentProps> = ({ prisonId }) => {
             if (updatedObj) {
                 setSelectedObject(updatedObj);
             }
-        } catch (error) {
+        } catch (error: any) {
             console.error('Erreur lors du changement d\'état de l\'objet:', error);
         } finally {
             setToggleLoading(null);
+        }
+    };
+    
+    // Fonction pour gérer le clic sur le bouton de suppression (ouverture du dialogue)
+    const handleDeleteObject = (e: React.MouseEvent, obj: ObjectType) => {
+        e.stopPropagation(); // Empêcher la propagation du clic
+        setObjectToDelete(obj);
+        setDeleteDialogOpen(true);
+    };
+
+    // Fonction pour confirmer et effectuer la suppression d'un objet
+    const confirmDeleteObject = async () => {
+        if (!objectToDelete) return;
+        
+        try {
+            await deleteObject(objectToDelete.id);
+            
+            // Désélectionner l'objet si c'est celui qui est actuellement sélectionné
+            if (selectedObject && selectedObject.id === objectToDelete.id) {
+                setSelectedObject(null);
+            }
+            
+            // Rafraîchir la liste des objets
+            const response = await getObjects(currentPrisonId || undefined);
+            const filteredObjects = currentPrisonId
+                ? response.data.filter(o => o.Prison_id === currentPrisonId)
+                : response.data;
+            
+            setObjects(filteredObjects);
+        } catch (error) {
+            console.error('Erreur lors de la suppression de l\'objet:', error);
+        } finally {
+            setDeleteDialogOpen(false);
+            setObjectToDelete(null);
+        }
+    };
+    
+    // Fonction pour réparer un objet en panne
+    const handleRepair = async (objectId: number) => {
+        try {
+            // Initialiser les états de réparation
+            setRepairInProgress(objectId);
+            setRepairProgress(0);
+            setRepairCountdown(6);
+            
+            // Créer un intervalle qui s'exécute chaque seconde pour mettre à jour le pourcentage et le compte à rebours
+            const intervalId = setInterval(() => {
+                setRepairProgress(prev => {
+                    const newProgress = prev + (100 / 6); // Augmente d'environ 16,67% chaque seconde
+                    return Math.min(newProgress, 100);
+                });
+                
+                setRepairCountdown(prev => {
+                    const newCountdown = prev - 1;
+                    return Math.max(newCountdown, 0);
+                });
+            }, 1000);
+            
+            // Attendre 6 secondes avant d'appeler l'API de réparation
+            await new Promise(resolve => setTimeout(resolve, 6000));
+            
+            // Effacer l'intervalle
+            clearInterval(intervalId);
+            
+            // Import et appel de l'API de réparation
+            const { repairObject } = await import('../../services/objectService');
+            const response = await repairObject(objectId);
+            console.log('Réparation réussie:', response);
+            
+            // Rafraîchir la liste des objets
+            const objectsResponse = await getObjects(currentPrisonId || undefined);
+            const filteredObjects = currentPrisonId
+                ? objectsResponse.data.filter(obj => obj.Prison_id === currentPrisonId)
+                : objectsResponse.data;
+            setObjects(filteredObjects);
+            
+            // Mettre à jour l'objet sélectionné si c'était celui qui était en réparation
+            if (selectedObject && selectedObject.id === objectId) {
+                const updatedObj = filteredObjects.find(obj => obj.id === objectId);
+                if (updatedObj) {
+                    setSelectedObject(updatedObj);
+                }
+            }
+        } catch (error: any) {
+            console.error('Erreur lors de la réparation de l\'objet:', error);
+            
+            // Gestion spéciale pour les erreurs d'authentification
+            if (error.response?.status === 401) {
+                alert('Session expirée. Veuillez vous reconnecter.');
+                // Effacer tous les tokens périmés qui pourraient causer l'erreur JWT
+                localStorage.removeItem('authToken');
+                localStorage.removeItem('sessionToken');
+                window.location.href = '/login'; // Rediriger vers la page de connexion
+                return;
+            }
+            
+            // Gestion générique des erreurs
+            alert('Erreur lors de la réparation de l\'objet: ' +
+                (error.friendlyMessage || error.response?.data?.detail || 'Problème de connexion au serveur'));
+        } finally {
+            // Réinitialiser tous les états de réparation
+            setRepairInProgress(null);
+            setRepairProgress(0);
+            setRepairCountdown(6);
         }
     };
 
@@ -364,13 +497,16 @@ const PlanComponent: React.FC<PlanComponentProps> = ({ prisonId }) => {
         setIsCreating(true);
         
         try {
-            const newObjectName = `Nouveau ${getObjectTypeName(type)}`;
+            // Utiliser le genre grammatical pour l'accord du mot "nouveau"
+            const genre = getObjectGender(type);
+            const prefixe = genre === 'feminin' ? 'Nouvelle' : 'Nouveau';
+            const newObjectName = `${prefixe} ${getObjectTypeName(type)}`;
             
             const newObject = {
                 nom: newObjectName,
                 type: type,
-                coord_x: contextMenuPosition.x,
-                coord_y: contextMenuPosition.y,
+                coord_x: contextMenuPosition ? contextMenuPosition.x : 50,
+                coord_y: contextMenuPosition ? contextMenuPosition.y : 50,
                 etat: 'off' as const,
                 Prison_id: currentPrisonId || undefined,
                 consomation: getDefaultConsumption(type),
@@ -408,6 +544,18 @@ const PlanComponent: React.FC<PlanComponentProps> = ({ prisonId }) => {
             case 'ventilation': return 'Ventilation';
             case "paneau d'affichage": return "Panneau d'affichage";
             default: return 'Objet';
+        }
+    };
+    
+    // Fonction pour obtenir le genre grammatical du type d'objet (pour accord)
+    const getObjectGender = (type: ObjectTypeName): 'masculin' | 'feminin' => {
+        switch(type) {
+            case 'porte': return 'feminin';
+            case 'lumiere': return 'feminin';
+            case 'camera': return 'feminin';
+            case 'ventilation': return 'feminin';
+            // Les autres sont masculins
+            default: return 'masculin';
         }
     };
     
@@ -582,6 +730,13 @@ const PlanComponent: React.FC<PlanComponentProps> = ({ prisonId }) => {
                                                                 <PencilIcon className="h-3.5 w-3.5" />
                                                             </button>
                                                             <button 
+                                                                className="text-red-500 hover:text-red-700 dark:text-red-400 dark:hover:text-red-300 p-1 rounded-full hover:bg-gray-100 dark:hover:bg-gray-800"
+                                                                onClick={(e) => handleDeleteObject(e, obj)}
+                                                                title="Supprimer"
+                                                            >
+                                                                <Trash2 className="h-3.5 w-3.5" />
+                                                            </button>
+                                                            <button 
                                                                 className="text-gray-500 hover:text-gray-700 dark:hover:text-gray-300 p-1 rounded-full hover:bg-gray-100 dark:hover:bg-gray-800"
                                                                 onClick={(e) => {
                                                                     e.stopPropagation();
@@ -608,15 +763,26 @@ const PlanComponent: React.FC<PlanComponentProps> = ({ prisonId }) => {
                                                                 <button
                                                                     className={`p-1 rounded-full hover:bg-gray-100 dark:hover:bg-gray-800 transition-colors`}
                                                                     onClick={(e) => handleToggleState(e, obj)}
-                                                                    disabled={toggleLoading === obj.id}
                                                                     title={obj.etat === 'on' ? 'Désactiver' : 'Activer'}
                                                                 >
                                                                     {toggleLoading === obj.id ? (
                                                                         <div className="h-3 w-3 border-2 border-t-transparent border-gray-400 rounded-full animate-spin"></div>
                                                                     ) : (
-                                                                        <ToggleLeft className={`h-3 w-3 ${obj.etat === 'on' ? 'transform rotate-180' : ''} text-gray-500`} />
+                                                                        <ToggleLeft className={`h-3 w-3 ${obj.etat === 'on' ? 'transform rotate-180' : ''}`} />
                                                                     )}
                                                                 </button>
+                                                                {(obj.maintenance === 'en panne' || obj.durabilité === 0) && (
+                                                                    <button
+                                                                        className="p-1 rounded-full hover:bg-gray-100 dark:hover:bg-gray-800 transition-colors"
+                                                                        onClick={(e) => {
+                                                                            e.stopPropagation();
+                                                                            setRepairModalObject(obj);
+                                                                        }}
+                                                                        title="Réparer l'objet"
+                                                                    >
+                                                                        <Wrench className="h-3 w-3 text-yellow-500" />
+                                                                    </button>
+                                                                )}
                                                             </div>
                                                         </div>
                                                         <div>
@@ -639,13 +805,21 @@ const PlanComponent: React.FC<PlanComponentProps> = ({ prisonId }) => {
                                                         </div>
                                                         <div>
                                                             <span className="text-xs font-semibold text-gray-500 uppercase block">Maintenance</span>
-                                                            <span className={`font-medium ${obj.maintenance === 'fonctionnel' ? 'text-green-500' : 'text-red-500'}`}>
-                                                                {formatMaintenanceState(obj.maintenance)}
-                                                            </span>
+                                                            <div className="flex items-center gap-1.5">
+                                                                <span className={`font-medium ${obj.maintenance === 'fonctionnel' ? 'text-green-500' : 'text-red-500'}`}>
+                                                                    {formatMaintenanceState(obj.maintenance)}
+                                                                </span>
+                                                            </div>
                                                         </div>
                                                         {obj.durabilité !== undefined && (
                                                             <div className="col-span-2">
-                                                                <span className="text-xs font-semibold text-gray-500 uppercase block">Durabilité</span>
+                                                                <div className="flex justify-between items-center">
+                                                                    <span className="text-xs font-semibold text-gray-500 uppercase block">Durabilité</span>
+                                                                    <span className={`text-xs font-medium ${
+                                                                        obj.durabilité > 70 ? 'text-green-500' :
+                                                                        obj.durabilité > 30 ? 'text-yellow-500' : 'text-red-500'
+                                                                    }`}>{obj.durabilité}%</span>
+                                                                </div>
                                                                 <div className="w-full bg-gray-200 dark:bg-gray-700 rounded-full h-1.5 mt-1">
                                                                     <div 
                                                                         className={`h-1.5 rounded-full ${
@@ -878,6 +1052,106 @@ const PlanComponent: React.FC<PlanComponentProps> = ({ prisonId }) => {
                     onClose={() => setShow3D(false)}
                     videoUrl="https://www.youtube.com/embed/g1uriA73Bp4"
                 />
+            )}
+
+            {/* Dialog de confirmation de suppression */}
+            <Dialog open={deleteDialogOpen} onOpenChange={setDeleteDialogOpen}>
+                <DialogContent className="sm:max-w-[425px]">
+                    <DialogHeader>
+                        <DialogTitle className="text-lg font-semibold text-red-600">
+                            <Trash2 className="inline-block mr-2 -mt-1" />
+                            Confirmation de suppression
+                        </DialogTitle>
+                    </DialogHeader>
+                    <DialogDescription className="text-sm text-gray-500 dark:text-gray-400">
+                        Êtes-vous sûr de vouloir supprimer cet objet ? Cette action est irréversible.
+                    </DialogDescription>
+                    <DialogFooter>
+                        <Button 
+                            variant="outline" 
+                            className="mr-2"
+                            onClick={() => setDeleteDialogOpen(false)}
+                        >
+                            Annuler
+                        </Button>
+                        <Button 
+                            className="bg-red-600 text-white hover:bg-red-700"
+                            onClick={confirmDeleteObject}
+                        >
+                            Supprimer
+                        </Button>
+                    </DialogFooter>
+                </DialogContent>
+            </Dialog>
+
+            {/* Dialog pour la réparation d'un objet en panne */}
+            {repairModalObject && (
+                <div className="fixed inset-0 flex items-center justify-center z-50">
+                    <div className="fixed inset-0 bg-black/30" onClick={() => setRepairModalObject(null)}></div>
+                    <div className="bg-white dark:bg-gray-800 rounded-lg shadow-lg p-5 max-w-md w-full mx-4 relative z-10 border-l-4 border-amber-500">
+                        <div className="flex items-start mb-3">
+                            <div className="mr-3 mt-0.5">
+                                <AlertTriangle className="h-5 w-5 text-amber-500" />
+                            </div>
+                            <div className="flex-1">
+                                <h3 className="text-lg font-medium text-gray-900 dark:text-white mb-1">
+                                    Appareil en panne
+                                </h3>
+                                <p className="text-gray-600 dark:text-gray-300 mb-4">
+                                    Cet appareil est en panne. Vous devez le réparer avant de pouvoir l'utiliser à nouveau.
+                                </p>
+                                <div className="flex justify-end space-x-3">
+                                    <button
+                                        onClick={() => setRepairModalObject(null)}
+                                        className="px-4 py-2 text-sm bg-gray-100 hover:bg-gray-200 text-gray-700 dark:bg-gray-700 dark:hover:bg-gray-600 dark:text-gray-300 rounded"
+                                    >
+                                        Annuler
+                                    </button>
+                                    <button
+                                        onClick={() => {
+                                            if (repairModalObject) {
+                                                handleRepair(repairModalObject.id);
+                                                setRepairModalObject(null);
+                                            }
+                                        }}
+                                        className="px-4 py-2 text-sm bg-green-600 hover:bg-green-700 text-white rounded flex items-center"
+                                    >
+                                        <Wrench className="h-4 w-4 mr-1.5" /> Réparer maintenant
+                                    </button>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            )}
+
+            {/* Modal de progression de réparation */}
+            {repairInProgress !== null && (
+                <div className="fixed inset-0 flex items-center justify-center z-50">
+                    <div className="fixed inset-0 bg-black/15" onClick={() => {}}></div>
+                    <div className="bg-white dark:bg-gray-800 rounded-lg shadow-lg p-6 max-w-xs w-full mx-4 relative z-10">
+                        <div className="flex flex-col items-center">
+                            <div className="mb-4 w-40 h-40 filter grayscale brightness-[0.6] contrast-[1.2]">
+                                <DotLottieReact
+                                    src="https://lottie.host/bab12c80-4bd7-4261-b763-0f7ec72a2834/LE6JcmwrGJ.lottie"
+                                    loop
+                                    autoplay
+                                />
+                            </div>
+                            
+                            <div className="w-full bg-gray-200 dark:bg-gray-700 rounded-full h-2 mb-2">
+                                <div
+                                    className="h-2 rounded-full bg-green-500 transition-all duration-1000 ease-linear"
+                                    style={{ width: `${repairProgress}%` }}
+                                ></div>
+                            </div>
+                            
+                            <div className="flex justify-center items-center mt-1">
+                                <p className="text-sm font-medium text-gray-600 dark:text-gray-300">{repairCountdown}s</p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
             )}
         </div>
     );

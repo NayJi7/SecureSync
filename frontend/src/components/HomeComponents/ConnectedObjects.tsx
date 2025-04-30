@@ -27,8 +27,8 @@ const ConnectedObjects: React.FC<ConnectedObjectsProps> = ({ prisonId, addPoints
     const [showAddModal, setShowAddModal] = useState(false);
     const [addingObjectType, setAddingObjectType] = useState<'porte' | 'lumiere' | 'camera' | 'thermostat' | 'ventilation' | "paneau d'affichage" | null>(null);
     const [newObjectName, setNewObjectName] = useState('');
-    const [newObjectX, setNewObjectX] = useState<number>(0);
-    const [newObjectY, setNewObjectY] = useState<number>(0);
+    const [newObjectX, setNewObjectX] = useState<number>(50);
+    const [newObjectY, setNewObjectY] = useState<number>(50);
     const [newObjectState, setNewObjectState] = useState<'on' | 'off'>('off');
     const [newConnection, setNewConnection] = useState<'wifi' | 'filaire'>('wifi');
     const [newConsumption, setNewConsumption] = useState<number>(0);
@@ -112,8 +112,8 @@ const ConnectedObjects: React.FC<ConnectedObjectsProps> = ({ prisonId, addPoints
         const fixedType = type === "panneau d'affichage" ? "paneau d'affichage" : type;
         setAddingObjectType(fixedType);
         setNewObjectName('');
-        setNewObjectX(0);
-        setNewObjectY(0);
+        setNewObjectX(50);
+        setNewObjectY(50);
         setNewObjectState('off');
         setNewConnection('wifi');
         
@@ -155,8 +155,8 @@ const ConnectedObjects: React.FC<ConnectedObjectsProps> = ({ prisonId, addPoints
         setError(null);
         // Reset form fields
         setNewObjectName('');
-        setNewObjectX(0);
-        setNewObjectY(0);
+        setNewObjectX(50);
+        setNewObjectY(50);
         setNewObjectState('off');
         setNewConnection('wifi');
         setNewConsumption(0);
