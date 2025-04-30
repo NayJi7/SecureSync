@@ -12,6 +12,7 @@ https://docs.djangoproject.com/en/5.1/ref/settings/
 
 from pathlib import Path
 from datetime import timedelta
+import os
 
 # Build paths inside the project like this: BASE_DIR / 'subdir'.
 BASE_DIR = Path(__file__).resolve().parent.parent
@@ -24,7 +25,7 @@ BASE_DIR = Path(__file__).resolve().parent.parent
 SECRET_KEY = "django-insecure-k0937=g%ue0zqcx*e$c*)y6hi^u$3+znm#dpjx#tyvr$3!(sx2"
 
 # SECURITY WARNING: don't run with debug turned on in production!
-DEBUG = True
+DEBUG = False
 
 ALLOWED_HOSTS = ["securesync-apvc.onrender.com"]
 AUTH_USER_MODEL = 'accounts.CustomUser'
@@ -68,7 +69,7 @@ ROOT_URLCONF = "backend.urls"
 TEMPLATES = [
     {
         "BACKEND": "django.template.backends.django.DjangoTemplates",
-        "DIRS": [],
+        "DIRS": [os.path.join(BASE_DIR, "frontend_build")],
         "APP_DIRS": True,
         "OPTIONS": {
             "context_processors": [
@@ -173,3 +174,10 @@ REST_FRAMEWORK = {
         'rest_framework_simplejwt.authentication.JWTAuthentication',
     ),
 }
+
+# Serveur des fichiers statiques du frontend React
+STATICFILES_DIRS = [
+    os.path.join(BASE_DIR, "frontend_build/assets"),
+]
+
+STATIC_ROOT = os.path.join(BASE_DIR, "staticfiles")
