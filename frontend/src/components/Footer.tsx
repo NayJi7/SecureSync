@@ -5,7 +5,7 @@ export default function Footer() {
     <footer className="p-6 backdrop-blur-sm bg-black/30 border-t border-green-900/30">
       <div className="max-w-6xl mx-auto flex flex-col md:flex-row justify-between items-center">
         <div className="flex items-center gap-4 mb-6 md:mb-0 mx-auto md:mx-0 text-center md:text-left">
-          <img src="/public/logo-band-inverted.png" alt="Logo" className="w-32" />
+          <img src="/static/logo-band-inverted.png" alt="Logo" className="w-32" />
           <p className="text-green-300/60 text-sm">
             © {new Date().getFullYear()} SecureSync. Tous droits réservés.
           </p>

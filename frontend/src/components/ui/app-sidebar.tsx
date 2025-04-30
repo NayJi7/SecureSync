@@ -46,7 +46,7 @@ export function AppSidebar() {
   return (
     <Sidebar>
       <div className="flex justify-center p-4">
-        <img src="/public/logo-band.png" alt="SmartHub Logo" className="w-auto h-24" />
+        <img src="/static/logo-band.png" alt="SmartHub Logo" className="w-auto h-24" />
       </div>
       <div className="px-5"><Separator /></div>
       <SidebarContent className="scroll overflow-x-hidden">
