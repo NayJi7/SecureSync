@@ -460,9 +460,9 @@ export default function LoginPage() {
 
 
   return (
-    <div className="relative w-full min-h-screen overflow-y-auto bg-black flex items-center justify-center">
-      {/* Main content container with fixed padding */}
-      <div className="w-full py-8 sm:py-12 md:py-16 px-2 sm:px-4 flex flex-col md:flex-row items-center justify-center">
+    <div className="relative w-full min-h-screen overflow-x-hidden overflow-y-auto bg-black flex items-center justify-center">
+      {/* Main content container with responsive padding */}
+      <div className="w-full py-4 sm:py-8 md:py-12 px-1 sm:px-4 flex flex-col md:flex-row items-center justify-center">
         {/* Squares Background Section */}
         <div className="absolute inset-0 w-full h-full z-0">
           <Squares
@@ -473,10 +473,12 @@ export default function LoginPage() {
         </div>
 
         {/* Title and Subtitle Section */}
-        <div className="w-full md:w-1/2 lg:w-2/5 flex items-center justify-center p-4 sm:p-8 md:p-12 order-1 z-10 my-4 md:my-0">
-          <div className="max-w-xl relative">
-            {/* Decorative element */}
-            <div className="absolute -left-2 sm:-left-6 top-0 sm:top-0 -mt-2 sm:-mt-0 w-1 h-10 sm:h-20 bg-gradient-to-b from-green-400 to-green-700 rounded-full"></div>
+        <div className="w-full md:w-1/2 lg:w-2/5 flex items-center justify-center p-2 sm:p-6 md:p-10 order-1 z-10 my-2 md:my-0">
+          <div className="max-w-full sm:max-w-xl w-full relative">
+            {/* Decorative element - version mobile avec positionnement calculé */}
+            <div className="hidden sm:block absolute -left-4 top-0 -mt-2 w-1 h-20 bg-gradient-to-b from-green-400 to-green-700 rounded-full"></div>
+            {/* Version mobile de la barre */}
+            <div className="sm:hidden absolute top-0 -mt-2 w-1 h-10 bg-gradient-to-b from-green-400 to-green-700 rounded-full" style={{ left: 'calc(50% - 75px)' }}></div>
 
             <motion.div
               initial={{ opacity: 0 }}
@@ -492,13 +494,13 @@ export default function LoginPage() {
                   delay: 0.2,
                   ease: [0.25, 0.1, 0.25, 1.0]
                 }}
-                className="text-3xl sm:text-4xl md:text-6xl lg:text-7xl font-bold text-white leading-tight mb-4 sm:mb-6"
+                className="text-2xl sm:text-3xl md:text-5xl lg:text-6xl font-bold text-white leading-tight mb-3 sm:mb-6 text-center sm:text-left"
               >
                 <span className="inline-block mb-1 sm:mb-2">
                   <span className="bg-clip-text text-transparent bg-gradient-to-r from-white to-green-300">SecureSync</span>
                 </span>
                 <br />
-                <span className="inline-block text-xl sm:text-2xl md:text-5xl lg:text-6xl text-neutral-200 font-semibold mt-1">
+                <span className="inline-block text-lg sm:text-xl md:text-3xl lg:text-5xl text-neutral-200 font-semibold mt-1">
                   Gestion Pénitentiaire
                 </span>
               </motion.h1>
@@ -507,7 +509,7 @@ export default function LoginPage() {
                 initial={{ width: 0 }}
                 animate={{ width: '40%' }}
                 transition={{ duration: 0.8, delay: 0.9 }}
-                className="h-1 bg-gradient-to-r from-green-500 to-green-900 rounded-full mb-2 sm:mb-8"
+                className="h-1 bg-gradient-to-r from-green-500 to-green-900 rounded-full mb-2 sm:mb-8 mx-auto sm:mx-0"
               />
 
               <motion.p
@@ -518,7 +520,7 @@ export default function LoginPage() {
                   delay: 1.0,
                   ease: "easeOut"
                 }}
-                className="text-sm sm:text-base md:text-xl text-neutral-300 leading-relaxed max-w-lg sm:block hidden"
+                className="text-xs sm:text-base md:text-xl text-neutral-300 leading-relaxed max-w-xs sm:max-w-lg sm:block hidden"
               >
                 <span className="text-green-300 font-medium">Contrôle complet</span> et surveillance des établissements pénitentiaires avec protocoles de sécurité renforcés.
                 <br className="hidden sm:block" /><br className="hidden sm:block" />
@@ -528,21 +530,22 @@ export default function LoginPage() {
           </div>
         </div>
 
-        <div className="absolute top-2 sm:top-4 right-2 sm:right-4 z-50">
+        <div className="absolute top-1 sm:top-4 right-1 sm:right-4 z-50">
           <motion.button
             onClick={() => navigate('/')}
-            className="cursor-pointer p-2 sm:p-3 rounded-full bg-black/50 transition-all duration-300 ease-in-out transform hover:bg-black/70 hover:scale-110 hover:rotate-12 hover:shadow-[0_0_15px_rgba(255,255,255,0.3)] group"
+            className="cursor-pointer p-1.5 sm:p-3 rounded-full bg-black/50 transition-all duration-300 ease-in-out transform hover:bg-black/70 hover:scale-110 hover:rotate-12 hover:shadow-[0_0_15px_rgba(255,255,255,0.3)] group"
             whileHover={{ scale: 1.1, rotate: 12 }}
             whileTap={{ scale: 0.95 }}
+            aria-label="Retour à l'accueil"
           >
-            <Home className="w-5 h-5 sm:w-6 sm:h-6 text-white transition-transform duration-300 group-hover:-rotate-12" />
+            <Home className="w-4 h-4 sm:w-6 sm:h-6 text-white transition-transform duration-300 group-hover:-rotate-12" />
           </motion.button>
         </div>
 
         {/* Login Form Section - Further optimized for mobile */}
-        <div className="relative w-full md:w-1/2 lg:w-3/5 h-full flex items-center justify-center z-40 order-2 my-4 sm:my-6 md:my-0">
+        <div className="relative w-full md:w-1/2 lg:w-3/5 h-full flex items-center justify-center z-40 order-2 my-2 sm:my-4 md:my-0">
           <div className="relative h-full flex items-center justify-center w-full">
-            <div className="w-full max-w-2xl mx-2 sm:mx-8">
+            <div className="w-full max-w-full sm:max-w-2xl mx-1 sm:mx-4">
               <AnimatePresence mode="wait">
                 {authStep === 'login' ? (
                   <motion.div
@@ -558,14 +561,14 @@ export default function LoginPage() {
                       spotlightColor="rgba(45, 161, 51, 0.2)"
                     >
                       <motion.form
-                        className="flex flex-col gap-3 sm:gap-6 w-[90%] mx-auto py-4 sm:py-8"
+                        className="flex flex-col gap-2 sm:gap-5 w-full max-w-[98vw] sm:w-[90%] mx-auto py-3 sm:py-8"
                         onSubmit={handleSubmit}
                         variants={formVariants}
                         initial="hidden"
                         animate="visible"
                       >
                         <div className="text-center space-y-1 sm:space-y-2">
-                          <h2 className="text-2xl sm:text-3xl md:text-4xl mb-4 sm:mb-6 text-white/85 font-bold">
+                          <h2 className="text-xl sm:text-2xl md:text-3xl mb-3 sm:mb-6 text-white/85 font-bold">
                             Connexion
                           </h2>
                         </div>
@@ -664,6 +667,7 @@ export default function LoginPage() {
                               whileHover={{ scale: 1.1 }}
                               whileTap={{ scale: 0.95 }}
                               tabIndex={-1}
+                              aria-label={showPassword ? "Masquer le mot de passe" : "Afficher le mot de passe"}
                             >
                               {showPassword ? <LuEye className="pointer-events-none" size={18} /> : <LuEyeClosed className="pointer-events-none" size={18} />}
                             </motion.button>
@@ -694,6 +698,7 @@ export default function LoginPage() {
                               whileHover={{ scale: 1.1 }}
                               whileTap={{ scale: 0.95 }}
                               tabIndex={-1}
+                              aria-label={showRepeatPassword ? "Masquer le mot de passe de confirmation" : "Afficher le mot de passe de confirmation"}
                             >
                               {showRepeatPassword ? <LuEye className="pointer-events-none" size={18} /> : <LuEyeClosed className="pointer-events-none" size={18} />}
                             </motion.button>
@@ -701,7 +706,7 @@ export default function LoginPage() {
                               <motion.p
                                 initial={{ opacity: 0, y: -5 }}
                                 animate={{ opacity: 1, y: 0 }}
-                                className="text-red-500 text-sm mt-1"
+                                className="text-red-500 text-xs sm:text-sm mt-0.5 sm:mt-1"
                               >
                                 {passwordError}
                               </motion.p>
@@ -709,7 +714,7 @@ export default function LoginPage() {
                           </div>
                         </motion.div>
 
-                        <motion.div variants={inputVariants} className="flex items-center gap-2 pt-4 w-full justify-center">
+                        <motion.div variants={inputVariants} className="flex items-center gap-2 pt-2 w-full justify-center">
                           <div className="flex items-center gap-2 whitespace-nowrap min-w-max">
                             {acceptedTerms && (
                               <motion.div whileHover={{ scale: 1.1 }} whileTap={{ scale: 0.95 }}>
@@ -733,7 +738,7 @@ export default function LoginPage() {
                             whileTap={{ scale: 0.98 }}
                           >
                             <Button
-                              className={`w-full bg-green-600 hover:bg-green-700 text-white font-semibold cursor-pointer transition-all duration-300 ${(!acceptedTerms || !username || !password || !repeatPassword || !email || isLoading) ? 'opacity-50 cursor-not-allowed' : ''}`}
+                              className={`w-full bg-green-600 hover:bg-green-700 text-white font-semibold cursor-pointer transition-all duration-300 text-base sm:text-lg ${(!acceptedTerms || !username || !password || !repeatPassword || !email || isLoading) ? 'opacity-50 cursor-not-allowed' : ''}`}
                               type="submit"
                               disabled={!acceptedTerms || !username || !password || !repeatPassword || !email || isLoading}
                             >
@@ -767,7 +772,7 @@ export default function LoginPage() {
                       spotlightColor="rgba(45, 161, 51, 0.2)"
                     >
                       <motion.form
-                        className="flex flex-col gap-6 w-[90%] mx-auto py-8"
+                        className="flex flex-col gap-3 sm:gap-6 w-full max-w-[98vw] sm:w-[90%] mx-auto py-5 sm:py-8"
                         onSubmit={(e) => {
                           e.preventDefault();
                           if (otpCode.length === 6 && !isLoading) {
@@ -779,7 +784,7 @@ export default function LoginPage() {
                         variants={formVariants}
                       >
                         <div className="text-center space-y-1 sm:space-y-2">
-                          <h2 className="text-2xl sm:text-3xl md:text-4xl mb-4 sm:mb-6 text-white/85 font-bold">
+                          <h2 className="text-xl sm:text-2xl md:text-3xl mb-3 sm:mb-6 text-white/85 font-bold">
                             Vérification
                           </h2>
                         </div>
@@ -797,13 +802,13 @@ export default function LoginPage() {
                         )}
 
                         <motion.div variants={inputVariants}>
-                          <div className="text-center text-white text-base md:text-lg mb-4 px-2">
+                          <div className="text-center text-white text-sm sm:text-base md:text-lg mb-4 px-2">
                             Un code de vérification a été envoyé à <span className='font-bold break-all'>{email}</span>
                           </div>
                           <div className="flex justify-center w-full">
                           <InputOTP
                             maxLength={6}
-                            className="gap-2"
+                            className="gap-1 sm:gap-2 scale-75 sm:scale-90 md:scale-100"
                             value={otpCode}
                             onChange={handleOTPChange}
                             onKeyDown={(e) => {
@@ -828,7 +833,7 @@ export default function LoginPage() {
                         </div>
                         </motion.div>
 
-                        <motion.div className="flex flex-col items-center gap-4 px-4 sm:px-0">
+                        <motion.div className="flex flex-col items-center gap-3 px-2 sm:px-0">
                           <button
                             className={`text-green-400 text-sm text-center ${resendDisabled ? 'opacity-50 cursor-not-allowed' : 'cursor-pointer hover:underline hover:text-green-300'}`}
                             onClick={handleResendCode}
@@ -837,7 +842,7 @@ export default function LoginPage() {
                             {resendDisabled ? `Veuillez patienter (${countdown}s)` : 'Renvoyer le code'}
                           </button>
                           <Button
-                            className={`w-full bg-green-600 hover:bg-green-700 text-white font-semibold cursor-pointer transition-all duration-300 h-12 sm:h-auto ${(otpCode.length !== 6 || isLoading) ? 'opacity-50 cursor-not-allowed' : ''}`}
+                            className={`w-full bg-green-600 hover:bg-green-700 text-white font-semibold cursor-pointer transition-all duration-300 h-12 sm:h-auto text-base sm:text-lg ${(otpCode.length !== 6 || isLoading) ? 'opacity-50 cursor-not-allowed' : ''}`}
                             onClick={handleVerifyOTP}
                             disabled={otpCode.length !== 6 || isLoading}
                             type="submit"
