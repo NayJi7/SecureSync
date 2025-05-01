@@ -401,7 +401,8 @@ export default function HomePage({ children }: { children?: React.ReactNode }) {
                   <h2 className="text-lg font-medium z-10 ml-2 text-gray-800 dark:text-white">
                     {activeTab === "dashboard" ? "Tableau de Bord" :
                         activeTab === "settings" ? "Paramètres" :
-                          activeTab === "logs" ? "Historique" : ""}
+                          activeTab === "statistics" ? "Statistiques" :
+                            activeTab === "logs" ? "Historique" : ""}
                   </h2>
 
                   <DropdownMenu>

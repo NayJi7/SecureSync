@@ -57,6 +57,7 @@ const StatsReport: React.FC = () => {
   const [generating, setGenerating] = useState<boolean>(false);
   const [isEditingCost, setIsEditingCost] = useState<boolean>(false);
   const [customCostRate, setCustomCostRate] = useState<number | null>(0.018);
+  const [tempCostRate, setTempCostRate] = useState<number | null>(null);
   const { isMobile } = useDevice();
 
   // Effet pour s'assurer que les graphiques sont bien rendus après un changement d'onglet
@@ -555,14 +556,18 @@ const StatsReport: React.FC = () => {
                         type="number"
                         step="0.001"
                         min="0"
-                        value={customCostRate !== null ? customCostRate : (averages.avgCoutHoraire * 180).toFixed(3)}
-                        onChange={(e) => setCustomCostRate(parseFloat(e.target.value))}
+                        value={tempCostRate !== null ? tempCostRate : (customCostRate !== null ? customCostRate : averages.avgCoutHoraire)}
+                        onChange={(e) => setTempCostRate(parseFloat(e.target.value))}
                         className="w-16 mx-1 p-0.5 text-xs border border-purple-400 rounded dark:bg-gray-700"
                       />
                       <span>€</span>
                       <button
                         className="ml-1 text-green-500 hover:text-green-700"
-                        onClick={() => setIsEditingCost(false)}
+                        onClick={() => {
+                          setCustomCostRate(tempCostRate !== null ? tempCostRate : (customCostRate !== null ? customCostRate : averages.avgCoutHoraire));
+                          setIsEditingCost(false);
+                          setTempCostRate(null);
+                        }}
                         aria-label="Valider"
                       >
                         ✓
@@ -571,7 +576,7 @@ const StatsReport: React.FC = () => {
                         className="ml-1 text-red-500 hover:text-red-700"
                         onClick={() => {
                           setIsEditingCost(false);
-                          setCustomCostRate(null);
+                          setTempCostRate(null);
                         }}
                         aria-label="Annuler"
                       >
@@ -583,7 +588,10 @@ const StatsReport: React.FC = () => {
                       Basé sur un coût horaire de {customCostRate !== null ? customCostRate.toFixed(3) : averages.avgCoutHoraire.toFixed(3)}€
                       <Pencil
                         className="h-3 w-3 ml-1 cursor-pointer hover:text-purple-600 transition-colors"
-                        onClick={() => setIsEditingCost(true)}
+                        onClick={() => {
+                          setIsEditingCost(true);
+                          setTempCostRate(customCostRate);
+                        }}
                       />
                     </span>
                   )}
