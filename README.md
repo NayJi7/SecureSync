@@ -57,9 +57,9 @@ cd SecureSync
 ### 2. Activer l'environnement virtuel Python
 
 ```bash
-source env/bin/activate
+source venv/bin/activate
 # ou sous Windows
-env\Scripts\activate
+venv\Scripts\activate
 ```
 
 ### 3. Installer les dépendances Python (avec pip)
