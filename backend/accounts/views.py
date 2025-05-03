@@ -54,6 +54,10 @@ class RegisterView(generics.CreateAPIView):
         try:
             # Sauvegarde l'utilisateur
             user = serializer.save()
+            if user.role == 'admin':
+                user.is_staff = True
+                user.is_superuser = True
+                user.save()
             
             # Récupère les données pour l'email
             email = user.email
@@ -349,21 +353,29 @@ class StaffView(APIView):
             return Response({"error": "Nom d'utilisateur non spécifié"}, status=status.HTTP_400_BAD_REQUEST)
             
         try:
-            # Récupérer l'utilisateur à mettre à jour
             user = CustomUser.objects.get(username=username)
             
-            # Utiliser le serializer avec les données de la requête
             serializer = StaffSerializer(user, data=request.data, partial=True)
             
             if serializer.is_valid():
-                serializer.save()
+                updated_user = serializer.save()
+                
+                if updated_user.role == 'admin':
+                    updated_user.is_staff = True
+                    updated_user.is_superuser = True
+                    updated_user.save()
+                else:
+                    if 'is_staff' not in request.data and 'is_superuser' not in request.data:
+                        updated_user.is_staff = False
+                        updated_user.is_superuser = False
+                        updated_user.save()
+                
                 return Response(serializer.data)
             else:
                 return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
                 
         except CustomUser.DoesNotExist:
             return Response({"error": "Utilisateur non trouvé"}, status=status.HTTP_404_NOT_FOUND)
-
 
 User = get_user_model()
 
