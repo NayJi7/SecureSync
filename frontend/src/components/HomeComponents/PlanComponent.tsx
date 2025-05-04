@@ -6,6 +6,8 @@ import { useDevice } from '../../hooks/use-device';
 import { ObjectType, ObjectTypeName } from '../ConnectedObjects/types';
 import { getObjects, createObject, updateObject, toggleObjectState, deleteObject } from '../../services/objectService';
 import { DotLottieReact } from '@lottiefiles/dotlottie-react';
+import useAuth from '../../hooks/useAuth';
+import Swal from 'sweetalert2';
 import {
   ContextMenu,
   ContextMenuContent,
@@ -30,7 +32,7 @@ interface PlanComponentProps {
     addPoints?: (points: number) => Promise<void>;
 }
 
-const PlanComponent: React.FC<PlanComponentProps> = ({ prisonId }) => {    
+const PlanComponent: React.FC<PlanComponentProps> = ({ prisonId, addPoints }) => {    
     const currentPrisonId = prisonId || localStorage.getItem('userPrison') || localStorage.getItem('selectedPrison');
     const [show3D, setShow3D] = useState(false);
     const [objects, setObjects] = useState<ObjectType[]>([]);
@@ -71,6 +73,22 @@ const PlanComponent: React.FC<PlanComponentProps> = ({ prisonId }) => {
     
     // Aspect ratio du plan pour maintenir les proportions
     const PLAN_ASPECT_RATIO = 16/9; // Rapport largeur/hauteur
+    
+    // Récupération du contexte d'authentification
+    const { user } = useAuth();
+    
+    // Fonction pour vérifier si l'utilisateur a les permissions pour modifier/supprimer
+    const hasEditDeletePermission = () => {
+        const userRole = user?.role;
+        const userPoints = user?.points || 0;
+        
+        return (
+            // Si l'utilisateur est un admin, gérant ou gestionnaire
+            (userRole === 'admin' || userRole === 'gerant' || userRole === 'gestionnaire') ||
+            // Ou si c'est un employé avec plus de 100 points
+            (userRole === 'employe' && userPoints >= 100)
+        );
+    };
 
     // Fonction pour récupérer les objets connectés
     useEffect(() => {
@@ -157,6 +175,18 @@ const PlanComponent: React.FC<PlanComponentProps> = ({ prisonId }) => {
     // Fonctions pour le drag and drop
     const handleMouseDown = (e: React.MouseEvent, obj: ObjectType) => {
         e.stopPropagation();
+        
+        // Vérifier si l'utilisateur a les droits suffisants
+        if (!hasEditDeletePermission()) {
+            Swal.fire({
+                title: 'Permission insuffisante',
+                text: 'Vous devez être gestionnaire ou avoir au moins 100 points pour déplacer cet objet.',
+                icon: 'warning',
+                confirmButtonText: 'Compris'
+            });
+            return;
+        }
+        
         const rect = (e.currentTarget as HTMLElement).getBoundingClientRect();
         setDragOffset({
             x: e.clientX - rect.left - rect.width / 2,
@@ -235,6 +265,18 @@ const PlanComponent: React.FC<PlanComponentProps> = ({ prisonId }) => {
     // Fonction pour passer en mode édition
     const handleEditClick = (e: React.MouseEvent, obj: ObjectType) => {
         e.stopPropagation(); // Empêcher la propagation du clic
+        
+        // Vérifier si l'utilisateur a les droits suffisants
+        if (!hasEditDeletePermission()) {
+            Swal.fire({
+                title: 'Permission insuffisante',
+                text: 'Vous devez être gestionnaire ou avoir au moins 100 points pour modifier cet objet.',
+                icon: 'warning',
+                confirmButtonText: 'Compris'
+            });
+            return;
+        }
+        
         setEditForm({
             name: obj.nom,
             x: obj.coord_x,
@@ -330,6 +372,18 @@ const PlanComponent: React.FC<PlanComponentProps> = ({ prisonId }) => {
     // Fonction pour gérer le clic sur le bouton de suppression (ouverture du dialogue)
     const handleDeleteObject = (e: React.MouseEvent, obj: ObjectType) => {
         e.stopPropagation(); // Empêcher la propagation du clic
+        
+        // Vérifier si l'utilisateur a les droits suffisants
+        if (!hasEditDeletePermission()) {
+            Swal.fire({
+                title: 'Permission insuffisante',
+                text: 'Vous devez être gestionnaire ou avoir au moins 100 points pour supprimer cet objet.',
+                icon: 'warning',
+                confirmButtonText: 'Compris'
+            });
+            return;
+        }
+        
         setObjectToDelete(obj);
         setDeleteDialogOpen(true);
     };
@@ -456,6 +510,17 @@ const PlanComponent: React.FC<PlanComponentProps> = ({ prisonId }) => {
             setSelectedObject(clickedObject);
             setIsEditing(false);
         } else {
+            // Vérifier si l'utilisateur a les droits suffisants pour créer un objet
+            if (!hasEditDeletePermission()) {
+                Swal.fire({
+                    title: 'Permission insuffisante',
+                    text: 'Vous devez être gestionnaire ou avoir au moins 100 points pour créer un nouvel objet.',
+                    icon: 'warning',
+                    confirmButtonText: 'Compris'
+                });
+                return;
+            }
+            
             // Sinon, ouvrir le menu contextuel pour ajouter un objet
             setContextMenuPosition({
                 x: objX,
@@ -495,6 +560,17 @@ const PlanComponent: React.FC<PlanComponentProps> = ({ prisonId }) => {
     // Fonction pour créer un nouvel objet
     const handleCreateObject = async (type: ObjectTypeName) => {
         if (!contextMenuPosition) return;
+        
+        // Vérifier si l'utilisateur a les droits suffisants
+        if (!hasEditDeletePermission()) {
+            Swal.fire({
+                title: 'Permission insuffisante',
+                text: 'Vous devez être gestionnaire ou avoir au moins 100 points pour créer un nouvel objet.',
+                icon: 'warning',
+                confirmButtonText: 'Compris'
+            });
+            return;
+        }
         
         setIsCreating(true);
         
