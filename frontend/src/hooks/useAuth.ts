@@ -3,12 +3,13 @@
 import { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import API from '../services/api';
+import { User, AuthContextType } from '../types/auth';
 
-export const useAuth = () => {
+export const useAuth = (): AuthContextType => {
   const [isAuthenticated, setIsAuthenticated] = useState(false);
   const [loading, setLoading] = useState(true);
-  const [user, setUser] = useState(null);
-  const [prisonId, setPrisonId] = useState(null);
+  const [user, setUser] = useState<User | null>(null);
+  const [prisonId, setPrisonId] = useState<string | null>(null);
   const navigate = useNavigate();
 
   // Verify a token format is valid before trying to use it
@@ -160,7 +161,7 @@ export const useAuth = () => {
     }
   };
 
-  const login = (token: string, refreshToken = null, sessionToken = null) => {
+  const login = (token: string, refreshToken: string | null = null, sessionToken: string | null = null) => {
     console.debug('Storing authentication tokens');
 
     // Validate token before storing

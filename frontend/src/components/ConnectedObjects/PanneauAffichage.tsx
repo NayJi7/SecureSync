@@ -3,6 +3,8 @@ import { Info, MoreVertical, Pencil, Save, Trash2, ToggleLeft, X, MonitorPlay, P
 import { ObjectType } from './types';
 import { toggleObjectState, updateObject, deleteObject, repairObject } from '../../services/objectService';
 import { DotLottieReact } from '@lottiefiles/dotlottie-react';
+import useAuth from '../../hooks/useAuth';
+import Swal from 'sweetalert2';
 
 interface PanneauAffichageProps {
     objects: ObjectType[];
@@ -38,6 +40,20 @@ const PanneauAffichage: React.FC<PanneauAffichageProps> = ({ objects, onStatusCh
     const [repairInProgress, setRepairInProgress] = useState<number | null>(null);
 
     const dropdownRef = useRef<HTMLDivElement>(null);
+    const { user } = useAuth();
+    
+    // Fonction pour vérifier si l'utilisateur a les permissions pour modifier/supprimer
+    const hasEditDeletePermission = () => {
+        const userRole = user?.role;
+        const userPoints = user?.points || 0;
+        
+        return (
+            // Si l'utilisateur est un admin, gérant ou gestionnaire
+            (userRole === 'admin' || userRole === 'gerant' || userRole === 'gestionnaire') ||
+            // Ou si c'est un employé avec plus de 100 points
+            (userRole === 'employe' && userPoints >= 100)
+        );
+    };
     
     useEffect(() => {
         // Add event listener for clicks outside the dropdown
@@ -104,6 +120,17 @@ const PanneauAffichage: React.FC<PanneauAffichageProps> = ({ objects, onStatusCh
     };
 
     const handleEditClick = (object: ObjectType) => {
+        // Vérifier si l'utilisateur a les droits suffisants
+        if (!hasEditDeletePermission()) {
+            Swal.fire({
+                title: 'Permission insuffisante',
+                text: 'Vous devez être gestionnaire ou avoir au moins 100 points pour modifier cet objet.',
+                icon: 'warning',
+                confirmButtonText: 'Compris'
+            });
+            return;
+        }
+        
         setObjectToEdit(object);
         setNewName(object.nom);
         setNewX(object.coord_x);
@@ -114,6 +141,17 @@ const PanneauAffichage: React.FC<PanneauAffichageProps> = ({ objects, onStatusCh
     };
 
     const handleMessageClick = (id: number) => {
+        // Vérifier si l'utilisateur a les droits suffisants
+        if (!hasEditDeletePermission()) {
+            Swal.fire({
+                title: 'Permission insuffisante',
+                text: 'Vous devez être gestionnaire ou avoir au moins 100 points pour modifier le message de cet objet.',
+                icon: 'warning',
+                confirmButtonText: 'Compris'
+            });
+            return;
+        }
+        
         const object = objects.find(o => o.id === id);
         setShowMessageInput(id);
         setNewMessage(String(object?.valeur_actuelle || ''));
@@ -208,6 +246,17 @@ const PanneauAffichage: React.FC<PanneauAffichageProps> = ({ objects, onStatusCh
     };
 
     const handleDeleteClick = (id: number) => {
+        // Vérifier si l'utilisateur a les droits suffisants
+        if (!hasEditDeletePermission()) {
+            Swal.fire({
+                title: 'Permission insuffisante',
+                text: 'Vous devez être gestionnaire ou avoir au moins 100 points pour supprimer cet objet.',
+                icon: 'warning',
+                confirmButtonText: 'Compris'
+            });
+            return;
+        }
+        
         setObjectToDelete(id);
         setShowDeleteModal(true);
         setActiveMenu(null);
@@ -411,35 +460,41 @@ const PanneauAffichage: React.FC<PanneauAffichageProps> = ({ objects, onStatusCh
                                     </button>
                                     {activeMenu === panneau.id && (
                                         <div ref={dropdownRef} className="absolute right-0 top-5 mt-0.5 w-48 bg-white dark:bg-gray-800 shadow-lg rounded-md border border-gray-200 dark:border-gray-700 z-10">
-                                            <ul className="py-1">
-                                                <li>
-                                                    <button 
-                                                        onClick={() => handleMessageClick(panneau.id)} 
-                                                        className="flex items-center w-full px-4 py-2 text-sm text-left text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-700"
-                                                    >
-                                                        <MessageSquare className="h-3.5 w-3.5 mr-2 text-gray-500 dark:text-gray-400" />
-                                                        Modifier message
-                                                    </button>
-                                                </li>
-                                                <li>
-                                                    <button 
-                                                        onClick={() => handleEditClick(panneau)} 
-                                                        className="flex items-center w-full px-4 py-2 text-sm text-left text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-700"
-                                                    >
-                                                        <Pencil className="h-3.5 w-3.5 mr-2 text-gray-500 dark:text-gray-400" />
-                                                        Modifier
-                                                    </button>
-                                                </li>
-                                                <li>
-                                                    <button 
-                                                        onClick={() => handleDeleteClick(panneau.id)} 
-                                                        className="flex items-center w-full px-4 py-2 text-sm text-left text-red-600 dark:text-red-400 hover:bg-gray-100 dark:hover:bg-gray-700"
-                                                    >
-                                                        <Trash2 className="h-3.5 w-3.5 mr-2 text-red-600 dark:text-red-400" />
-                                                        Supprimer
-                                                    </button>
-                                                </li>
-                                            </ul>
+                                            {hasEditDeletePermission() ? (
+                                                <ul className="py-1">
+                                                    <li>
+                                                        <button 
+                                                            onClick={() => handleMessageClick(panneau.id)} 
+                                                            className="flex items-center w-full px-4 py-2 text-sm text-left text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-700"
+                                                        >
+                                                            <MessageSquare className="h-3.5 w-3.5 mr-2 text-gray-500 dark:text-gray-400" />
+                                                            Modifier message
+                                                        </button>
+                                                    </li>
+                                                    <li>
+                                                        <button 
+                                                            onClick={() => handleEditClick(panneau)} 
+                                                            className="flex items-center w-full px-4 py-2 text-sm text-left text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-700"
+                                                        >
+                                                            <Pencil className="h-3.5 w-3.5 mr-2 text-gray-500 dark:text-gray-400" />
+                                                            Modifier
+                                                        </button>
+                                                    </li>
+                                                    <li>
+                                                        <button 
+                                                            onClick={() => handleDeleteClick(panneau.id)} 
+                                                            className="flex items-center w-full px-4 py-2 text-sm text-left text-red-600 dark:text-red-400 hover:bg-gray-100 dark:hover:bg-gray-700"
+                                                        >
+                                                            <Trash2 className="h-3.5 w-3.5 mr-2 text-red-600 dark:text-red-400" />
+                                                            Supprimer
+                                                        </button>
+                                                    </li>
+                                                </ul>
+                                            ) : (
+                                                <div className="px-4 py-3 text-sm text-gray-600 dark:text-gray-400">
+                                                    <p>Vous avez besoin de 100 points minimum pour modifier ou supprimer des objets.</p>
+                                                </div>
+                                            )}
                                         </div>
                                     )}
                                 </div>

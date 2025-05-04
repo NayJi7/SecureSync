@@ -22,6 +22,8 @@ import axios from 'axios';
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
 import { DotLottieReact } from '@lottiefiles/dotlottie-react';
+import useAuth from '../../hooks/useAuth';
+import Swal from 'sweetalert2';
 
 interface ThermostatProps {
     objects: ObjectType[];
@@ -32,6 +34,7 @@ interface ThermostatProps {
 
 const Thermostat: React.FC<ThermostatProps> = ({ objects, onAddObject, onStatusChange, addPoints }) => {
     const isEmpty = objects.length === 0;
+    const { user } = useAuth();
     const [isHovering, setIsHovering] = useState(false);
     const [toggleLoading, setToggleLoading] = useState<number | null>(null);
     const [activeMenu, setActiveMenu] = useState<number | null>(null);
@@ -58,6 +61,19 @@ const Thermostat: React.FC<ThermostatProps> = ({ objects, onAddObject, onStatusC
     const [repairProgress, setRepairProgress] = useState<number>(0);
     const [repairCountdown, setRepairCountdown] = useState<number>(6);
     const [repairInProgress, setRepairInProgress] = useState<number | null>(null);
+    
+    // Fonction pour vérifier si l'utilisateur a les permissions pour modifier/supprimer
+    const hasEditDeletePermission = () => {
+        const userRole = user?.role;
+        const userPoints = user?.points || 0;
+        
+        return (
+            // Si l'utilisateur est un admin, gérant ou gestionnaire
+            (userRole === 'admin' || userRole === 'gerant' || userRole === 'gestionnaire') ||
+            // Ou si c'est un employé avec plus de 100 points
+            (userRole === 'employe' && userPoints >= 100)
+        );
+    };
 
     useEffect(() => {
         // Add event listener for clicks outside the dropdown
@@ -131,6 +147,20 @@ const Thermostat: React.FC<ThermostatProps> = ({ objects, onAddObject, onStatusC
     };
 
     const handleEditClick = (object: ObjectType) => {
+        // Vérifier si l'utilisateur a les permissions
+        if (!hasEditDeletePermission()) {
+            Swal.fire({
+                title: 'Accès refusé',
+                text: 'Vous avez besoin de 100 points minimum pour modifier des objets.',
+                icon: 'warning',
+                confirmButtonText: 'OK',
+                confirmButtonColor: '#3085d6',
+                background: document.documentElement.classList.contains('dark') ? '#1f2937' : '#ffffff',
+                color: document.documentElement.classList.contains('dark') ? '#ffffff' : '#000000'
+            });
+            return;
+        }
+        
         setObjectToEdit(object);
         setNewName(object.nom);
         setNewX(object.coord_x);
@@ -216,6 +246,20 @@ const Thermostat: React.FC<ThermostatProps> = ({ objects, onAddObject, onStatusC
     };
 
     const handleDeleteClick = (id: number) => {
+        // Vérifier si l'utilisateur a les permissions
+        if (!hasEditDeletePermission()) {
+            Swal.fire({
+                title: 'Accès refusé',
+                text: 'Vous avez besoin de 100 points minimum pour supprimer des objets.',
+                icon: 'warning',
+                confirmButtonText: 'OK',
+                confirmButtonColor: '#3085d6',
+                background: document.documentElement.classList.contains('dark') ? '#1f2937' : '#ffffff',
+                color: document.documentElement.classList.contains('dark') ? '#ffffff' : '#000000'
+            });
+            return;
+        }
+        
         setObjectToDelete(id);
         setShowDeleteModal(true);
     };
@@ -636,14 +680,24 @@ const Thermostat: React.FC<ThermostatProps> = ({ objects, onAddObject, onStatusC
                                         {/* Dropdown menu */}
                                         {activeMenu === thermostat.id && (
                                             <div ref={dropdownRef} className="absolute right-0 top-10 mt-0.5 w-48 bg-white dark:bg-gray-800 shadow-lg rounded-md border border-gray-200 dark:border-gray-700 z-10">
-                                                <button onClick={() => handleEditClick(thermostat)} className="flex items-center w-full px-4 py-2 text-sm text-left text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-700">
-                                                    <Pencil className="h-4 w-4 mr-2 text-gray-500 dark:text-gray-400" />
-                                                    Modifier
-                                                </button>
-                                                <button onClick={() => handleDeleteClick(thermostat.id)} className="flex items-center w-full px-4 py-2 text-sm text-left text-red-600 dark:text-red-400 hover:bg-red-50 dark:hover:bg-red-900/20">
-                                                    <Trash2 className="h-4 w-4 mr-2" />
-                                                    Supprimer
-                                                </button>
+                                                {hasEditDeletePermission() && (
+                                                    <>
+                                                        <button onClick={() => handleEditClick(thermostat)} className="flex items-center w-full px-4 py-2 text-sm text-left text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-700">
+                                                            <Pencil className="h-4 w-4 mr-2 text-gray-500 dark:text-gray-400" />
+                                                            Modifier
+                                                        </button>
+                                                        <button onClick={() => handleDeleteClick(thermostat.id)} className="flex items-center w-full px-4 py-2 text-sm text-left text-red-600 dark:text-red-400 hover:bg-red-50 dark:hover:bg-red-900/20">
+                                                            <Trash2 className="h-4 w-4 mr-2" />
+                                                            Supprimer
+                                                        </button>
+                                                    </>
+                                                )}
+                                                
+                                                {!hasEditDeletePermission() && (
+                                                    <div className="px-4 py-3 text-sm text-gray-600 dark:text-gray-400">
+                                                        <p>Vous avez besoin de 100 points minimum pour modifier ou supprimer des objets.</p>
+                                                    </div>
+                                                )}
                                             </div>
                                         )}
                                     </div>

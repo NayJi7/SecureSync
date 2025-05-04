@@ -4,6 +4,8 @@ import { Lock, Unlock, Plus, DoorClosed, ToggleLeft, MoreVertical, Pencil, Trash
 import { toggleObjectState, updateObject, deleteObject, repairObject } from '../../services/objectService';
 import { Switch } from "@/components/ui/switch";
 import { DotLottieReact } from '@lottiefiles/dotlottie-react';
+import useAuth from '../../hooks/useAuth';
+import Swal from 'sweetalert2';
 
 interface DoorProps {
     objects: ObjectType[];
@@ -14,6 +16,7 @@ interface DoorProps {
 
 const Door: React.FC<DoorProps> = ({ objects, onAddObject, onStatusChange, addPoints }) => {
     const isEmpty = objects.length === 0;
+    const { user } = useAuth();
     const [isHovering, setIsHovering] = useState(false);
     const [toggleLoading, setToggleLoading] = useState<number | null>(null);
     const [activeMenu, setActiveMenu] = useState<number | null>(null);
@@ -42,6 +45,19 @@ const Door: React.FC<DoorProps> = ({ objects, onAddObject, onStatusChange, addPo
 
     const [editFormData, setEditFormData] = useState<any>({});
     const [deleteConfirmationId, setDeleteConfirmationId] = useState<number | null>(null);
+    
+    // Fonction pour vérifier si l'utilisateur a les permissions pour modifier/supprimer
+    const hasEditDeletePermission = () => {
+        const userRole = user?.role;
+        const userPoints = user?.points || 0;
+        
+        return (
+            // Si l'utilisateur est un admin, gérant ou gestionnaire
+            (userRole === 'admin' || userRole === 'gerant' || userRole === 'gestionnaire') ||
+            // Ou si c'est un employé avec plus de 100 points
+            (userRole === 'employe' && userPoints >= 100)
+        );
+    };
 
     useEffect(() => {
         // Add event listener for clicks outside the dropdown
@@ -540,21 +556,31 @@ const Door: React.FC<DoorProps> = ({ objects, onAddObject, onStatusChange, addPo
 
                                             {activeMenu === door.id && (
                                                 <div ref={dropdownRef} className="absolute right-0 top-10 mt-0.5 w-48 bg-white dark:bg-gray-800 shadow-lg rounded-md border border-gray-200 dark:border-gray-700 z-10">
-                                                    <button
-                                                        onClick={() => handleEditClick(door)}
-                                                        className="flex items-center w-full px-4 py-2 text-sm text-left text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-700"
-                                                    >
-                                                        <Pencil className="h-4 w-4 mr-2 text-gray-500 dark:text-gray-400" />
-                                                        Modifier
-                                                    </button>
+                                                    {hasEditDeletePermission() && (
+                                                        <>
+                                                            <button
+                                                                onClick={() => handleEditClick(door)}
+                                                                className="flex items-center w-full px-4 py-2 text-sm text-left text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-700"
+                                                            >
+                                                                <Pencil className="h-4 w-4 mr-2 text-gray-500 dark:text-gray-400" />
+                                                                Modifier
+                                                            </button>
+                                                            
+                                                            <button
+                                                                onClick={() => handleDeleteClick(door.id)}
+                                                                className="flex items-center w-full px-4 py-2 text-sm text-left text-red-600 dark:text-red-400 hover:bg-red-50 dark:hover:bg-red-900/20"
+                                                            >
+                                                                <Trash2 className="h-4 w-4 mr-2" />
+                                                                Supprimer
+                                                            </button>
+                                                        </>
+                                                    )}
                                                     
-                                                    <button
-                                                        onClick={() => handleDeleteClick(door.id)}
-                                                        className="flex items-center w-full px-4 py-2 text-sm text-left text-red-600 dark:text-red-400 hover:bg-red-50 dark:hover:bg-red-900/20"
-                                                    >
-                                                        <Trash2 className="h-4 w-4 mr-2" />
-                                                        Supprimer
-                                                    </button>
+                                                    {!hasEditDeletePermission() && (
+                                                        <div className="px-4 py-3 text-sm text-gray-600 dark:text-gray-400">
+                                                            <p>Vous avez besoin de 100 points minimum pour modifier ou supprimer des objets.</p>
+                                                        </div>
+                                                    )}
                                                 </div>
                                             )}
                                         </div>
