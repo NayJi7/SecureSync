@@ -468,9 +468,9 @@ def send_otp_email_Register(email, username, password):
                 </div>
                 
                 <p>Pour des raisons de sécurité, nous vous recommandons de vous connecter dès que possible et de changer votre mot de passe dans votre espace personnel.</p>
-                
-                <a href="https://securesync.com/login" class="action-btn">Se connecter maintenant</a>
-                
+
+                <a href="https://securesync-apvc.onrender.com/login" class="action-btn">Se connecter maintenant</a>
+
                 <p>Si vous avez des questions ou besoin d'aide, n'hésitez pas à contacter notre équipe support.</p>
                 
                 <p>Cordialement,<br>L'équipe SecureSync</p>
