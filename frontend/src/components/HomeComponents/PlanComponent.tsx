@@ -178,7 +178,7 @@ const PlanComponent: React.FC<PlanComponentProps> = ({ prisonId, addPoints }) =>
         if (!hasEditDeletePermission()) {
             Swal.fire({
                 title: 'Permission insuffisante',
-                text: 'Vous devez être gestionnaire ou avoir au moins 100 points pour déplacer cet objet.',
+                text: 'Vous devez être gestionnaire, gérant ou avoir au moins 100 points pour déplacer cet objet.',
                 icon: 'warning',
                 confirmButtonText: 'Compris'
             });
@@ -268,7 +268,7 @@ const PlanComponent: React.FC<PlanComponentProps> = ({ prisonId, addPoints }) =>
         if (!hasEditDeletePermission()) {
             Swal.fire({
                 title: 'Permission insuffisante',
-                text: 'Vous devez être gestionnaire ou avoir au moins 100 points pour modifier cet objet.',
+                text: 'Vous devez être gestionnaire, gérant ou avoir au moins 100 points pour modifier cet objet.',
                 icon: 'warning',
                 confirmButtonText: 'Compris'
             });
@@ -375,7 +375,7 @@ const PlanComponent: React.FC<PlanComponentProps> = ({ prisonId, addPoints }) =>
         if (!hasEditDeletePermission()) {
             Swal.fire({
                 title: 'Permission insuffisante',
-                text: 'Vous devez être gestionnaire ou avoir au moins 100 points pour supprimer cet objet.',
+                text: 'Vous devez être gestionnaire, gérant ou avoir au moins 100 points pour supprimer cet objet.',
                 icon: 'warning',
                 confirmButtonText: 'Compris'
             });
@@ -512,7 +512,7 @@ const PlanComponent: React.FC<PlanComponentProps> = ({ prisonId, addPoints }) =>
             if (!hasEditDeletePermission()) {
                 Swal.fire({
                     title: 'Permission insuffisante',
-                    text: 'Vous devez être gestionnaire ou avoir au moins 100 points pour créer un nouvel objet.',
+                    text: 'Vous devez être gestionnaire, gérant ou avoir au moins 100 points pour créer un nouvel objet.',
                     icon: 'warning',
                     confirmButtonText: 'Compris'
                 });
@@ -563,7 +563,7 @@ const PlanComponent: React.FC<PlanComponentProps> = ({ prisonId, addPoints }) =>
         if (!hasEditDeletePermission()) {
             Swal.fire({
                 title: 'Permission insuffisante',
-                text: 'Vous devez être gestionnaire ou avoir au moins 100 points pour créer un nouvel objet.',
+                text: 'Vous devez être gestionnaire, gérant ou avoir au moins 100 points pour créer un nouvel objet.',
                 icon: 'warning',
                 confirmButtonText: 'Compris'
             });
@@ -763,6 +763,12 @@ const PlanComponent: React.FC<PlanComponentProps> = ({ prisonId, addPoints }) =>
                                             }}
                                             title={`${obj.nom} (${obj.etat === 'on' ? 'Actif' : 'Inactif'}) - Clic droit pour voir les détails, clic gauche et glisser pour déplacer`}
                                             onMouseDown={(e) => handleMouseDown(e, obj)}
+                                            onContextMenu={(e) => {
+                                                e.preventDefault();
+                                                e.stopPropagation();
+                                                setSelectedObject(obj);
+                                                setIsEditing(false);
+                                            }}
                                         >
                                             {getObjectIcon(obj.type, obj.etat)}
                                         </div>
@@ -776,6 +782,10 @@ const PlanComponent: React.FC<PlanComponentProps> = ({ prisonId, addPoints }) =>
                                                     perspective: '1000px',
                                                 }}
                                                 ref={popupRef}
+                                                onContextMenu={(e) => {
+                                                    e.preventDefault();
+                                                    e.stopPropagation();
+                                                }}
                                             >
                                                 {/* Face avant (détails) */}
                                                 <div style={{
@@ -918,7 +928,12 @@ const PlanComponent: React.FC<PlanComponentProps> = ({ prisonId, addPoints }) =>
                                                     width: '100%',
                                                     opacity: isEditing ? 1 : 0,
                                                     transform: isEditing ? 'rotateY(0deg)' : 'rotateY(-180deg)',
-                                                }}>
+                                                }}
+                                                onContextMenu={(e) => {
+                                                    e.preventDefault();
+                                                    e.stopPropagation();
+                                                }}
+                                                >
                                                     <div className="flex justify-between items-center mb-3">
                                                         <h3 className="text-base font-semibold text-indigo-600 dark:text-indigo-400">Modifier l'objet</h3>
                                                         <button 
@@ -1164,7 +1179,12 @@ const PlanComponent: React.FC<PlanComponentProps> = ({ prisonId, addPoints }) =>
             {repairModalObject && (
                 <div className="fixed inset-0 flex items-center justify-center z-50">
                     <div className="fixed inset-0 bg-black/30" onClick={() => setRepairModalObject(null)}></div>
-                    <div className="bg-white dark:bg-gray-800 rounded-lg shadow-lg p-5 max-w-md w-full mx-4 relative z-10 border-l-4 border-amber-500">
+                    <div className="bg-white dark:bg-gray-800 rounded-lg shadow-lg p-5 max-w-md w-full mx-4 relative z-10 border-l-4 border-amber-500"
+                        onContextMenu={(e) => {
+                            e.preventDefault();
+                            e.stopPropagation();
+                        }}
+                    >
                         <div className="flex items-start mb-3">
                             <div className="mr-3 mt-0.5">
                                 <AlertTriangle className="h-5 w-5 text-amber-500" />
