@@ -5,6 +5,8 @@ import { toggleObjectState, updateObject, deleteObject, repairObject } from '../
 import { Switch } from "@/components/ui/switch";
 import { Slider } from "@/components/ui/slider";
 import { DotLottieReact } from '@lottiefiles/dotlottie-react';
+import useAuth from '../../hooks/useAuth';
+import Swal from 'sweetalert2';
 
 interface VentilationProps {
     objects: ObjectType[];
@@ -38,6 +40,20 @@ const Ventilation: React.FC<VentilationProps> = ({ objects, onAddObject, onStatu
     const [repairInProgress, setRepairInProgress] = useState<number | null>(null);
     
     const dropdownRef = useRef<HTMLDivElement>(null);
+    const { user } = useAuth();
+    
+    // Fonction pour vérifier si l'utilisateur a les permissions pour modifier/supprimer
+    const hasEditDeletePermission = () => {
+        const userRole = user?.role;
+        const userPoints = user?.points || 0;
+        
+        return (
+            // Si l'utilisateur est un admin, gérant ou gestionnaire
+            (userRole === 'admin' || userRole === 'gerant' || userRole === 'gestionnaire') ||
+            // Ou si c'est un employé avec plus de 100 points
+            (userRole === 'employe' && userPoints >= 100)
+        );
+    };
     
     useEffect(() => {
         // Add event listener for clicks outside the dropdown
@@ -129,6 +145,17 @@ const Ventilation: React.FC<VentilationProps> = ({ objects, onAddObject, onStatu
     };
 
     const handleEditClick = (object: ObjectType) => {
+        // Vérifier si l'utilisateur a les droits suffisants
+        if (!hasEditDeletePermission()) {
+            Swal.fire({
+                title: 'Permission insuffisante',
+                text: 'Vous devez être gestionnaire ou avoir au moins 100 points pour modifier cet objet.',
+                icon: 'warning',
+                confirmButtonText: 'Compris'
+            });
+            return;
+        }
+        
         setObjectToEdit(object);
         setNewName(object.nom);
         setNewX(object.coord_x);
@@ -216,8 +243,20 @@ const Ventilation: React.FC<VentilationProps> = ({ objects, onAddObject, onStatu
     };
 
     const handleDeleteClick = (id: number) => {
+        // Vérifier si l'utilisateur a les droits suffisants
+        if (!hasEditDeletePermission()) {
+            Swal.fire({
+                title: 'Permission insuffisante',
+                text: 'Vous devez être gestionnaire ou avoir au moins 100 points pour supprimer cet objet.',
+                icon: 'warning',
+                confirmButtonText: 'Compris'
+            });
+            return;
+        }
+        
         setObjectToDelete(id);
         setShowDeleteModal(true);
+        setActiveMenu(null);
     };
 
     const confirmDelete = async () => {
@@ -555,14 +594,22 @@ const Ventilation: React.FC<VentilationProps> = ({ objects, onAddObject, onStatu
                                         {/* Dropdown menu */}
                                         {activeMenu === ventilation.id && (
                                             <div ref={dropdownRef} className="absolute right-0 top-13 mt-0.5 w-48 bg-white dark:bg-gray-800 shadow-lg rounded-md border border-gray-200 dark:border-gray-700 z-10">
-                                                <button onClick={() => handleEditClick(ventilation)} className="flex items-center w-full px-4 py-2 text-sm text-left text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-700">
-                                                    <Pencil className="h-4 w-4 mr-2 text-gray-500 dark:text-gray-400" />
-                                                    Modifier
-                                                </button>
-                                                <button onClick={() => handleDeleteClick(ventilation.id)} className="flex items-center w-full px-4 py-2 text-sm text-left text-red-600 dark:text-red-400 hover:bg-red-50 dark:hover:bg-red-900/20">
-                                                    <Trash2 className="h-4 w-4 mr-2" />
-                                                    Supprimer
-                                                </button>
+                                                {hasEditDeletePermission() ? (
+                                                    <>
+                                                        <button onClick={() => handleEditClick(ventilation)} className="flex items-center w-full px-4 py-2 text-sm text-left text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-700">
+                                                            <Pencil className="h-4 w-4 mr-2 text-gray-500 dark:text-gray-400" />
+                                                            Modifier
+                                                        </button>
+                                                        <button onClick={() => handleDeleteClick(ventilation.id)} className="flex items-center w-full px-4 py-2 text-sm text-left text-red-600 dark:text-red-400 hover:bg-red-50 dark:hover:bg-red-900/20">
+                                                            <Trash2 className="h-4 w-4 mr-2" />
+                                                            Supprimer
+                                                        </button>
+                                                    </>
+                                                ) : (
+                                                    <div className="px-4 py-3 text-sm text-gray-600 dark:text-gray-400">
+                                                        <p>Vous avez besoin de 100 points minimum pour modifier ou supprimer des objets.</p>
+                                                    </div>
+                                                )}
                                             </div>
                                         )}
                                     </div>

@@ -13,6 +13,8 @@ import axios from 'axios';
 import VideoView from './VideoView';
 import { DotLottieReact } from '@lottiefiles/dotlottie-react';
 import { useDevice } from '../../hooks/use-device';
+import useAuth from '../../hooks/useAuth';
+import Swal from 'sweetalert2';
 
 interface ConnectedObjectsProps {
     prisonId?: string;
@@ -21,6 +23,7 @@ interface ConnectedObjectsProps {
 
 const ConnectedObjects: React.FC<ConnectedObjectsProps> = ({ prisonId, addPoints }) => {
     const { isMobile } = useDevice();
+    const { user } = useAuth();
     const [objects, setObjects] = useState<ObjectType[]>([]);
     const [loading, setLoading] = useState(true);
     const [refreshing, setRefreshing] = useState(false);
@@ -108,6 +111,29 @@ const ConnectedObjects: React.FC<ConnectedObjectsProps> = ({ prisonId, addPoints
     };
 
     const handleAddObject: AddObjectCallback = (type) => {
+        // Vérifier si l'utilisateur a les permissions nécessaires pour ajouter un objet
+        const userRole = user?.role;
+        const userPoints = user?.points || 0;
+        
+        const hasPermission = 
+            // Si l'utilisateur est un admin, gérant ou gestionnaire
+            (userRole === 'admin' || userRole === 'gerant' || userRole === 'gestionnaire') ||
+            // Ou si c'est un employé avec plus de 100 points
+            (userRole === 'employe' && userPoints > 100);
+        
+        if (!hasPermission) {
+            Swal.fire({
+                title: 'Accès refusé',
+                text: 'Vous n\'avez pas l\'autorisation d\'ajouter un objet. Vous devez être gestionnaire, gérant ou administrateur, ou alors être un employé avec plus de 100 points.',
+                icon: 'warning',
+                confirmButtonText: 'OK',
+                confirmButtonColor: '#3085d6',
+                background: document.documentElement.classList.contains('dark') ? '#1f2937' : '#ffffff',
+                color: document.documentElement.classList.contains('dark') ? '#ffffff' : '#000000'
+            });
+            return;
+        }
+        
         // Convert "panneau d'affichage" (from UI/component definition) to "paneau d'affichage" (backend/database definition)
         const fixedType = type === "panneau d'affichage" ? "paneau d'affichage" : type;
         setAddingObjectType(fixedType);
