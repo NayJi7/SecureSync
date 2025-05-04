@@ -22,6 +22,7 @@ const Door: React.FC<DoorProps> = ({ objects, onAddObject, onStatusChange, addPo
     const [activeMenu, setActiveMenu] = useState<number | null>(null);
     const [objectToEdit, setObjectToEdit] = useState<ObjectType | null>(null);
     const [showInfoId, setShowInfoId] = useState<number | null>(null);
+    const [isTogglingAll, setIsTogglingAll] = useState<'on' | 'off' | null>(null);
 
     // Form state for editing
     const [newName, setNewName] = useState<string>('');
@@ -359,6 +360,92 @@ const Door: React.FC<DoorProps> = ({ objects, onAddObject, onStatusChange, addPo
         setDirectRepairId(id);
         startRepairProcess(id);
     };
+    
+    // Fonction pour verrouiller toutes les portes en même temps
+    const handleLockAllDoors = async () => {
+        try {
+            setIsTogglingAll('on');
+            
+            // Filtrer les portes qui sont actuellement déverrouillées (off)
+            const unlockedDoors = objects.filter(door => 
+                door.etat === 'off' && 
+                door.durabilité !== undefined && 
+                door.durabilité > 0 && 
+                door.maintenance === 'fonctionnel'
+            );
+            
+            if (unlockedDoors.length === 0) {
+                alert('Toutes les portes sont déjà verrouillées ou hors service.');
+                setIsTogglingAll(null);
+                return;
+            }
+            
+            // Verrouiller chaque porte une par une
+            for (const door of unlockedDoors) {
+                await toggleObjectState(door.id, 'off');
+            }
+            
+            // Ajouter des points pour l'action
+            if (addPoints) {
+                await addPoints(unlockedDoors.length * 2); // Attribuer des points en fonction du nombre de portes verrouillées
+            }
+            
+            // Rafraîchir l'état des objets
+            if (onStatusChange) {
+                onStatusChange();
+            }
+            
+            setIsTogglingAll(null);
+        } catch (error: any) {
+            console.error('Erreur lors du verrouillage de toutes les portes:', error);
+            alert('Erreur lors du verrouillage de toutes les portes: ' + 
+                (error.friendlyMessage || error.response?.data?.detail || 'Problème de connexion au serveur'));
+            setIsTogglingAll(null);
+        }
+    };
+    
+    // Fonction pour déverrouiller toutes les portes en même temps
+    const handleUnlockAllDoors = async () => {
+        try {
+            setIsTogglingAll('off');
+            
+            // Filtrer les portes qui sont actuellement verrouillées (on)
+            const lockedDoors = objects.filter(door => 
+                door.etat === 'on' && 
+                door.durabilité !== undefined && 
+                door.durabilité > 0 && 
+                door.maintenance === 'fonctionnel'
+            );
+            
+            if (lockedDoors.length === 0) {
+                alert('Toutes les portes sont déjà déverrouillées ou hors service.');
+                setIsTogglingAll(null);
+                return;
+            }
+            
+            // Déverrouiller chaque porte une par une
+            for (const door of lockedDoors) {
+                await toggleObjectState(door.id, 'on');
+            }
+            
+            // Ajouter des points pour l'action
+            if (addPoints) {
+                await addPoints(lockedDoors.length * 2); // Attribuer des points en fonction du nombre de portes déverrouillées
+            }
+            
+            // Rafraîchir l'état des objets
+            if (onStatusChange) {
+                onStatusChange();
+            }
+            
+            setIsTogglingAll(null);
+        } catch (error: any) {
+            console.error('Erreur lors du déverrouillage de toutes les portes:', error);
+            alert('Erreur lors du déverrouillage de toutes les portes: ' + 
+                (error.friendlyMessage || error.response?.data?.detail || 'Problème de connexion au serveur'));
+            setIsTogglingAll(null);
+        }
+    };
 
     return (
         <div
@@ -366,25 +453,76 @@ const Door: React.FC<DoorProps> = ({ objects, onAddObject, onStatusChange, addPo
             onMouseEnter={() => setIsHovering(true)}
             onMouseLeave={() => setIsHovering(false)}
         >
-            <div className="flex justify-between items-center mb-4 sticky top-0 bg-white dark:bg-gray-800 z-10 pb-4">
-                <div className="flex items-center">
-                    <div className="bg-blue-100 dark:bg-blue-900/30 p-2 rounded-lg mr-3">
-                        <DoorClosed className="h-5 w-5 text-blue-600 dark:text-blue-400" />
+            <div className="flex flex-col space-y-3 sticky top-0 bg-white dark:bg-gray-800 z-10 pb-4">
+                <div className="flex justify-between items-center mb-1">
+                    <div className="flex items-center">
+                        <div className="bg-blue-100 dark:bg-blue-900/30 p-2 rounded-lg mr-3">
+                            <DoorClosed className="h-5 w-5 text-blue-600 dark:text-blue-400" />
+                        </div>
+                        <h3 className="text-lg font-semibold text-gray-900 dark:text-white">Portes</h3>
+                        
+                        {!isEmpty && (
+                            <button
+                                onClick={() => {
+                                    // Si la majorité des portes sont verrouillées, on déverrouille toutes
+                                    // Sinon, on verrouille toutes
+                                    const lockedDoors = objects.filter(door => 
+                                        door.etat === 'on' && 
+                                        door.durabilité !== undefined && 
+                                        door.durabilité > 0 && 
+                                        door.maintenance === 'fonctionnel'
+                                    ).length;
+                                    
+                                    const functioningDoors = objects.filter(door => 
+                                        door.durabilité !== undefined && 
+                                        door.durabilité > 0 && 
+                                        door.maintenance === 'fonctionnel'
+                                    ).length;
+                                    
+                                    // Si plus de la moitié des portes fonctionnelles sont verrouillées, alors on déverrouille toutes
+                                    const shouldUnlock = lockedDoors >= functioningDoors / 2;
+                                    
+                                    if (shouldUnlock) {
+                                        handleUnlockAllDoors();
+                                    } else {
+                                        handleLockAllDoors();
+                                    }
+                                }}
+                                disabled={isTogglingAll !== null}
+                                className={`ml-2 relative group p-1.5 rounded-full hover:bg-blue-100 dark:hover:bg-blue-900/30 transition-colors ${isTogglingAll !== null ? 'opacity-50 cursor-not-allowed' : ''}`}
+                            >
+                                {isTogglingAll !== null ? (
+                                    <div className="h-5 w-5 border-2 border-blue-500 border-t-transparent rounded-full animate-spin"></div>
+                                ) : (
+                                    <ToggleLeft 
+                                        className={`h-5 w-5 text-blue-600 dark:text-blue-400 ${
+                                            objects.filter(door => door.etat === 'off').length > objects.length / 2 
+                                            ? '' 
+                                            : 'transform rotate-180'
+                                        }`} 
+                                    />
+                                )}
+                                <span className="absolute left-full ml-2 px-2 py-1 text-xs font-medium text-gray-600 dark:text-gray-300 bg-gray-100 dark:bg-gray-700 rounded opacity-0 group-hover:opacity-100 transition-opacity whitespace-nowrap top-1/2 transform -translate-y-1/2">
+                                    {objects.filter(door => door.etat === 'on').length > objects.length / 2 
+                                        ? 'Tout déverrouiller' 
+                                        : 'Tout verrouiller'}
+                                </span>
+                            </button>
+                        )}
                     </div>
-                    <h3 className="text-lg font-semibold text-gray-900 dark:text-white">Portes</h3>
-                </div>
-                <div className="flex items-center space-x-2">
-                    <span className="bg-blue-100 text-blue-800 text-xs font-medium px-2.5 py-1 rounded dark:bg-blue-900 dark:text-blue-300">
-                        {objects.length}
-                    </span>
-                    <button
-                        onClick={handleAddClick}
-                        className={`p-1.5 bg-blue-100 rounded-lg hover:bg-blue-200 dark:bg-blue-900/30 dark:hover:bg-blue-800/50 transition-colors ${isHovering ? 'opacity-100' : 'opacity-70'}`}
-                        aria-label="Ajouter une porte"
-                        title="Ajouter une porte"
-                    >
-                        <Plus className="h-4 w-4 text-blue-600 dark:text-blue-400" />
-                    </button>
+                    <div className="flex items-center space-x-2">
+                        <span className="bg-blue-100 text-blue-800 text-xs font-medium px-2.5 py-1 rounded dark:bg-blue-900 dark:text-blue-300">
+                            {objects.length}
+                        </span>
+                        <button
+                            onClick={handleAddClick}
+                            className={`p-1.5 bg-blue-100 rounded-lg hover:bg-blue-200 dark:bg-blue-900/30 dark:hover:bg-blue-800/50 transition-colors ${isHovering ? 'opacity-100' : 'opacity-70'}`}
+                            aria-label="Ajouter une porte"
+                            title="Ajouter une porte"
+                        >
+                            <Plus className="h-4 w-4 text-blue-600 dark:text-blue-400" />
+                        </button>
+                    </div>
                 </div>
             </div>
 
