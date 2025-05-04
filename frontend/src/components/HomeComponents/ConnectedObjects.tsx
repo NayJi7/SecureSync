@@ -203,16 +203,19 @@ const ConnectedObjects: React.FC<ConnectedObjectsProps> = ({ prisonId, addPoints
         try {
             // Assurons-nous que l'ID de la prison actuelle est utilisé et non écrasé
             const prisonId = currentPrisonId || '';
-            // console.log('Création d\'un objet pour la prison:', prisonId);
+
+            // Vérifier que prisonId est non vide et valide
+            if (!prisonId) {
+                setError('ID de prison manquant. Veuillez sélectionner une prison.');
+                setIsSaving(false);
+                return;
+            }
+
+            // Log pour le débogage
+            console.debug('Création d\'un objet pour la prison:', prisonId, 'de type:', typeof prisonId);
 
             // Pour être sûr de débugger le problème
             if (localStorage.getItem('userPrison') !== prisonId || localStorage.getItem('selectedPrison') !== prisonId) {
-                // console.warn('Attention: l\'ID de prison actuel ne correspond pas au localStorage:', {
-                //     'currentPrisonId': prisonId,
-                //     'localStorage.userPrison': localStorage.getItem('userPrison'),
-                //     'localStorage.selectedPrison': localStorage.getItem('selectedPrison')
-                // });
-
                 // Forcer la mise à jour du localStorage pour éviter des conflits futurs
                 if (prisonId) {
                     localStorage.setItem('selectedPrison', prisonId);
@@ -239,7 +242,7 @@ const ConnectedObjects: React.FC<ConnectedObjectsProps> = ({ prisonId, addPoints
                 etat: newObjectState,
                 coord_x: newObjectX,
                 coord_y: newObjectY,
-                Prison_id: prisonId, // Utiliser une variable explicite
+                Prison_id: String(prisonId), // Convertir explicitement en chaîne
                 // Champs requis par le modèle backend
                 consomation: newConsumption, // Consumption in kWh
                 valeur_actuelle: initialValue,
