@@ -28,12 +28,24 @@ export const createObject = (object: Omit<ObjectType, 'id'>) => {
   
   // Si aucun Prison_id n'est fourni ou s'il est vide, utiliser celui du localStorage
   if (!object.Prison_id || object.Prison_id === '') {
-    const currentPrisonId = localStorage.getItem('userPrison') || localStorage.getItem('selectedPrison') || undefined;
+    const currentPrisonId = localStorage.getItem('userPrison') || localStorage.getItem('selectedPrison') || '';
+    
+    // Vérifier que Prison_id est une chaîne de caractères valide et non undefined
+    if (currentPrisonId) {
+      objectToCreate = {
+        ...object,
+        Prison_id: currentPrisonId
+      };
+      console.debug('Prison_id non fourni, utilisation de la valeur par défaut:', currentPrisonId);
+    } else {
+      console.error('Erreur: Aucun Prison_id valide trouvé');
+    }
+  } else {
+    // S'assurer que Prison_id est bien une chaîne et non un tableau ou un autre type
     objectToCreate = {
       ...object,
-      Prison_id: currentPrisonId
+      Prison_id: String(object.Prison_id)
     };
-    console.debug('Prison_id non fourni, utilisation de la valeur par défaut:', currentPrisonId);
   }
   
   // Définir une consommation par défaut si aucune n'est spécifiée
@@ -68,6 +80,8 @@ export const createObject = (object: Omit<ObjectType, 'id'>) => {
     };
     console.debug(`Consommation non spécifiée, valeur par défaut utilisée: ${defaultConsumption} pour type: ${objectToCreate.type}`);
   }
+  
+  // Nous n'avons plus besoin de vérifier les valeurs car le modèle backend accepte maintenant toutes les valeurs
   
   console.debug('Creating object with prison ID:', objectToCreate.Prison_id);
   return API.post<ObjectType>(OBJECTS_ENDPOINT, objectToCreate);

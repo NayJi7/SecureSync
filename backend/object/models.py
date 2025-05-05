@@ -49,15 +49,9 @@ class Object(models.Model):
         null=True,
         verbose_name="Connection"
     )
-    PRISON_CHOICES = [
-        ('paris', 'Paris'),
-        ('lyon', 'Lyon'),
-        ('marseille', 'Marseille'),
-        ('cergy', 'Cergy')
-    ]
+    # Remplacé par une référence au modèle Prison
     Prison_id = models.CharField(
-        max_length=10,
-        choices=PRISON_CHOICES,
+        max_length=20,
         blank=True,
         null=True,
         verbose_name="Prison ID"
