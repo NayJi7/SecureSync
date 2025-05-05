@@ -40,10 +40,12 @@
   color: #888;
 }
 
-/* Masquer les barres de défilement pour tous les éléments */
+/* Masquer les barres de défilement tout en préservant la fonctionnalité de défilement */
 html, body {
   scrollbar-width: none; /* Pour Firefox */
   -ms-overflow-style: none; /* Pour Internet Explorer et Edge */
+  -webkit-overflow-scrolling: touch; /* Améliore le défilement sur iOS */
+  overflow-y: auto; /* Assure que le défilement vertical fonctionne */
 }
 
 /* Pour Chrome, Safari et Opera */
