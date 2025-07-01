@@ -89,6 +89,97 @@ export default function LoginPage() {
     };
   }, []);
 
+  // Fonction pour afficher le code OTP dans le frontend
+  const displayOTPCode = (code: any) => {
+    // Supprimer l'ancien affichage s'il existe
+    const existingDebug = document.querySelector('#otp-code-display');
+    if (existingDebug) {
+      existingDebug.remove();
+    }
+
+    // Créer le nouvel affichage
+    const otpDiv = document.createElement('div');
+    otpDiv.id = 'otp-code-display';
+    otpDiv.style.cssText = `
+      position: fixed;
+      top: 20px;
+      right: 20px;
+      background: linear-gradient(135deg, #10b981, #059669);
+      color: white;
+      padding: 15px 20px;
+      border-radius: 10px;
+      z-index: 9999;
+      font-family: 'Courier New', monospace;
+      font-weight: bold;
+      font-size: 16px;
+      box-shadow: 0 8px 32px rgba(0, 0, 0, 0.3);
+      border: 2px solid rgba(255, 255, 255, 0.2);
+      backdrop-filter: blur(10px);
+      animation: slideIn 0.3s ease-out;
+      max-width: 280px;
+    `;
+    
+    // Ajouter les styles d'animation
+    if (!document.querySelector('#otp-code-styles')) {
+      const style = document.createElement('style');
+      style.id = 'otp-code-styles';
+      style.textContent = `
+        @keyframes slideIn {
+          from {
+            transform: translateX(100%);
+            opacity: 0;
+          }
+          to {
+            transform: translateX(0);
+            opacity: 1;
+          }
+        }
+        @keyframes fadeOut {
+          from {
+            opacity: 1;
+            transform: translateX(0);
+          }
+          to {
+            opacity: 0;
+            transform: translateX(100%);
+          }
+        }
+      `;
+      document.head.appendChild(style);
+    }
+    
+    otpDiv.innerHTML = `
+      <div style="display: flex; align-items: center; gap: 10px;">
+        <span style="font-size: 20px;">🔐</span>
+        <div style="flex: 1;">
+          <div style="font-size: 12px; opacity: 0.9; margin-bottom: 5px;">CODE OTP</div>
+          <div style="font-size: 24px; letter-spacing: 3px; text-align: center; padding: 5px; background: rgba(255,255,255,0.1); border-radius: 5px;">${code}</div>
+        </div>
+        <button onclick="this.parentElement.parentElement.remove()" 
+                style="background: none; border: none; color: white; font-size: 18px; cursor: pointer; opacity: 0.7; margin-left: 10px; min-width: 24px;">
+          ✕
+        </button>
+      </div>
+    `;
+    
+    document.body.appendChild(otpDiv);
+    
+    // Supprimer automatiquement après 20 secondes
+    setTimeout(() => {
+      if (otpDiv.parentNode) {
+        otpDiv.style.animation = 'fadeOut 0.3s ease-out';
+        setTimeout(() => {
+          if (otpDiv.parentNode) {
+            otpDiv.remove();
+          }
+        }, 300);
+      }
+    }, 20000);
+    
+    // Log dans la console aussi
+    console.log(`🔐 CODE OTP: ${code}`);
+  };
+
   // Fonction pour envoyer ou renvoyer le code OTP
   const handleSendOTP = async (tokenParam = null) => {
     const tokenToUse = tokenParam || authToken;
@@ -134,7 +225,12 @@ export default function LoginPage() {
         return false;
       }
 
-      console.log('Code OTP envoyé avec succès:', data);
+      console.log('Code OTP demandé avec succès:', data);
+
+      // Afficher le code OTP s'il est présent dans la réponse
+      if (data.otp_code) {
+        displayOTPCode(data.otp_code);
+      }
 
       // Nettoyer l'ancien timer s'il existe
       if (timerRef.current) {
@@ -233,9 +329,6 @@ export default function LoginPage() {
           username: username,
           email: email,
           password: password,
-          // Ajout d'un paramètre pour indiquer que l'API doit envoyer elle-même l'OTP
-          // et ne pas attendre que le frontend le fasse
-          sendOtp: true
         }),
       });
 
@@ -305,46 +398,33 @@ export default function LoginPage() {
       setAuthToken(token);
       localStorage.setItem("authToken", token);
 
-      // Vérifier si l'API backend indique si un OTP a été envoyé
-      // Si l'API ne fournit pas cette information, supposer que oui puisque
-      // nous avons demandé sendOtp: true dans la requête
-      const otpAlreadySent = data.otpSent !== false;
-
-      if (otpAlreadySent) {
-        // L'OTP a déjà été envoyé par l'API, pas besoin de le renvoyer
-        console.log("L'OTP a été envoyé automatiquement par l'API");
-
-        // Si nous utilisons le resendDisabled pour éviter des tentatives trop fréquentes,
-        // initialisons-le ici aussi
-        setResendDisabled(true);
-        setCountdown(30);
-        let timeLeft = 30;
-
-        // Démarrer le compte à rebours pour le bouton "Renvoyer le code"
-        if (timerRef.current) {
-          clearInterval(timerRef.current);
-        }
-
-        timerRef.current = setInterval(() => {
-          timeLeft -= 1;
-          setCountdown(timeLeft);
-
-          if (timeLeft <= 0) {
-            if (timerRef.current) clearInterval(timerRef.current);
-            setResendDisabled(false);
-          }
-        }, 1000);
-
-        // Passer à l'étape de vérification
-        setAuthStep('verify');
-      } else {
-        // Si pour une raison quelconque l'API n'a pas envoyé d'OTP, le faire manuellement
-        const otpSent = await handleSendOTP(token);
-
-        if (otpSent) {
-          setAuthStep('verify');
-        }
+      // Afficher le code OTP s'il est présent dans la réponse
+      if (data.otp_code) {
+        displayOTPCode(data.otp_code);
       }
+
+      // Initialiser le countdown pour le resend
+      setResendDisabled(true);
+      setCountdown(30);
+      let timeLeft = 30;
+
+      if (timerRef.current) {
+        clearInterval(timerRef.current);
+      }
+
+      timerRef.current = setInterval(() => {
+        timeLeft -= 1;
+        setCountdown(timeLeft);
+
+        if (timeLeft <= 0) {
+          if (timerRef.current) clearInterval(timerRef.current);
+          setResendDisabled(false);
+        }
+      }, 1000);
+
+      // Passer à l'étape de vérification
+      setAuthStep('verify');
+
     } catch (error) {
       console.error('Exception lors de l\'authentification:', error);
       setApiError('Erreur de connexion au serveur. Veuillez réessayer plus tard.');
@@ -397,6 +477,12 @@ export default function LoginPage() {
       }
 
       console.log('Vérification OTP réussie:', data);
+
+      // Supprimer l'affichage du code OTP une fois la vérification réussie
+      const otpDisplay = document.querySelector('#otp-code-display');
+      if (otpDisplay) {
+        otpDisplay.remove();
+      }
 
       // Recherche du token de session dans différentes structures possibles
       let sessionToken = authToken; // Par défaut, utiliser le token existant
@@ -835,6 +921,7 @@ export default function LoginPage() {
 
                         <motion.div className="flex flex-col items-center gap-3 px-2 sm:px-0">
                           <button
+                            type="button"
                             className={`text-green-400 text-sm text-center ${resendDisabled ? 'opacity-50 cursor-not-allowed' : 'cursor-pointer hover:underline hover:text-green-300'}`}
                             onClick={handleResendCode}
                             disabled={resendDisabled}
