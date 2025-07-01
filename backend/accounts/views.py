@@ -90,40 +90,70 @@ class LoginAPIView(APIView):
     permission_classes = [AllowAny]
 
     def post(self, request):
-        serializer = UserLoginSerializer(data=request.data)
-        if not serializer.is_valid():
-            return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+        try:
+            serializer = UserLoginSerializer(data=request.data)
+            if not serializer.is_valid():
+                return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
 
-        username = serializer.validated_data.get('username')
-        email = serializer.validated_data.get('email')
-        password = serializer.validated_data.get('password')
+            username = serializer.validated_data.get('username')
+            email = serializer.validated_data.get('email')
+            password = serializer.validated_data.get('password')
 
-        user = authenticate(username=username, password=password)
+            user = authenticate(username=username, password=password)
 
-        if not user:
-            return Response({'detail': 'Identifiants invalides.'}, status=status.HTTP_401_UNAUTHORIZED)
+            if not user:
+                return Response({'detail': 'Identifiants invalides.'}, status=status.HTTP_401_UNAUTHORIZED)
 
-        if user.email != email:
-            return Response({'detail': 'Email incorrect.'}, status=status.HTTP_400_BAD_REQUEST)
+            if user.email != email:
+                return Response({'detail': 'Email incorrect.'}, status=status.HTTP_400_BAD_REQUEST)
 
-        refresh = RefreshToken.for_user(user)
-        otp = OTPCode.objects.create(user=user, email=email)
-        send_otp_email(email, otp.code)
-        UserActivityLog.objects.create(
-        user=user,
-        action='otp_request',
+            refresh = RefreshToken.for_user(user)
+            otp = OTPCode.objects.create(user=user, email=email)
+            
+            # Essayer d'envoyer l'email mais toujours retourner le code dans le frontend
+            try:
+                send_otp_email(email, otp.code)
+                email_sent = True
+                logger.info(f"Email envoyé avec succès à {email}")
+            except Exception as email_error:
+                logger.error(f"Failed to send OTP email: {str(email_error)}")
+                email_sent = False
+            
+            # Toujours retourner le code OTP pour affichage dans le frontend
+            debug_otp_code = otp.code
+            logger.info(f"Code OTP généré pour {email}: {otp.code}")
+            
+            UserActivityLog.objects.create(
+                user=user,
+                action='otp_request',
             )
-        return Response({
-            'tokens': {
-                'refresh': str(refresh),
-                'access': str(refresh.access_token)
-            },
-            'user': {
-                'id': user.id,
-                'username': user.username,
-                'email': user.email
+            
+            response_data = {
+                'tokens': {
+                    'refresh': str(refresh),
+                    'access': str(refresh.access_token)
+                },
+                'user': {
+                    'id': user.id,
+                    'username': user.username,
+                    'email': user.email
+                },
+                'email_sent': email_sent,
+                'message': 'Code OTP généré'
             }
-        })
+            
+            # Toujours inclure le code OTP dans la réponse pour affichage frontend
+            response_data['otp_code'] = debug_otp_code
+            response_data['message'] = f'Code OTP généré et {"envoyé par email" if email_sent else "email non envoyé"}'
+            
+            return Response(response_data)
+            
+        except Exception as e:
+            logger.error(f"Login API Error: {str(e)}")
+            return Response(
+                {'detail': 'Une erreur interne s\'est produite.'}, 
+                status=status.HTTP_500_INTERNAL_SERVER_ERROR
+            )
 
 class VerifyOTPView(APIView):
     permission_classes = [IsAuthenticated]
@@ -150,9 +180,9 @@ class VerifyOTPView(APIView):
         otp.is_used = True
         otp.save()
         UserActivityLog.objects.create(
-        user=request.user,
-        action='otp_validate',
-            )
+            user=request.user,
+            action='otp_validate',
+        )
 
         refresh = RefreshToken.for_user(request.user)
 
@@ -188,14 +218,33 @@ class ResendOTPView(APIView):
             return Response({'detail': "Email ne correspond pas à l'utilisateur connecté."}, status=status.HTTP_400_BAD_REQUEST)
 
         otp = OTPCode.objects.create(user=request.user, email=email)
-        send_otp_email(email, otp.code)
+        
+        # Essayer d'envoyer l'email mais toujours retourner le code dans le frontend
+        try:
+            send_otp_email(email, otp.code)
+            email_sent = True
+            logger.info(f"Nouvel email envoyé avec succès à {email}")
+        except Exception as email_error:
+            logger.error(f"Failed to send OTP email: {str(email_error)}")
+            email_sent = False
+        
+        # Toujours retourner le code OTP pour affichage dans le frontend
+        debug_otp_code = otp.code
+        logger.info(f"Nouveau code OTP généré pour {email}: {otp.code}")
+        message = f'Nouveau code généré et {"envoyé par email" if email_sent else "email non envoyé"}'
+        
         UserActivityLog.objects.create(
-        user=request.user,
-        action='otp_request',
-            )
+            user=request.user,
+            action='otp_request',
+        )
 
-        return Response({'detail': 'Nouveau code envoyé.'})
-
+        response_data = {
+            'detail': message,
+            'email_sent': email_sent,
+            'otp_code': debug_otp_code  # Toujours inclure le code OTP
+        }
+        
+        return Response(response_data)
 
 # =======================
 # 🌐 Vues HTML Django (Frontend classique)
