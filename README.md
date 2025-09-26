@@ -1,5 +1,7 @@
 # 🌐 SecureSync
 
+![SecureSync Overview](frontend/src/README/1.gif)
+
 Bienvenue dans ce projet de développement web combinant **Django** pour le backend et **React + Vite + TypeScript** pour le frontend.
 
 ## 🚀 Stack Technique
