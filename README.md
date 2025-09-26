@@ -2,15 +2,15 @@
 
 ![SecureSync Overview](frontend/src/README/1.gif)
 
-Bienvenue dans ce projet de développement web combinant **Django** pour le backend et **React + Vite + TypeScript** pour le frontend.
+Welcome to this web development project combining **Django** for the backend and **React + Vite + TypeScript** for the frontend.
 
-## 🚀 Stack Technique
+## 🚀 Tech Stack
 
-- 🐍 **Backend** : Django (Python)
-- ⚛️ **Frontend** : React (avec TypeScript)
-- ⚙️ **Bundler** : Vite
+- 🐍 **Backend**: Django (Python)
+- ⚛️ **Frontend**: React (with TypeScript)
+- ⚙️ **Bundler**: Vite
 
-## 📁 Structure du projet
+## 📁 Project Structure
 
 ```
 SecureSync/
@@ -40,31 +40,31 @@ SecureSync/
 └── venv/
 ```
 
-## 🔧 Pré-requis
+## 🔧 Prerequisites
 
 - Python 3.10+
 - Node.js + npm
-- Virtualenv (venv pour python)
+- Virtualenv (venv for Python)
 - Git
 
-## 🛠 Installation & Lancement
+## 🛠 Installation & Setup
 
-### 1. Cloner le projet
+### 1. Clone the project
 
 ```bash
-git clone https://github.com/ton-utilisateur/ton-projet.git
+git clone https://github.com/your-username/your-project.git
 cd SecureSync
 ```
 
-### 2. Activer l'environnement virtuel Python
+### 2. Activate the Python virtual environment
 
 ```bash
 source venv/bin/activate
-# ou sous Windows
+# or on Windows
 venv\Scripts\activate
 ```
 
-### 3. Installer les dépendances Python (avec pip)
+### 3. Install Python dependencies (with pip)
 
 ```bash
 cd backend
@@ -72,33 +72,32 @@ pip install -r requirements.txt
 cd ..
 ```
 
-### 4. Installer les dépendances Node (avec npm)
+### 4. Install Node dependencies (with npm)
 
 ```bash
 cd frontend
 npm install
 ```
 
-### 5. Lancer le backend Django + le frontend React avec Vite
+### 5. Run Django backend + React frontend with Vite
 
 ```bash
-# Démarrer le backend (dans un terminal)
+# Start the backend (in one terminal)
 cd backend
 python manage.py runserver
 
-# Démarrer le frontend (dans un autre terminal)
+# Start the frontend (in another terminal)
 cd frontend
 npm run dev
 ```
 
-## 🌍 Accès à l'application
+## 🌍 Application Access
 
-- Backend (API) : http://localhost:8000/admin
-- Frontend (UI) : http://localhost:5173/
+- Backend (API): http://localhost:8000/admin
+- Frontend (UI): http://localhost:5173/
 
-## 💪 Contributeurs
+## 💪 Contributors
 
-- Anthony Voisin
-- Adam Terrak
-- Mehdi Sekkat
-- Firas Benmansour
+<a href="https://github.com/NayJi7/SecureSync/graphs/contributors">
+  <img src="https://contrib.rocks/image?repo=NayJi7/SecureSync" />
+</a>
